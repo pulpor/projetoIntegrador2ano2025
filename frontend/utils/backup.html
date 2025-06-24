@@ -16,6 +16,13 @@
         <h1 class="text-2xl font-bold mb-4 text-center">
           Sistema RPG de Aprendizado
         </h1>
+        <!-- Adicionar no formulário de registro -->
+        <input
+          id="fullname"
+          type="text"
+          placeholder="Nome completo"
+          class="w-full p-2 mb-4 border rounded"
+        />
         <input
           id="username"
           type="text"
@@ -88,6 +95,12 @@
         >
           Enviar Código
         </button>
+
+        <!-- Adicionar após a seção de missões -->
+        <h2 class="text-xl font-bold mt-4">Meu Histórico</h2>
+        <div id="submission-history" class="grid gap-4 mt-4">
+          <!-- Histórico será preenchido via JavaScript -->
+        </div>
       </div>
 
       <!-- Tela do Mestre -->
@@ -271,6 +284,13 @@
               `Erro HTTP: ${response.status} ${response.statusText}`
             );
           }
+          const userSubmissions = submissions.filter(
+            (s) => s.userId === user.id
+          );
+          const availableMissions = missions.filter((mission) => {
+            const sub = userSubmissions.find((s) => s.missionId === mission.id);
+            return !sub || (sub && !sub.approved);
+          });
           const missions = await response.json();
           const missionList = document.getElementById("missions");
           const missionSelect = document.getElementById("mission-select");
@@ -294,6 +314,60 @@
           // alert("Erro ao carregar missões. Tente novamente.");
         }
       }
+
+      async function loadSubmissionHistory() {
+        const user = JSON.parse(localStorage.getItem("user"));
+        const token = localStorage.getItem("token");
+
+        try {
+          const response = await fetch(`${apiUrl}/submission-history`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const history = await response.json();
+
+          const historyContainer =
+            document.getElementById("submission-history");
+          historyContainer.innerHTML = "";
+
+          history.forEach((sub) => {
+            const statusClass = sub.pending
+              ? "bg-yellow-100"
+              : sub.approved
+              ? "bg-green-100"
+              : "bg-red-100";
+            const statusText = sub.pending
+              ? "Pendente"
+              : sub.approved
+              ? "Aprovado"
+              : "Rejeitado";
+
+            historyContainer.innerHTML += `
+        <div class="p-4 ${statusClass} rounded">
+          <h3 class="font-bold">${sub.missionTitle}</h3>
+          <p>Status: ${statusText}</p>
+          <p>Enviado em: ${new Date(sub.submittedAt).toLocaleString()}</p>
+          ${sub.feedback ? `<p>Feedback: ${sub.feedback}</p>` : ""}
+          ${sub.penalty ? `<p>Penalidade: -${sub.penalty} XP</p>` : ""}
+          <div class="mt-2">
+            ${sub.filePaths
+              .map(
+                (file) => `
+              <a href="${file}" target="_blank" class="text-blue-500 underline mr-2">
+                Baixar ${file.split("/").pop()}
+              </a>
+            `
+              )
+              .join("")}
+          </div>
+        </div>
+      `;
+          });
+        } catch (error) {
+          console.error("Erro ao carregar histórico:", error);
+        }
+      }
+
+      // Chamar esta função em showStudentScreen()
 
       async function submitCode() {
         const user = JSON.parse(localStorage.getItem("user"));
@@ -423,6 +497,12 @@
         <p><strong>${student.username}</strong> (${student.class})</p>
         <p>Nível: ${student.level} | XP: ${student.xp}</p>
         <input type="number" id="penalty-${student.id}" placeholder="Penalidade de XP" class="p-2 border rounded">
+<div id="feedback-container-${student.id}" class="hidden mt-2">
+  <input type="text" id="feedback-${student.id}" placeholder="Motivo/feedback" class="w-full p-2 border rounded">
+</div>
+<button onclick="showFeedbackInput('${student.id}')" class="bg-gray-500 text-white p-2 rounded hover:bg-gray-600">
+  Adicionar Feedback
+</button>
         <button onclick="applyPenalty('${student.id}')" class="bg-red-500 text-white p-2 rounded hover:bg-red-600">Aplicar Penalidade</button>
       </div>`;
         });
@@ -477,6 +557,25 @@
         }
       </div>`;
         });
+      }
+
+      function showFeedbackInput(submissionId) {
+        const container = document.getElementById(
+          `feedback-container-${submissionId}`
+        );
+        container.classList.toggle("hidden");
+      }
+
+      async function approveSubmission(submissionId) {
+        const feedback =
+          document.getElementById(`feedback-${submissionId}`)?.value || "";
+        // ... enviar feedback junto com a requisição
+      }
+
+      async function rejectSubmission(submissionId) {
+        const feedback =
+          document.getElementById(`feedback-${submissionId}`)?.value || "";
+        // ... enviar feedback junto com a requisição
       }
 
       async function approveUser(userId) {

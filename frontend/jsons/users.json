@@ -1,0 +1,12 @@
+[
+  {
+    "id": 1,
+    "username": "mestre",
+    "password": "$2b$10$86xIuDQYU5I/GC9ExZVZIODZ79fxBAeHFV.GC1WfSody7zpAGYNUi",
+    "class": "Mestre Fullstack",
+    "isMaster": true,
+    "level": 1,
+    "xp": 0,
+    "pending": false
+  }
+]

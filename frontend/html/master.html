@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel do Mestre - Sistema RPG</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="js/master.js"></script>
+</head>
+<body class="bg-gray-50 font-sans">
+  <!-- Barra de Navegação -->
+  <nav class="bg-purple-600 text-white p-4 shadow-md">
+    <div class="container mx-auto flex justify-between items-center">
+      <h1 class="text-xl font-bold">Painel do Mestre</h1>
+      <button onclick="logout()" class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded transition">
+        <i class="fas fa-sign-out-alt mr-1"></i> Sair
+      </button>
+    </div>
+  </nav>
+  
+  <div class="container mx-auto p-4">
+    <!-- Abas -->
+    <div class="mb-6 border-b border-gray-200">
+      <div class="flex space-x-4">
+        <button id="tab-pending" class="tab-button active px-4 py-2 font-medium border-b-2 border-purple-500 text-purple-600">
+          Pendentes
+        </button>
+        <button id="tab-students" class="tab-button px-4 py-2 font-medium text-gray-500 hover:text-gray-700">
+          Alunos
+        </button>
+        <button id="tab-submissions" class="tab-button px-4 py-2 font-medium text-gray-500 hover:text-gray-700">
+          Submissões
+        </button>
+        <button id="tab-missions" class="tab-button px-4 py-2 font-medium text-gray-500 hover:text-gray-700">
+          Missões
+        </button>
+      </div>
+    </div>
+    
+    <!-- Conteúdo das Abas -->
+    <div id="pending-content" class="tab-content">
+      <h2 class="text-xl font-bold mb-4">Usuários Pendentes</h2>
+      <div id="pending-users" class="grid gap-4"></div>
+    </div>
+    
+    <div id="students-content" class="tab-content hidden">
+      <h2 class="text-xl font-bold mb-4">Gerenciar Alunos</h2>
+      <div id="students-list" class="grid gap-4"></div>
+    </div>
+    
+    <div id="submissions-content" class="tab-content hidden">
+      <h2 class="text-xl font-bold mb-4">Submissões</h2>
+      <div id="submissions-list" class="grid gap-4"></div>
+    </div>
+    
+    <div id="missions-content" class="tab-content hidden">
+      <h2 class="text-xl font-bold mb-4">Criar Nova Missão</h2>
+      <div class="bg-white p-6 rounded-lg shadow">
+        <input id="mission-title" type="text" placeholder="Título da missão" 
+        class="w-full p-3 mb-4 border rounded-lg focus:ring-2 focus:ring-purple-200">
+        <textarea id="mission-description" placeholder="Descrição da missão" 
+        class="w-full p-3 mb-4 border rounded-lg focus:ring-2 focus:ring-purple-200" rows="4"></textarea>
+        <input id="mission-xp" type="number" placeholder="XP da missão" 
+        class="w-full p-3 mb-4 border rounded-lg focus:ring-2 focus:ring-purple-200">
+        <button onclick="createMission()" 
+        class="w-full bg-purple-600 text-white p-3 rounded-lg hover:bg-purple-700 transition">
+          <i class="fas fa-plus-circle mr-2"></i> Criar Missão
+        </button>
+      </div>
+    </div>
+  </div>
+</body>
+<script src="js/auth.js"></script>
+</html>

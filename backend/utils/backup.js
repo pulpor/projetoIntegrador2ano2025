@@ -60,9 +60,14 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const { userId, missionId } = req.body;
-    cb(null, `submission_user${userId}_mission${missionId}_${Date.now()}${path.extname(file.originalname)}`);
+    const user = users.find(u => u.id === parseInt(userId));
+    const mission = missions.find(m => m.id === parseInt(missionId));
+    const safeUsername = user.username.replace(/[^a-z0-9]/gi, '_');
+    const safeMission = mission.title.replace(/[^a-z0-9]/gi, '_');
+    cb(null, `${safeUsername}_${safeMission}_${Date.now()}${path.extname(file.originalname)}`);
   }
 });
+
 const upload = multer({ storage });
 
 let users = [];
@@ -88,6 +93,7 @@ app.post('/register', async (req, res) => {
   const user = {
     id: userIdCounter++,
     username,
+    fullname,
     password: hashedPassword,
     class: userClass,
     isMaster: isMaster || false,
@@ -217,7 +223,7 @@ app.post('/reject-user', authenticate, isMaster, (req, res) => {
 
 // Aprovar submissão
 app.post('/approve-submission', authenticate, isMaster, (req, res) => {
-  const { submissionId } = req.body;
+  const { submissionId, feedback } = req.body;
   const submission = submissions.find(s => s.id === parseInt(submissionId));
   if (!submission) {
     return res.status(404).json({ error: 'Submissão não encontrada' });
@@ -226,7 +232,9 @@ app.post('/approve-submission', authenticate, isMaster, (req, res) => {
   if (!user) {
     return res.status(404).json({ error: 'Usuário não encontrado' });
   }
+  submission.approved = true;
   submission.pending = false;
+  submission.feedback = feedback;
   user.xp += submission.xp;
   user.level = Math.floor(user.xp / 100) + 1;
   try {

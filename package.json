@@ -1,30 +1,19 @@
-{
-  "name": "projetointegrador2ano2025",
+{ "name": "projeto-integrador-rpg",
   "version": "1.0.0",
+  "description": "Sistema RPG de Aprendizado",
+  "main": "server/server.js",
   "scripts": {
-    "start": "nodemon server.js"
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js",
+    "test": "jest",
+    "setup-db": "node backend/config/initializeDB.js"
   },
-  "dependencies": {
+  "devDependencies": {
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "multer": "^2.0.1"
-  },
-  "devDependencies": {
+    "multer": "^2.0.1",
     "nodemon": "^3.1.10"
-  },
-  "main": "script.js",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/pulpor/projetoIntegrador2ano2025.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/pulpor/projetoIntegrador2ano2025/issues"
-  },
-  "homepage": "https://github.com/pulpor/projetoIntegrador2ano2025#readme",
-  "description": ""
+  }
 }

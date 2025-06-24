@@ -1,0 +1,57 @@
+[
+  {
+    "id": 1,
+    "userId": 2,
+    "missionId": 1,
+    "filePaths": [
+      "C:\\Users\\Leonardo\\Documents\\projetoIntegrador2ano2025\\Uploads\\submission_userundefined_missionundefined_1750786895574.png"
+    ],
+    "submittedAt": "2025-06-24T17:41:35.586Z",
+    "pending": false,
+    "xp": 1
+  },
+  {
+    "id": 2,
+    "userId": 2,
+    "missionId": 1,
+    "filePaths": [
+      "C:\\Users\\Leonardo\\Documents\\projetoIntegrador2ano2025\\Uploads\\submission_userundefined_missionundefined_1750787241382.png"
+    ],
+    "submittedAt": "2025-06-24T17:47:21.394Z",
+    "pending": true,
+    "xp": 1
+  },
+  {
+    "id": 3,
+    "userId": 2,
+    "missionId": 1,
+    "filePaths": [
+      "C:\\Users\\Leonardo\\Documents\\projetoIntegrador2ano2025\\Uploads\\submission_userundefined_missionundefined_1750787341396.png"
+    ],
+    "submittedAt": "2025-06-24T17:49:01.405Z",
+    "pending": true,
+    "xp": 1
+  },
+  {
+    "id": 4,
+    "userId": 2,
+    "missionId": 1,
+    "filePaths": [
+      "C:\\Users\\Leonardo\\Documents\\projetoIntegrador2ano2025\\Uploads\\submission_userundefined_missionundefined_1750787367852.png"
+    ],
+    "submittedAt": "2025-06-24T17:49:27.861Z",
+    "pending": true,
+    "xp": 1
+  },
+  {
+    "id": 5,
+    "userId": 2,
+    "missionId": 2,
+    "filePaths": [
+      "C:\\Users\\Leonardo\\Documents\\projetoIntegrador2ano2025\\Uploads\\submission_userundefined_missionundefined_1750787460161.png"
+    ],
+    "submittedAt": "2025-06-24T17:51:00.171Z",
+    "pending": false,
+    "xp": 500
+  }
+]
