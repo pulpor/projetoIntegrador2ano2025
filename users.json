@@ -2,7 +2,7 @@
   {
     "id": 1,
     "username": "mestre",
-    "password": "fullstack123",
+    "password": "$2b$10$SId/F4MmAN3yO8Bx6BE7oeVRowbc8GpHyWad/Inqa.k3Elet3nI3S",
     "class": "Mestre Fullstack",
     "isMaster": true,
     "level": 1,
@@ -11,12 +11,12 @@
   },
   {
     "id": 2,
-    "username": "teste",
-    "password": "teste",
-    "class": "Arqueiro do JavaScript",
+    "username": "oi",
+    "password": "$2b$10$TEO/RFydKhstQzVblSdmEOA5zHNDEvotcJBwp0F1Pqeo1pgcmxMRC",
+    "class": "Cafeicultor do Java",
     "isMaster": false,
-    "level": 1,
-    "xp": 0,
+    "level": 5,
+    "xp": 451,
     "pending": false
   }
 ]
