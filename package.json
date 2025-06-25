@@ -1,4 +1,5 @@
-{ "name": "projeto-integrador-rpg",
+{
+  "name": "projeto-integrador-rpg",
   "version": "1.0.0",
   "description": "Sistema RPG de Aprendizado",
   "main": "server/server.js",
@@ -8,12 +9,14 @@
     "test": "jest",
     "setup-db": "node backend/config/initializeDB.js"
   },
-  "devDependencies": {
+  "dependencies": {
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "multer": "^2.0.1",
+    "multer": "^2.0.1"
+  },
+  "devDependencies": {
     "nodemon": "^3.1.10"
   }
 }

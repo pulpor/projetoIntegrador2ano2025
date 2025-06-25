@@ -9,7 +9,10 @@ router.get('/students', autenticar, ehMestre, (req, res) => {
 });
 
 router.get('/pending-users', autenticar, ehMestre, (req, res) => {
-  res.json(users.filter(u => u.pending && !u.isMaster));
+  
+  const pendingUsers = users.filter(u => u.pending && !u.isMaster);
+  
+  res.json(pendingUsers);
 });
 
 router.post('/approve-user', autenticar, ehMestre, async (req, res) => {

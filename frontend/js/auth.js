@@ -15,13 +15,13 @@ async function login() {
 
     if (res.ok) {
       localStorage.setItem('token', data.token);
-      localStorage.setItem('username', data.username);
-      localStorage.setItem('isMaster', data.isMaster);
+      localStorage.setItem('username', data.user.username);
+      localStorage.setItem('isMaster', data.user.isMaster);
 
-      if (data.isMaster) {
-        window.location.href = '/html/master.html';
+      if (data.user.isMaster === true) {
+        window.location.href = '../html/master.html';
       } else {
-        window.location.href = '/html/student.html';
+        window.location.href = '../html/student.html';
       }
     } else {
       alert(data.message || 'Usuário ou senha inválidos');
@@ -61,7 +61,7 @@ async function register() {
 
 function logout() {
   localStorage.clear();
-  window.location.href = '/html/login.html';
+  window.location.href = '../html/login.html';
 }
 
 function showRegisterForm() {

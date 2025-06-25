@@ -18,6 +18,9 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+// Configura o diretório frontend/html como estático
+app.use(express.static('frontend/html'));
 app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
 // Middleware de logs
