@@ -1,34 +1,74 @@
 [
   {
-    "id": 1,
-    "title": "missao 1 - teste de aluno",
-    "description": "missao 1 - teste de aluno oioioiasdasdasd",
-    "xp": 1,
-    "targetYear": null,
+    "id": 6,
+    "title": "1gg",
+    "description": "teste",
+    "xp": 50,
+    "targetYear": 1,
     "targetClass": "geral"
   },
   {
-    "id": 2,
-    "title": "teste2",
-    "description": "oi",
-    "xp": 500,
-    "targetYear": 2,
-    "targetClass": "geral"
+    "id": 7,
+    "title": "1gc",
+    "description": "sdasd",
+    "xp": 5,
+    "targetYear": 1,
+    "targetClass": "Cafeicultor do Java"
   },
   {
-    "id": 4,
-    "title": "oiii",
-    "description": "oiiii",
-    "xp": 55,
+    "id": 8,
+    "title": "1ga",
+    "description": "asdsd",
+    "xp": 20,
     "targetYear": 1,
     "targetClass": "Arqueiro do JavaScript"
   },
   {
-    "id": 5,
-    "title": "kkk",
-    "description": "kkk",
-    "xp": 30,
-    "targetYear": 3,
-    "targetClass": "geral"
+    "id": 9,
+    "title": "Estilização Mágica",
+    "description": "Criar uma página web com CSS avançado usando Flexbox e Grid",
+    "xp": 100,
+    "targetYear": 1,
+    "targetClass": "Mago do CSS"
+  },
+  {
+    "id": 10,
+    "title": "Estrutura Sagrada",
+    "description": "Desenvolver uma página HTML semântica e acessível",
+    "xp": 80,
+    "targetYear": 1,
+    "targetClass": "Paladino do HTML"
+  },
+  {
+    "id": 11,
+    "title": "Conquista do Servidor",
+    "description": "Implementar uma API REST completa com Node.js",
+    "xp": 150,
+    "targetYear": 2,
+    "targetClass": "Bárbaro do Back-end"
+  },
+  {
+    "id": 12,
+    "title": "Domínio das Consultas",
+    "description": "Criar queries complexas em SQL e otimizar banco de dados",
+    "xp": 120,
+    "targetYear": 2,
+    "targetClass": "Domador de Dados"
+  },
+  {
+    "id": 13,
+    "title": "Interface Encantada",
+    "description": "Desenvolver uma SPA moderna com React ou Vue.js",
+    "xp": 130,
+    "targetYear": 1,
+    "targetClass": "Elfo do Front-end"
+  },
+  {
+    "id": 14,
+    "title": "A Grande Caçada",
+    "description": "Encontrar e corrigir 10 bugs em uma aplicação existente",
+    "xp": 90,
+    "targetYear": null,
+    "targetClass": "Caçador de Bugs"
   }
 ]

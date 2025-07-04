@@ -36,6 +36,14 @@ app.use('/usuarios', usuariosRotas);
 app.use('/submissoes', submissoesRotas);
 app.use('/Uploads', express.static(path.join(__dirname, 'Uploads')));
 
+// Servir arquivos estáticos do frontend
+app.use(express.static(path.join(__dirname, '..', 'frontend')));
+
+// Rota padrão para servir index.html
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'frontend', 'index.html'));
+});
+
 // Iniciar servidor
 app.listen(port, () => {
   console.log(`Servidor rodando em http://localhost:${port}`);
