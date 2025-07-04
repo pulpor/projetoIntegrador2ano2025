@@ -3,7 +3,7 @@ import './index.css';
 
 const API_URL = 'http://localhost:3000';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   console.log('[DEBUG STUDENT] DOM carregado, iniciando aplicação student');
 
   const token = localStorage.getItem('token');
@@ -34,8 +34,11 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  loadStudentInfo();
-  loadMissions();
+  await loadStudentInfo();
+  console.log('[DEBUG STUDENT] Informações do aluno carregadas, agora carregando missões...');
+  
+  // Carregar missões após carregar informações do aluno para garantir que a filtragem funcione
+  await loadMissions();
   loadSubmissionHistory();
   setupTabs();
 });
@@ -75,7 +78,13 @@ async function loadStudentInfo() {
     }
 
     const data = await res.json();
-    console.log('[DEBUG STUDENT] Dados do usuário:', data); if (data) {
+    console.log('[DEBUG STUDENT] Dados do usuário:', data);
+    
+    // Armazenar informações do aluno globalmente
+    studentInfo = data;
+    console.log('[DEBUG STUDENT] studentInfo definida:', studentInfo);
+    
+    if (data) {
       document.getElementById('student-class').textContent = data.class || 'Classe não definida';
 
       // Exibir ano do estudante
@@ -137,6 +146,11 @@ async function loadMissions() {
     return;
   }
 
+  // Carregar primeiro as missões já submetidas
+  console.log('[DEBUG STUDENT] Carregando missões completadas primeiro...');
+  await loadCompletedMissions();
+  console.log('[DEBUG STUDENT] Missões completadas carregadas:', studentCompletedMissions);
+
   try {
     console.log('[DEBUG STUDENT] Fazendo requisição para missões');
     const res = await fetch(`${API_URL}/missoes`, {
@@ -156,6 +170,54 @@ async function loadMissions() {
 
     const data = await res.json();
     console.log('[DEBUG STUDENT] Missões recebidas:', data);
+    
+    // Filtrar missões por ano/classe do aluno
+    let filteredMissions = data;
+    if (studentInfo) {
+      console.log('[DEBUG STUDENT] Filtrando missões para:');
+      console.log('[DEBUG STUDENT] - Aluno ano:', studentInfo.year);
+      console.log('[DEBUG STUDENT] - Aluno classe:', studentInfo.class);
+      
+      filteredMissions = data.filter(mission => {
+        // Missão é geral (para todos) ou específica para o ano/classe do aluno
+        const isForStudentYear = !mission.targetYear || mission.targetYear === studentInfo.year;
+        const isForStudentClass = !mission.targetClass || mission.targetClass === 'geral' || mission.targetClass === studentInfo.class;
+        
+        const canSee = isForStudentYear && isForStudentClass;
+        console.log(`[DEBUG STUDENT] Missão "${mission.title}":`, {
+          targetYear: mission.targetYear,
+          targetClass: mission.targetClass,
+          isForStudentYear,
+          isForStudentClass,
+          canSee
+        });
+        
+        return canSee;
+      });
+      console.log('[DEBUG STUDENT] Missões filtradas por ano/classe:', filteredMissions.length, 'de', data.length);
+    } else {
+      console.log('[DEBUG STUDENT] Informações do aluno não disponíveis ainda, mostrando todas as missões');
+    }
+
+    // Filtrar missões pendentes ou aprovadas - elas só ficam no histórico
+    // Missões rejeitadas voltam para o painel para nova submissão
+    console.log('[DEBUG STUDENT] Verificando missões já submetidas...');
+    console.log('[DEBUG STUDENT] studentCompletedMissions (pendentes + aprovadas):', studentCompletedMissions);
+    console.log('[DEBUG STUDENT] Missões antes do filtro de submissões:', filteredMissions.map(m => `${m.id}: ${m.title}`));
+    
+    if (studentCompletedMissions && studentCompletedMissions.length > 0) {
+      const beforeFilter = filteredMissions.length;
+      filteredMissions = filteredMissions.filter(mission => {
+        const isCompleted = studentCompletedMissions.includes(mission.id);
+        console.log(`[DEBUG STUDENT] Missão ${mission.id} (${mission.title}): já submetida = ${isCompleted}`);
+        return !isCompleted;
+      });
+      console.log('[DEBUG STUDENT] Removidas missões pendentes/aprovadas:', beforeFilter - filteredMissions.length);
+      console.log('[DEBUG STUDENT] Missões pendentes/aprovadas:', studentCompletedMissions);
+      console.log('[DEBUG STUDENT] Missões finais a exibir (incluindo rejeitadas):', filteredMissions.map(m => `${m.id}: ${m.title}`));
+    } else {
+      console.log('[DEBUG STUDENT] Nenhuma missão pendente/aprovada encontrada, exibindo todas as missões disponíveis');
+    }
 
     const missionsDiv = document.getElementById('missions');
     const select = document.getElementById('mission-select');
@@ -168,20 +230,33 @@ async function loadMissions() {
     missionsDiv.innerHTML = '';
     select.innerHTML = `<option value="">Selecione uma missão</option>`;
 
-    if (data.length === 0) {
-      missionsDiv.innerHTML = '<p class="text-gray-500 py-4">Nenhuma missão disponível no momento.</p>';
-      console.log('[DEBUG STUDENT] Nenhuma missão encontrada');
+    if (filteredMissions.length === 0) {
+      missionsDiv.innerHTML = '<p class="text-gray-500 py-4">Nenhuma missão disponível para sua classe/ano no momento.</p>';
+      console.log('[DEBUG STUDENT] Nenhuma missão encontrada para o aluno');
       return;
     }
 
-    data.forEach(mission => {
+    filteredMissions.forEach(mission => {
       console.log('[DEBUG STUDENT] Renderizando missão:', mission.title);
+      
+      // Verificar se esta missão foi rejeitada anteriormente
+      const wasRejected = studentRejectedMissions.includes(mission.id);
+      console.log(`[DEBUG STUDENT] Missão ${mission.id} foi rejeitada anteriormente:`, wasRejected);
+      
       const card = document.createElement('div');
-      card.className = 'bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition mb-4';
+      card.className = `bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition mb-4 ${wasRejected ? 'border-l-4 border-orange-400' : ''}`;
+      
+      const rejectedBadge = wasRejected ? 
+        '<span class="inline-block bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full ml-2">Rejeitada - Reenvie</span>' : '';
+      
       card.innerHTML = `
-        <h3 class="font-bold text-lg text-purple-700">${mission.title}</h3>
+        <h3 class="font-bold text-lg text-purple-700">
+          ${mission.title}
+          ${rejectedBadge}
+        </h3>
         <p class="text-gray-600 mb-2">${mission.description}</p>
         <span class="inline-block bg-green-100 text-green-800 text-sm px-2 py-1 rounded-full">XP: ${mission.xp}</span>
+        ${wasRejected ? '<p class="text-orange-600 text-sm mt-2"><i class="fas fa-exclamation-triangle mr-1"></i>Esta missão foi rejeitada. Você pode submeter novamente.</p>' : ''}
       `;
       missionsDiv.appendChild(card);
 
@@ -192,6 +267,9 @@ async function loadMissions() {
     });
 
     console.log('[DEBUG STUDENT] Missões renderizadas com sucesso');
+    
+    // Carregar dados para filtros após renderizar as missões
+    await loadMissionsForFilters();
 
   } catch (err) {
     console.error('[DEBUG STUDENT] Erro ao carregar missões:', err);
@@ -403,6 +481,27 @@ async function submitCode() {
       // Limpar formulário
       document.getElementById('mission-select').value = '';
       document.getElementById('code-upload').value = '';
+      
+      // Limpar display de arquivos selecionados
+      const filesDisplay = document.getElementById('selected-files-display');
+      if (filesDisplay) {
+        filesDisplay.innerHTML = '';
+      }
+      
+      // Recarregar missões para remover a missão submetida do painel
+      console.log('[DEBUG STUDENT] Recarregando missões após submissão...');
+      
+      // Aguardar um pouco para o backend processar
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      await loadCompletedMissions(); // Atualizar lista de missões submetidas
+      console.log('[DEBUG STUDENT] Missões completadas atualizadas, recarregando painel...');
+      
+      await loadMissions(); // Recarregar painel de missões
+      console.log('[DEBUG STUDENT] Painel de missões recarregado com sucesso');
+      
+      // Também recarregar o histórico para mostrar a nova submissão
+      loadSubmissionHistory();
     } else {
       const errorData = await res.json().catch(() => ({ error: 'Erro desconhecido' }));
       console.error('[DEBUG STUDENT] Erro na submissão:', res.status, errorData);
@@ -457,6 +556,43 @@ document.addEventListener('DOMContentLoaded', () => {
   const fileInput = document.getElementById('code-upload');
   if (fileInput) {
     fileInput.addEventListener('change', displaySelectedFiles);
+    
+    // Adicionar funcionalidade de drag & drop
+    const dropZone = fileInput.parentElement;
+    
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, highlight, false);
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, unhighlight, false);
+    });
+    
+    function highlight(e) {
+      dropZone.classList.add('border-blue-500', 'bg-blue-100');
+    }
+    
+    function unhighlight(e) {
+      dropZone.classList.remove('border-blue-500', 'bg-blue-100');
+    }
+    
+    dropZone.addEventListener('drop', handleDrop, false);
+    
+    function handleDrop(e) {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      fileInput.files = files;
+      displaySelectedFiles();
+    }
   }
 });
 
@@ -538,4 +674,381 @@ function removeFile(index) {
 
   fileInput.files = dt.files;
   displaySelectedFiles();
+}
+
+// Variables para armazenar dados originais
+let originalMissions = [];
+let originalSubmissionHistory = [];
+let studentCompletedMissions = []; // IDs das missões já completadas pelo aluno (pendentes + aprovadas)
+let studentRejectedMissions = []; // IDs das missões rejeitadas (que voltam para o painel)
+let studentInfo = null; // Informações do aluno atual (ano, classe, etc.)
+
+// Funções de filtro para missões (aluno)
+function setupMissionFiltersStudent() {
+  const applyBtn = document.getElementById('apply-mission-filters-student');
+  const clearBtn = document.getElementById('clear-mission-filters-student');
+
+  applyBtn?.addEventListener('click', applyMissionFiltersStudent);
+  clearBtn?.addEventListener('click', clearMissionFiltersStudent);
+}
+
+function applyMissionFiltersStudent() {
+  const difficultyFilter = document.getElementById('filter-mission-difficulty').value;
+  const classFilter = document.getElementById('filter-mission-target-class').value;
+
+  let filteredMissions = [...originalMissions];
+
+  // Filtrar por dificuldade (XP)
+  if (difficultyFilter) {
+    filteredMissions = filteredMissions.filter(mission => {
+      const xp = mission.xp;
+      switch (difficultyFilter) {
+        case '0-50':
+          return xp >= 0 && xp <= 50;
+        case '51-100':
+          return xp >= 51 && xp <= 100;
+        case '101-200':
+          return xp >= 101 && xp <= 200;
+        case '201+':
+          return xp >= 201;
+        default:
+          return true;
+      }
+    });
+  }
+
+  // Filtrar por classe alvo
+  if (classFilter) {
+    filteredMissions = filteredMissions.filter(mission => 
+      mission.targetClass === classFilter || mission.targetClass === 'geral'
+    );
+  }
+
+  displayFilteredMissionsStudent(filteredMissions);
+}
+
+function clearMissionFiltersStudent() {
+  document.getElementById('filter-mission-difficulty').value = '';
+  document.getElementById('filter-mission-target-class').value = '';
+  displayFilteredMissionsStudent(originalMissions);
+}
+
+function displayFilteredMissionsStudent(missions) {
+  const container = document.getElementById('missions');
+  container.innerHTML = '';
+
+  if (missions.length === 0) {
+    container.innerHTML = '<p class="text-gray-500 py-4">Nenhuma missão disponível no momento. Verifique seu histórico para ver missões já submetidas. Missões rejeitadas voltarão a aparecer aqui.</p>';
+    return;
+  }
+
+  missions.forEach(mission => {
+    const difficultyColor = mission.xp <= 50 ? 'text-green-600' : 
+                           mission.xp <= 100 ? 'text-yellow-600' : 
+                           mission.xp <= 200 ? 'text-orange-600' : 'text-red-600';
+
+    const difficultyText = mission.xp <= 50 ? 'Fácil' : 
+                          mission.xp <= 100 ? 'Médio' : 
+                          mission.xp <= 200 ? 'Difícil' : 'Muito Difícil';
+
+    const card = document.createElement('div');
+    card.className = 'bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition border-l-4 border-blue-500';
+    
+    card.innerHTML = `
+      <div class="flex justify-between items-start mb-4">
+        <div class="flex-1">
+          <div class="flex items-center space-x-2 mb-2">
+            <h3 class="text-xl font-bold">${mission.title}</h3>
+            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">✓ Disponível</span>
+          </div>
+          <p class="text-gray-600 mb-3">${mission.description}</p>
+          <div class="flex flex-wrap gap-3 text-sm">
+            <span class="${difficultyColor} font-semibold">
+              <i class="fas fa-star mr-1"></i>${mission.xp} XP - ${difficultyText}
+            </span>
+            <span class="text-blue-600">
+              <i class="fas fa-graduation-cap mr-1"></i>${mission.targetYear ? `${mission.targetYear}º ano` : 'Todos os anos'}
+            </span>
+            <span class="text-purple-600">
+              <i class="fas fa-shield-alt mr-1"></i>${mission.targetClass}
+            </span>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    container.appendChild(card);
+  });
+}
+
+// Funções de filtro para histórico
+function setupHistoryFilters() {
+  const applyBtn = document.getElementById('apply-history-filters');
+  const clearBtn = document.getElementById('clear-history-filters');
+
+  applyBtn?.addEventListener('click', applyHistoryFilters);
+  clearBtn?.addEventListener('click', clearHistoryFilters);
+}
+
+function applyHistoryFilters() {
+  const statusFilter = document.getElementById('filter-history-status').value;
+  const periodFilter = document.getElementById('filter-history-period').value;
+  const missionFilter = document.getElementById('filter-history-mission').value.toLowerCase();
+
+  let filteredHistory = [...originalSubmissionHistory];
+
+  // Filtrar por status
+  if (statusFilter) {
+    filteredHistory = filteredHistory.filter(submission => 
+      submission.status === statusFilter
+    );
+  }
+
+  // Filtrar por período
+  if (periodFilter) {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    filteredHistory = filteredHistory.filter(submission => {
+      const submissionDate = new Date(submission.createdAt);
+      
+      switch (periodFilter) {
+        case 'today':
+          return submissionDate >= today;
+        case 'week':
+          const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+          return submissionDate >= weekAgo;
+        case 'month':
+          const monthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+          return submissionDate >= monthAgo;
+        case 'year':
+          const yearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+          return submissionDate >= yearAgo;
+        default:
+          return true;
+      }
+    });
+  }
+
+  // Filtrar por nome da missão
+  if (missionFilter) {
+    filteredHistory = filteredHistory.filter(submission => 
+      submission.missionTitle?.toLowerCase().includes(missionFilter)
+    );
+  }
+
+  displayFilteredHistory(filteredHistory);
+}
+
+function clearHistoryFilters() {
+  document.getElementById('filter-history-status').value = '';
+  document.getElementById('filter-history-period').value = '';
+  document.getElementById('filter-history-mission').value = '';
+  displayFilteredHistory(originalSubmissionHistory);
+}
+
+function displayFilteredHistory(history) {
+  const container = document.getElementById('submission-history');
+  container.innerHTML = '';
+
+  if (history.length === 0) {
+    container.innerHTML = '<p class="text-gray-500 py-4">Nenhuma submissão encontrada com os filtros aplicados.</p>';
+    return;
+  }
+
+  history.forEach(submission => {
+    const statusColor = submission.status === 'approved' ? 'text-green-600' :
+                       submission.status === 'rejected' ? 'text-red-600' : 'text-yellow-600';
+    
+    const statusIcon = submission.status === 'approved' ? 'fa-check-circle' :
+                      submission.status === 'rejected' ? 'fa-times-circle' : 'fa-clock';
+    
+    const statusText = submission.status === 'approved' ? 'Aprovado' :
+                      submission.status === 'rejected' ? 'Rejeitado' : 'Pendente';
+
+    const card = document.createElement('div');
+    card.className = 'bg-white p-4 rounded-lg shadow hover:shadow-md transition border-l-4 ' +
+                    (submission.status === 'approved' ? 'border-green-500' :
+                     submission.status === 'rejected' ? 'border-red-500' : 'border-yellow-500');
+    
+    card.innerHTML = `
+      <div class="flex justify-between items-start">
+        <div class="flex-1">
+          <h4 class="font-semibold text-lg mb-2">${submission.missionTitle || 'Missão não encontrada'}</h4>
+          <div class="space-y-1 text-sm text-gray-600">
+            <p><i class="fas fa-calendar mr-2"></i>Enviado em: ${new Date(submission.createdAt).toLocaleDateString('pt-BR', { 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric', 
+              hour: '2-digit', 
+              minute: '2-digit' 
+            })}</p>
+            <p class="${statusColor} font-medium">
+              <i class="fas ${statusIcon} mr-2"></i>Status: ${statusText}
+            </p>
+            ${submission.feedback ? `<p class="text-gray-700 mt-2"><strong>Feedback:</strong> ${submission.feedback}</p>` : ''}
+          </div>
+        </div>
+        <div class="ml-4">
+          <button onclick="viewSubmissionDetails(${submission.id})" 
+                  class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition">
+            <i class="fas fa-eye mr-1"></i>Ver Detalhes
+          </button>
+        </div>
+      </div>
+    `;
+    
+    container.appendChild(card);
+  });
+}
+
+// Função para carregar missões completadas/submetidas
+async function loadCompletedMissions() {
+  console.log('[DEBUG STUDENT] Iniciando loadCompletedMissions...');
+  
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('[DEBUG STUDENT] Token não encontrado em loadCompletedMissions');
+      return;
+    }
+    
+    console.log('[DEBUG STUDENT] Fazendo requisição para my-submissions...');
+    const res = await fetch(`${API_URL}/submissoes/my-submissions`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    
+    console.log('[DEBUG STUDENT] Resposta da requisição my-submissions:', res.status, res.ok);
+    
+    if (res.ok) {
+      const submissions = await res.json();
+      console.log('[DEBUG STUDENT] Submissões recebidas:', submissions);
+      
+      // Incluir apenas missões pendentes ou aprovadas (removidas do painel)
+      // Missões rejeitadas voltam para o painel para nova submissão
+      const previousLength = studentCompletedMissions ? studentCompletedMissions.length : 0;
+      studentCompletedMissions = submissions
+        .filter(sub => sub.pending || sub.approved) // Apenas pendentes ou aprovadas
+        .map(sub => sub.missionId);
+      
+      // Armazenar também as missões rejeitadas para indicação visual
+      studentRejectedMissions = submissions
+        .filter(sub => !sub.pending && !sub.approved) // Rejeitadas
+        .map(sub => sub.missionId);
+      
+      console.log('[DEBUG STUDENT] Submissões por status:');
+      const pending = submissions.filter(sub => sub.pending);
+      const approved = submissions.filter(sub => sub.approved);
+      const rejected = submissions.filter(sub => !sub.pending && !sub.approved);
+      
+      console.log('[DEBUG STUDENT] - Pendentes:', pending.length, pending.map(s => `${s.missionId}(${s.missionTitle})`));
+      console.log('[DEBUG STUDENT] - Aprovadas:', approved.length, approved.map(s => `${s.missionId}(${s.missionTitle})`));
+      console.log('[DEBUG STUDENT] - Rejeitadas:', rejected.length, rejected.map(s => `${s.missionId}(${s.missionTitle})`));
+      
+      console.log('[DEBUG STUDENT] Missões removidas do painel (pendentes + aprovadas):', studentCompletedMissions);
+      console.log('[DEBUG STUDENT] Missões que voltam para o painel (rejeitadas):', studentRejectedMissions);
+      console.log('[DEBUG STUDENT] Total de missões removidas do painel:', studentCompletedMissions.length, '(anteriormente:', previousLength, ')');
+    } else {
+      const errorText = await res.text().catch(() => 'Erro desconhecido');
+      console.error('[DEBUG STUDENT] Erro na requisição my-submissions:', res.status, errorText);
+      // Manter array vazio se houver erro
+      studentCompletedMissions = studentCompletedMissions || [];
+    }
+  } catch (error) {
+    console.error('[DEBUG STUDENT] Erro ao carregar missões completadas:', error);
+    // Manter array vazio se houver erro
+    studentCompletedMissions = studentCompletedMissions || [];
+  }
+}
+
+// Função para atualizar opções dos filtros baseado nas missões disponíveis para o aluno
+function updateFilterOptions() {
+  if (!originalMissions || !studentInfo) return;
+  
+  console.log('[DEBUG STUDENT] Atualizando opções dos filtros para', originalMissions.length, 'missões');
+  
+  // Atualizar filtro de classe - apenas mostrar as classes que têm missões disponíveis para o aluno
+  const classFilter = document.getElementById('filter-mission-target-class');
+  if (classFilter) {
+    // Manter apenas as opções relevantes (sem "Todas as classes")
+    const defaultOptions = `
+      <option value="">Selecione uma classe</option>
+      <option value="geral">Geral</option>
+    `;
+    
+    // Adicionar apenas as classes que aparecem nas missões disponíveis
+    const availableClasses = [...new Set(
+      originalMissions
+        .map(mission => mission.targetClass)
+        .filter(targetClass => targetClass && targetClass !== 'geral')
+    )];
+    
+    const classOptions = availableClasses.map(className => 
+      `<option value="${className}">${className}</option>`
+    ).join('');
+    
+    classFilter.innerHTML = defaultOptions + classOptions;
+    console.log('[DEBUG STUDENT] Classes disponíveis nos filtros:', availableClasses);
+  }
+}
+
+// Função para carregar dados para filtros
+async function loadMissionsForFilters() {
+  try {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${API_URL}/missoes`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    
+    if (res.ok) {
+      const allMissions = await res.json();
+      
+      // Filtrar missões por ano/classe do aluno antes de armazenar
+      if (studentInfo) {
+        let filteredForStudent = allMissions.filter(mission => {
+          const isForStudentYear = !mission.targetYear || mission.targetYear === studentInfo.year;
+          const isForStudentClass = !mission.targetClass || mission.targetClass === 'geral' || mission.targetClass === studentInfo.class;
+          return isForStudentYear && isForStudentClass;
+        });
+        
+        // Remover apenas missões pendentes ou aprovadas dos filtros (rejeitadas ficam disponíveis)
+        if (studentCompletedMissions && studentCompletedMissions.length > 0) {
+          filteredForStudent = filteredForStudent.filter(mission => 
+            !studentCompletedMissions.includes(mission.id)
+          );
+        }
+        
+        originalMissions = filteredForStudent;
+        console.log('[DEBUG STUDENT] Missões filtradas para filtros:', originalMissions.length, 'de', allMissions.length);
+      } else {
+        originalMissions = allMissions;
+      }
+      
+      displayFilteredMissionsStudent(originalMissions);
+      setupMissionFiltersStudent();
+      updateFilterOptions();
+    }
+  } catch (error) {
+    console.error('Erro ao carregar missões para filtros:', error);
+  }
+}
+
+// Função para carregar histórico para filtros
+async function loadSubmissionHistoryForFilters() {
+  await loadSubmissionHistory();
+  
+  try {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${API_URL}/submissoes/my-submissions`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    
+    if (res.ok) {
+      originalSubmissionHistory = await res.json();
+      displayFilteredHistory(originalSubmissionHistory);
+      setupHistoryFilters();
+    }
+  } catch (error) {
+    console.error('Erro ao carregar histórico para filtros:', error);
+  }
 }

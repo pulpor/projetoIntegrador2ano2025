@@ -18,6 +18,18 @@
     "class": "Arqueiro do JavaScript",
     "year": 1,
     "isMaster": false,
+    "level": 2,
+    "xp": 200,
+    "pending": false
+  },
+  {
+    "id": 3,
+    "username": "gg",
+    "fullname": "gg",
+    "password": "$2b$10$IPbzHMSYQjSKWL02uX9tOedtTUJLS2DBJUH13OVd8AZW93cz0c0Hm",
+    "class": "Arqueiro do JavaScript",
+    "year": 1,
+    "isMaster": false,
     "level": 1,
     "xp": 0,
     "pending": false

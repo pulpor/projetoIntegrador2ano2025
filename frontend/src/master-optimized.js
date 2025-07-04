@@ -22,49 +22,13 @@ document.addEventListener('DOMContentLoaded', () => {
 function validateAuthentication() {
   const token = localStorage.getItem('token');
   const isMaster = localStorage.getItem('isMaster');
-  const username = localStorage.getItem('username');
 
-  console.log('[DEBUG MASTER] Validando autenticação:', { 
-    hasToken: !!token, 
-    isMaster, 
-    username,
-    tokenLength: token ? token.length : 0
-  });
-
-  if (!token) {
-    console.error('[DEBUG MASTER] Token não encontrado');
-    alert('Acesso negado. Token não encontrado. Faça login como Mestre.');
+  if (!token || isMaster !== 'true') {
+    alert('Acesso negado. Faça login como Mestre.');
     window.location.href = './index.html';
     return false;
   }
-
-  if (isMaster !== 'true') {
-    console.error('[DEBUG MASTER] Usuário não é mestre:', isMaster);
-    alert('Acesso negado. Esta área é exclusiva para mestres.');
-    window.location.href = './index.html';
-    return false;
-  }
-
-  console.log('[DEBUG MASTER] ✅ Autenticação válida');
   return true;
-}
-
-// Função para testar se o token ainda é válido
-async function testTokenValidity() {
-  try {
-    console.log('[DEBUG MASTER] Testando validade do token...');
-    await apiRequest('/usuarios/me');
-    console.log('[DEBUG MASTER] ✅ Token válido');
-    return true;
-  } catch (error) {
-    console.error('[DEBUG MASTER] ❌ Token inválido:', error.message);
-    if (error.message.includes('401') || error.message.includes('Token')) {
-      alert('Sua sessão expirou. Faça login novamente.');
-      localStorage.clear();
-      window.location.href = './index.html';
-    }
-    return false;
-  }
 }
 
 function loadInitialData() {
@@ -72,7 +36,6 @@ function loadInitialData() {
   loadApprovedStudents();
   loadMissions();
   loadSubmissions();
-  setupMissionCreation(); // Adicionar setup para criação de missões
 }
 
 // ====== CONFIGURAÇÃO DE INTERFACE ======
@@ -135,25 +98,7 @@ function setActiveTab(activeId, activeContent) {
 
 // ====== FUNÇÕES DE API ======
 async function apiRequest(endpoint, options = {}) {
-  console.log('[DEBUG MASTER] Fazendo requisição:', { endpoint, options });
-  
   const token = localStorage.getItem('token');
-  const username = localStorage.getItem('username');
-  const isMaster = localStorage.getItem('isMaster');
-  
-  console.log('[DEBUG MASTER] Estado de autenticação:', { 
-    hasToken: !!token, 
-    tokenLength: token ? token.length : 0,
-    tokenPreview: token ? token.substring(0, 20) + '...' : 'N/A',
-    username, 
-    isMaster 
-  });
-  
-  if (!token) {
-    console.error('[DEBUG MASTER] Token não encontrado no localStorage');
-    throw new Error('Token de autenticação não encontrado. Faça login novamente.');
-  }
-  
   const defaultOptions = {
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -161,45 +106,14 @@ async function apiRequest(endpoint, options = {}) {
     }
   };
 
-  const url = `${API_URL}${endpoint}`;
-  console.log('[DEBUG MASTER] URL completa:', url);
-  console.log('[DEBUG MASTER] Headers da requisição:', {
-    ...defaultOptions.headers,
-    'Authorization': `Bearer ${token.substring(0, 20)}...`
-  });
+  const response = await fetch(`${API_URL}${endpoint}`, { ...defaultOptions, ...options });
   
-  try {
-    const response = await fetch(url, { ...defaultOptions, ...options });
-    console.log('[DEBUG MASTER] Resposta recebida:', { status: response.status, ok: response.ok });
-    
-    if (!response.ok) {
-      let errorMessage = 'Erro desconhecido';
-      try {
-        const error = await response.json();
-        errorMessage = error.error || error.message || errorMessage;
-        console.log('[DEBUG MASTER] Erro do servidor:', error);
-      } catch (e) {
-        errorMessage = response.statusText || errorMessage;
-        console.log('[DEBUG MASTER] Erro ao ler resposta:', e);
-      }
-      
-      // Não redirecionar automaticamente, apenas lançar erro específico
-      if (response.status === 401) {
-        throw new Error(`Erro de autenticação: ${errorMessage}`);
-      }
-      
-      throw new Error(`HTTP ${response.status}: ${errorMessage}`);
-    }
-    
-    const result = await response.json();
-    console.log('[DEBUG MASTER] Resultado da requisição:', result);
-    return result;
-  } catch (error) {
-    if (error.name === 'TypeError' && error.message.includes('fetch')) {
-      throw new Error('Não foi possível conectar ao servidor. Verifique se o backend está rodando.');
-    }
-    throw error;
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Erro desconhecido' }));
+    throw new Error(`HTTP ${response.status}: ${error.error || response.statusText}`);
   }
+  
+  return response.json();
 }
 
 // ====== GERENCIAMENTO DE USUÁRIOS ======
@@ -492,7 +406,7 @@ async function loadMissions() {
 }
 
 function renderMissions(missions) {
-  const container = document.getElementById('existing-missions-list');
+  const container = document.getElementById('missions-list');
   if (!container) return;
 
   if (missions.length === 0) {
@@ -500,94 +414,41 @@ function renderMissions(missions) {
     return;
   }
 
-  // Limitar a 5 missões por padrão
-  const maxDisplayed = 5;
-  const missionsToShow = missions.slice(0, maxDisplayed);
-  const hasMore = missions.length > maxDisplayed;
-
-  let html = `
-    <div class="flex justify-between items-center mb-4">
-      <h4 class="text-lg font-semibold text-gray-800">Missões Existentes (${missions.length})</h4>
-      ${hasMore ? `
-        <button id="toggle-all-missions" class="text-blue-600 hover:text-blue-800 text-sm">
-          <i class="fas fa-chevron-down mr-1"></i>Mostrar todas
-        </button>
-      ` : ''}
-    </div>
-    <div id="missions-display">
-      ${missionsToShow.map(mission => createMissionCard(mission)).join('')}
-    </div>
-  `;
-
-  if (hasMore) {
-    html += `
-      <div id="hidden-missions" class="hidden">
-        ${missions.slice(maxDisplayed).map(mission => createMissionCard(mission)).join('')}
-      </div>
-    `;
-  }
-
-  container.innerHTML = html;
+  container.innerHTML = missions.map(mission => createMissionCard(mission)).join('');
   setupMissionButtons();
-  
-  // Configurar toggle para mostrar/ocultar todas as missões
-  if (hasMore) {
-    const toggleBtn = document.getElementById('toggle-all-missions');
-    const hiddenMissions = document.getElementById('hidden-missions');
-    let showingAll = false;
-    
-    toggleBtn.addEventListener('click', () => {
-      showingAll = !showingAll;
-      
-      if (showingAll) {
-        hiddenMissions.classList.remove('hidden');
-        toggleBtn.innerHTML = '<i class="fas fa-chevron-up mr-1"></i>Mostrar menos';
-      } else {
-        hiddenMissions.classList.add('hidden');
-        toggleBtn.innerHTML = '<i class="fas fa-chevron-down mr-1"></i>Mostrar todas';
-      }
-      
-      // Reconfigurar botões após mostrar/ocultar
-      setupMissionButtons();
-    });
-  }
 }
 
 function createMissionCard(mission) {
-  const yearLabels = { 1: '1º ano', 2: '2º ano', 3: '3º ano' };
+  const yearLabels = { 1: '1º ano - Front-end', 2: '2º ano - Back-end', 3: '3º ano - Mobile' };
   
-  // Truncar descrição se for muito longa
-  const maxDescLength = 100;
-  const description = mission.description.length > maxDescLength 
-    ? mission.description.substring(0, maxDescLength) + '...' 
-    : mission.description;
-  
+  let targetInfo = '';
+  if (mission.targetYear) {
+    targetInfo += `<span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mr-2">${yearLabels[mission.targetYear]}</span>`;
+  } else {
+    targetInfo += `<span class="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full mr-2">Todos os anos</span>`;
+  }
+
+  if (mission.targetClass === 'geral') {
+    targetInfo += `<span class="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Todas as classes</span>`;
+  } else {
+    targetInfo += `<span class="inline-block bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full">${mission.targetClass}</span>`;
+  }
+
   return `
-    <div class="bg-white p-3 rounded-lg shadow-sm hover:shadow-md transition mb-3 border-l-4 border-purple-400">
-      <div class="flex justify-between items-start">
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center justify-between mb-1">
-            <h3 class="font-semibold text-md text-gray-800 truncate">${mission.title}</h3>
-            <span class="text-green-600 font-medium text-sm ml-2 flex-shrink-0">${mission.xp} XP</span>
-          </div>
-          <p class="text-gray-600 text-sm mb-2 line-clamp-2">${description}</p>
-          <div class="flex flex-wrap gap-1 mb-2">
-            ${mission.targetYear ? 
-              `<span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded">${yearLabels[mission.targetYear]}</span>` :
-              `<span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Todos</span>`
-            }
-            ${mission.targetClass === 'geral' ? 
-              `<span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded">Geral</span>` :
-              `<span class="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded max-w-20 truncate" title="${mission.targetClass}">${mission.targetClass}</span>`
-            }
-          </div>
+    <div class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition mb-4">
+      <div class="flex justify-between items-center">
+        <div class="flex-1">
+          <h3 class="font-bold text-lg">${mission.title}</h3>
+          <p class="text-gray-600 mb-2">${mission.description}</p>
+          <div class="mb-2">${targetInfo}</div>
+          <p class="text-green-600 font-medium">XP: ${mission.xp}</p>
         </div>
-        <div class="flex space-x-1 ml-3 flex-shrink-0">
-          <button data-mission-id="${mission.id}" class="edit-mission-btn bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs" title="Editar">
-            <i class="fas fa-edit"></i>
+        <div class="flex space-x-2 ml-4">
+          <button data-mission-id="${mission.id}" class="edit-mission-btn bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded">
+            <i class="fas fa-edit mr-1"></i> Editar
           </button>
-          <button data-mission-id="${mission.id}" class="delete-mission-btn bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs" title="Excluir">
-            <i class="fas fa-trash"></i>
+          <button data-mission-id="${mission.id}" class="delete-mission-btn bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">
+            <i class="fas fa-trash mr-1"></i> Excluir
           </button>
         </div>
       </div>
@@ -598,7 +459,8 @@ function createMissionCard(mission) {
 function setupMissionButtons() {
   setupEventListeners('.edit-mission-btn', async (e) => {
     const missionId = e.target.closest('button').getAttribute('data-mission-id');
-    await editMission(missionId);
+    // Implementar edição de missão aqui
+    console.log('Editar missão:', missionId);
   });
 
   setupEventListeners('.delete-mission-btn', async (e) => {
@@ -606,37 +468,6 @@ function setupMissionButtons() {
     const missionId = e.target.closest('button').getAttribute('data-mission-id');
     await missionAction(missionId, 'DELETE', 'Missão excluída com sucesso!');
   });
-}
-
-async function editMission(missionId) {
-  try {
-    // Buscar dados da missão
-    const mission = originalMissions.find(m => m.id === parseInt(missionId));
-    if (!mission) {
-      alert('Missão não encontrada.');
-      return;
-    }
-    
-    // Preencher formulário com dados da missão
-    document.getElementById('mission-title').value = mission.title;
-    document.getElementById('mission-description').value = mission.description;
-    document.getElementById('mission-xp').value = mission.xp;
-    document.getElementById('mission-year').value = mission.targetYear || '';
-    document.getElementById('mission-class').value = mission.targetClass;
-    
-    // Alterar botão para modo edição
-    const createBtn = document.getElementById('create-mission-btn');
-    const cancelBtn = document.getElementById('cancel-edit-btn');
-    
-    createBtn.innerHTML = '<i class="fas fa-save mr-2"></i>Salvar Alterações';
-    createBtn.setAttribute('data-edit-mission-id', missionId);
-    cancelBtn.classList.remove('hidden');
-    
-    console.log('[DEBUG MASTER] Editando missão:', mission);
-  } catch (err) {
-    console.error('[DEBUG MASTER] Erro ao carregar missão para edição:', err);
-    alert('Erro ao carregar dados da missão.');
-  }
 }
 
 async function missionAction(missionId, method, successMessage) {
@@ -648,111 +479,6 @@ async function missionAction(missionId, method, successMessage) {
     console.error('Erro na ação de missão:', err);
     alert(`Erro: ${err.message}`);
   }
-}
-
-// ====== CRIAÇÃO DE MISSÕES ======
-function setupMissionCreation() {
-  const createBtn = document.getElementById('create-mission-btn');
-  const cancelBtn = document.getElementById('cancel-edit-btn');
-  
-  if (createBtn) {
-    createBtn.addEventListener('click', handleMissionSubmit);
-  }
-  
-  if (cancelBtn) {
-    cancelBtn.addEventListener('click', cancelMissionEdit);
-  }
-}
-
-async function handleMissionSubmit() {
-  const title = document.getElementById('mission-title').value.trim();
-  const description = document.getElementById('mission-description').value.trim();
-  const xp = document.getElementById('mission-xp').value;
-  const year = document.getElementById('mission-year').value;
-  let targetClass = document.getElementById('mission-class').value;
-  
-  // Se não foi selecionada uma classe, usar "geral" como padrão
-  if (!targetClass) {
-    targetClass = 'geral';
-  }
-  
-  // Verificar se estamos editando uma missão existente
-  const createBtn = document.getElementById('create-mission-btn');
-  const editMissionId = createBtn.getAttribute('data-edit-mission-id');
-  const isEditing = !!editMissionId;
-  
-  // Validação
-  if (!title || !description || !xp) {
-    alert('Por favor, preencha todos os campos obrigatórios (título, descrição e XP).');
-    return;
-  }
-  
-  if (parseInt(xp) <= 0) {
-    alert('O XP deve ser maior que zero.');
-    return;
-  }
-  
-  const missionData = {
-    titulo: title,
-    descricao: description,
-    xp: parseInt(xp),
-    targetYear: year ? parseInt(year) : null,
-    targetClass: targetClass
-  };
-  
-  console.log('[DEBUG MASTER] ' + (isEditing ? 'Editando' : 'Criando') + ' missão:', missionData);
-  
-  try {
-    const url = isEditing ? `/missoes/${editMissionId}` : '/missoes';
-    const method = isEditing ? 'PUT' : 'POST';
-    
-    console.log('[DEBUG MASTER] Fazendo requisição:', { url, method, data: missionData });
-    
-    const result = await apiRequest(url, {
-      method: method,
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(missionData)
-    });
-    
-    console.log('[DEBUG MASTER] Missão ' + (isEditing ? 'editada' : 'criada') + ' com sucesso:', result);
-    alert('Missão ' + (isEditing ? 'editada' : 'criada') + ' com sucesso!');
-    
-    // Limpar formulário e resetar estado
-    clearMissionForm();
-    resetMissionFormState();
-    
-    // Recarregar lista de missões
-    loadMissions();
-  } catch (err) {
-    console.error('[DEBUG MASTER] Erro na requisição:', err);
-    
-    // Tratamento específico para erros de autenticação
-    if (err.message.includes('401') || err.message.includes('autenticação') || err.message.includes('Token')) {
-      const shouldRelogin = confirm('Problema de autenticação detectado. Deseja fazer login novamente?');
-      if (shouldRelogin) {
-        localStorage.clear();
-        window.location.href = './index.html';
-      }
-    } else {
-      alert('Erro ao ' + (isEditing ? 'editar' : 'criar') + ' missão: ' + err.message);
-    }
-  }
-}
-
-function clearMissionForm() {
-  document.getElementById('mission-title').value = '';
-  document.getElementById('mission-description').value = '';
-  document.getElementById('mission-xp').value = '';
-  document.getElementById('mission-year').value = '';
-  document.getElementById('mission-class').value = 'geral'; // Definir "geral" como padrão
-}
-
-function cancelMissionEdit() {
-  clearMissionForm();
-  document.getElementById('create-mission-btn').textContent = '+ Criar Missão';
-  document.getElementById('cancel-edit-btn').classList.add('hidden');
 }
 
 // ====== SISTEMA DE FILTROS ======

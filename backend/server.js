@@ -3,7 +3,14 @@ const cors = require('cors');
 const path = require('path');
 
 // Inicializar dados primeiro
-require('./inicializacao');
+console.log('[SERVER] Iniciando carregamento de dados...');
+try {
+  require('./inicializacao');
+  console.log('[SERVER] ✅ Dados carregados com sucesso');
+} catch (error) {
+  console.error('[SERVER] ❌ Erro ao carregar dados:', error);
+  process.exit(1);
+}
 
 const autenticacaoRotas = require('./routes/autenticacaoRotas');
 const missoesRotas = require('./routes/missoesRotas');
@@ -23,6 +30,12 @@ app.use(cors({
 
 app.use(express.json());
 
+// Middleware de tratamento de erros
+app.use((err, req, res, next) => {
+  console.error('Erro no servidor:', err);
+  res.status(500).json({ error: 'Erro interno do servidor', details: err.message });
+});
+
 // Middleware de logs
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
@@ -30,11 +43,13 @@ app.use((req, res, next) => {
 });
 
 // Configurar rotas
+console.log('[SERVER] Configurando rotas...');
 app.use('/auth', autenticacaoRotas);
 app.use('/missoes', missoesRotas);
 app.use('/usuarios', usuariosRotas);
 app.use('/submissoes', submissoesRotas);
 app.use('/Uploads', express.static(path.join(__dirname, 'Uploads')));
+console.log('[SERVER] ✅ Rotas configuradas');
 
 // Servir arquivos estáticos do frontend
 app.use(express.static(path.join(__dirname, '..', 'frontend')));
@@ -46,5 +61,13 @@ app.get('/', (req, res) => {
 
 // Iniciar servidor
 app.listen(port, () => {
-  console.log(`Servidor rodando em http://localhost:${port}`);
+  console.log(`🚀 Servidor rodando em http://localhost:${port}`);
+  console.log('📋 Rotas disponíveis:');
+  console.log('   - POST /auth/login');
+  console.log('   - POST /auth/register');
+  console.log('   - GET  /missoes (requer autenticação)');
+  console.log('   - POST /missoes (requer autenticação de mestre)');
+  console.log('   - GET  /usuarios/me (requer autenticação)');
+  console.log('   - GET  /submissoes/my-submissions (requer autenticação)');
+  console.log('✅ Sistema pronto para uso!');
 });

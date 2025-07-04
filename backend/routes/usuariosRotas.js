@@ -26,6 +26,7 @@ router.get('/approved-students', autenticar, ehMestre, (req, res) => {
       username: student.username,
       fullname: student.fullname,
       class: student.class,
+      year: student.year,
       level: student.level,
       xp: student.xp,
       levelInfo: levelInfo
@@ -33,6 +34,7 @@ router.get('/approved-students', autenticar, ehMestre, (req, res) => {
   });
 
   console.log('[DEBUG BACKEND] Alunos aprovados encontrados:', enrichedStudents.length);
+  console.log('[DEBUG BACKEND] Exemplo de aluno enviado:', enrichedStudents[0]);
   res.json(enrichedStudents);
 });
 

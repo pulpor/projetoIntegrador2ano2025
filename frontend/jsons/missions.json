@@ -70,5 +70,13 @@
     "xp": 90,
     "targetYear": null,
     "targetClass": "Caçador de Bugs"
+  },
+  {
+    "id": 15,
+    "title": "Missão de Teste - 1751659130320",
+    "description": "Esta é uma missão criada pelo script de teste para verificar o fluxo de autenticação.",
+    "xp": 100,
+    "targetYear": 1,
+    "targetClass": "A"
   }
 ]

@@ -11,6 +11,15 @@ const { autenticar, ehMestre } = require('../middlewares/autenticacao');
 
 const { missions, missionIdCounter, users } = require('../inicializacao');
 
+// Middleware de log específico para missões
+router.use((req, res, next) => {
+  console.log(`[MISSOES] ${req.method} ${req.originalUrl}`, {
+    body: req.body,
+    headers: req.headers.authorization ? 'Token presente' : 'Sem token',
+    user: req.user?.userId || 'Não autenticado'
+  });
+  next();
+});
 
 router.get('/', autenticar, (req, res) => {
   console.log('Acessando /missoes:', { user: req.user });
@@ -47,29 +56,51 @@ router.get('/', autenticar, (req, res) => {
 });
 
 router.post('/', autenticar, ehMestre, async (req, res) => {
-  const { titulo, descricao, xp, targetYear, targetClass } = req.body;
-  console.log('Criando missão:', { titulo, descricao, xp, targetYear, targetClass, user: req.user });
-  if (!titulo || !descricao || !xp || !targetClass) {
-    return res.status(400).json({ error: 'Preencha todos os campos obrigatórios' });
-  }
-
-  const mission = {
-    id: missionIdCounter.value++,
-    title: titulo,
-    description: descricao,
-    xp: parseInt(xp),
-    targetYear: targetYear ? parseInt(targetYear) : null,
-    targetClass: targetClass
-  };
-
-  missions.push(mission);
   try {
+    const { titulo, descricao, xp, targetYear, targetClass } = req.body;
+    console.log('[MISSOES] Criando missão:', { titulo, descricao, xp, targetYear, targetClass, user: req.user });
+    
+    // Validação mais robusta
+    if (!titulo || titulo.trim() === '') {
+      console.log('[MISSOES] Erro: título vazio');
+      return res.status(400).json({ error: 'Título é obrigatório' });
+    }
+    
+    if (!descricao || descricao.trim() === '') {
+      console.log('[MISSOES] Erro: descrição vazia');
+      return res.status(400).json({ error: 'Descrição é obrigatória' });
+    }
+    
+    if (!xp || parseInt(xp) <= 0) {
+      console.log('[MISSOES] Erro: XP inválido');
+      return res.status(400).json({ error: 'XP deve ser maior que zero' });
+    }
+    
+    if (!targetClass) {
+      console.log('[MISSOES] Erro: classe alvo não especificada');
+      return res.status(400).json({ error: 'Classe alvo é obrigatória' });
+    }
+
+    const mission = {
+      id: missionIdCounter.value++,
+      title: titulo.trim(),
+      description: descricao.trim(),
+      xp: parseInt(xp),
+      targetYear: targetYear ? parseInt(targetYear) : null,
+      targetClass: targetClass
+    };
+
+    console.log('[MISSOES] Missão criada:', mission);
+    missions.push(mission);
+    
+    console.log('[MISSOES] Salvando no arquivo...');
     await fs.writeFile(caminhoMissions, JSON.stringify(missions, null, 2));
-    console.log('missions.json salvo com sucesso:', mission);
-    res.json(mission);
+    console.log('[MISSOES] ✅ missions.json salvo com sucesso');
+    
+    res.status(201).json(mission);
   } catch (err) {
-    console.error('Erro ao salvar missions.json:', err);
-    res.status(500).json({ error: 'Erro interno do servidor' });
+    console.error('[MISSOES] ❌ Erro ao criar missão:', err);
+    res.status(500).json({ error: 'Erro interno do servidor', details: err.message });
   }
 });
 
