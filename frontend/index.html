@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sistema RPG de Aprendizado - Login</title>
+    <!-- Tailwind CSS - CDN para desenvolvimento, será substituído na build -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="../js/auth.js"></script>
   </head>
   <body class="bg-gray-100 font-sans">
     <div
@@ -19,7 +19,6 @@
           Sistema RPG de Aprendizado
         </h1>
 
-        <!-- Formulário de Login -->
         <div id="login-form">
           <input
             id="username"
@@ -35,7 +34,7 @@
           />
 
           <button
-            onclick="login()"
+            id="loginButton"
             class="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition"
           >
             Entrar
@@ -44,14 +43,13 @@
           <p class="text-center my-4 text-gray-500">OU</p>
 
           <button
-            onclick="showRegisterForm()"
+            id="registerButton"
             class="w-full bg-gray-200 text-gray-700 p-3 rounded-lg hover:bg-gray-300 transition"
           >
             Criar nova conta
           </button>
         </div>
 
-        <!-- Formulário de Registro (inicialmente oculto) -->
         <div id="register-form" class="hidden">
           <input
             id="reg-username"
@@ -72,6 +70,15 @@
             class="w-full p-3 mb-4 border rounded-lg focus:ring-2 focus:ring-blue-200"
           />
           <select
+            id="year-select"
+            class="w-full p-3 mb-4 border rounded-lg focus:ring-2 focus:ring-blue-200"
+          >
+            <option value="">Escolha seu ano</option>
+            <option value="1">1º ano - Front-end</option>
+            <option value="2">2º ano - Back-end</option>
+            <option value="3">3º ano - Mobile</option>
+          </select>
+          <select
             id="class-select"
             class="w-full p-3 mb-4 border rounded-lg focus:ring-2 focus:ring-blue-200"
           >
@@ -83,13 +90,13 @@
           </select>
           <div class="flex gap-3">
             <button
-              onclick="hideRegisterForm()"
+              id="backButton"
               class="flex-1 bg-gray-200 text-gray-700 p-3 rounded-lg hover:bg-gray-300 transition"
             >
               Voltar
             </button>
             <button
-              onclick="register()"
+              id="registerSubmitButton"
               class="flex-1 bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 transition"
             >
               Cadastrar
@@ -98,5 +105,25 @@
         </div>
       </div>
     </div>
+    <script type="module">
+      import {
+        login,
+        logout,
+        showRegisterForm,
+        hideRegisterForm,
+        register,
+      } from "./src/auth.js";
+
+      document.getElementById("loginButton").addEventListener("click", login);
+      document
+        .getElementById("registerButton")
+        .addEventListener("click", showRegisterForm);
+      document
+        .getElementById("backButton")
+        .addEventListener("click", hideRegisterForm);
+      document
+        .getElementById("registerSubmitButton")
+        .addEventListener("click", register);
+    </script>
   </body>
 </html>

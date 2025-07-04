@@ -4,59 +4,58 @@
     "username": "mestre",
     "password": "$2b$10$86xIuDQYU5I/GC9ExZVZIODZ79fxBAeHFV.GC1WfSody7zpAGYNUi",
     "class": "Mestre Fullstack",
+    "year": null,
     "isMaster": true,
     "level": 1,
     "xp": 0,
     "pending": false
   },
   {
-    "id": 2,
-    "username": "t",
-    "password": "$2b$10$mFOkhNKaaW6CVD66DgtOc.tHYFym6RYl0N0iq2munZaaRXuBXSv3e",
-    "class": "Arqueiro do JavaScript",
+    "id": 9,
+    "username": "kkk",
+    "fullname": "kkk",
+    "password": "$2b$10$VjH3Q/hEJb3thYQFaPQje.EchOrd2KloitzAportxnqcs.3396KOO",
+    "class": "Cafeicultor do Java",
+    "year": 2,
     "isMaster": false,
     "level": 1,
     "xp": 0,
-    "pending": true
+    "pending": false
   },
   {
-    "id": 3,
-    "username": "e",
-    "password": "$2b$10$f78NLWgPo9cWiL.xKotv3eZwsg6IkXgfgr23PD1QDS46Sjn7241GG",
+    "id": 10,
+    "username": "jj",
+    "fullname": "jj",
+    "password": "$2b$10$aoVVZ02a7bwho/S9cKEoM.FJG9SPicsSROydCjwmfvURz.KkrgBMu",
     "class": "Arqueiro do JavaScript",
+    "year": 1,
     "isMaster": false,
     "level": 1,
     "xp": 0,
-    "pending": true
+    "pending": false
   },
   {
-    "id": 4,
-    "username": "p",
-    "password": "$2b$10$KPtkIt6AVbJyZdoAh3jlVuAFluoG8ItXHb1N8NFv9sGZXQleIgpbO",
+    "id": 11,
+    "username": "g",
+    "fullname": "g",
+    "password": "$2b$10$tZCPeQMXE0UoCRiYbLE6M.9DwBS1dZIjRJmVS7DrQfghYRrLVV3Gy",
     "class": "Arqueiro do JavaScript",
+    "year": 1,
     "isMaster": false,
-    "level": 1,
-    "xp": 0,
-    "pending": true
+    "level": 4,
+    "xp": 530,
+    "pending": false
   },
   {
-    "id": 5,
-    "username": "u",
-    "password": "$2b$10$l4vr6R7A7AyhAXH7nWGaHOV0k4FzJcAQ7Q95LVEyZnY/WdFX30nGW",
+    "id": 12,
+    "username": "dai",
+    "fullname": "dai",
+    "password": "$2b$10$BOdSFxpzFobwEj679L2UaOHT9Ou/g1aemVtebvjQicH3UsguhdDZ6",
     "class": "Arqueiro do JavaScript",
+    "year": 3,
     "isMaster": false,
     "level": 1,
     "xp": 0,
-    "pending": true
-  },
-  {
-    "id": 6,
-    "username": "y",
-    "password": "$2b$10$/nPeijAMrks6y/UE6RZUnuuE76XN8kBFBLcndJD9WM7CaywaQVDAW",
-    "class": "Arqueiro do JavaScript",
-    "isMaster": false,
-    "level": 1,
-    "xp": 0,
-    "pending": true
+    "pending": false
   }
 ]

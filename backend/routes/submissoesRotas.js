@@ -1,11 +1,17 @@
 const express = require('express');
 const fs = require('fs').promises;
+const path = require('path');
 const router = express.Router();
+
+// Caminho correto para o arquivo submissions.json
+const caminhoSubmissions = path.join(__dirname, '..', '..', 'frontend', 'jsons', 'submissions.json');
+const caminhoUsers = path.join(__dirname, '..', '..', 'frontend', 'jsons', 'users.json');
 
 const { autenticar, ehMestre } = require('../middlewares/autenticacao');
 
-const { missions, submissions, submissionIdCounter } = require('../inicializacao');
+const { users, missions, submissions, submissionIdCounter } = require('../inicializacao');
 const { upload } = require('../utils/armazenamentoArquivos');
+const { updateUserLevel } = require('../utils/levelSystem');
 
 router.post('/submit', autenticar, upload, async (req, res) => {
   const { missionId } = req.body;
@@ -26,7 +32,7 @@ router.post('/submit', autenticar, upload, async (req, res) => {
   };
   submissions.push(submission);
   try {
-    await fs.writeFile('submissions.json', JSON.stringify(submissions, null, 2));
+    await fs.writeFile(caminhoSubmissions, JSON.stringify(submissions, null, 2));
     console.log('submissions.json salvo com sucesso:', submission);
     res.json({ message: 'Submissão enviada com sucesso' });
   } catch (err) {
@@ -35,37 +41,88 @@ router.post('/submit', autenticar, upload, async (req, res) => {
   }
 });
 
-router.get('/', autenticar, ehMestre, (req, res) => {
-  const enrichedSubmissions = submissions.map(sub => {
-    const user = users.find(u => u.id === parseInt(sub.userId));
-    const mission = missions.find(m => m.id === parseInt(sub.missionId));
-    return {
-      ...sub,
-      username: user ? user.username : 'Desconhecido',
-      missionTitle: mission ? mission.title : 'Desconhecida'
-    };
-  });
-  res.json(enrichedSubmissions);
+router.get('/my-submissions', autenticar, (req, res) => {
+  const userId = req.user.userId;
+  console.log('[DEBUG] Buscando submissões do usuário:', userId);
+
+  try {
+    const userSubmissions = submissions.filter(sub => parseInt(sub.userId) === parseInt(userId));
+    console.log('[DEBUG] Submissões encontradas:', userSubmissions.length);
+
+    const enrichedSubmissions = userSubmissions.map(sub => {
+      const mission = missions.find(m => m.id === parseInt(sub.missionId));
+      return {
+        ...sub,
+        missionTitle: mission ? mission.title : 'Missão Desconhecida',
+        missionDescription: mission ? mission.description : ''
+      };
+    });
+
+    console.log('[DEBUG] Submissões do usuário enriquecidas:', enrichedSubmissions);
+    res.json(enrichedSubmissions);
+  } catch (err) {
+    console.error('[DEBUG] Erro na rota GET /my-submissions:', err);
+    res.status(500).json({ error: 'Erro interno do servidor', details: err.message });
+  }
 });
 
-router.post('/approve-submission', autenticar, ehMestre, async (req, res) => {
-  const { submissionId, feedback } = req.body;
-  const submission = submissions.find(s => s.id === parseInt(submissionId));
+router.get('/', autenticar, ehMestre, (req, res) => {
+  console.log('[DEBUG] Rota GET /submissoes chamada');
+  console.log('[DEBUG] Usuário autenticado:', req.user);
+  console.log('[DEBUG] Total de submissões:', submissions.length);
+
+  try {
+    const enrichedSubmissions = submissions.map(sub => {
+      console.log('[DEBUG] Processando submissão:', sub.id);
+      const user = users.find(u => u.id === parseInt(sub.userId));
+      const mission = missions.find(m => m.id === parseInt(sub.missionId));
+
+      console.log('[DEBUG] Usuário encontrado:', user ? user.username : 'não encontrado');
+      console.log('[DEBUG] Missão encontrada:', mission ? mission.title : 'não encontrada');
+
+      return {
+        ...sub,
+        username: user ? user.username : 'Desconhecido',
+        missionTitle: mission ? mission.title : 'Desconhecida'
+      };
+    });
+
+    console.log('[DEBUG] Submissões enriquecidas:', enrichedSubmissions);
+    res.json(enrichedSubmissions);
+  } catch (err) {
+    console.error('[DEBUG] Erro na rota GET /submissoes:', err);
+    res.status(500).json({ error: 'Erro interno do servidor', details: err.message });
+  }
+});
+
+router.post('/:id/approve', autenticar, ehMestre, async (req, res) => {
+  const submissionId = parseInt(req.params.id);
+  const { feedback } = req.body;
+
+  console.log('[DEBUG] Aprovando submissão:', submissionId);
+
+  const submission = submissions.find(s => s.id === submissionId);
   if (!submission) {
     return res.status(404).json({ error: 'Submissão não encontrada' });
   }
+
   const user = users.find(u => u.id === parseInt(submission.userId));
   if (!user) {
     return res.status(404).json({ error: 'Usuário não encontrado' });
   }
+
   submission.approved = true;
   submission.pending = false;
-  submission.feedback = feedback;
+  submission.feedback = feedback || '';
   user.xp += submission.xp;
-  user.level = Math.floor(user.xp / 100) + 1;
+
+  // Usar o novo sistema de níveis
+  updateUserLevel(user);
+
   try {
-    await fs.writeFile('submissions.json', JSON.stringify(submissions, null, 2));
-    await fs.writeFile('users.json', JSON.stringify(users, null, 2));
+    await fs.writeFile(caminhoSubmissions, JSON.stringify(submissions, null, 2));
+    await fs.writeFile(caminhoUsers, JSON.stringify(users, null, 2));
+    console.log('[DEBUG] Submissão aprovada e arquivos salvos');
     res.json({ submission, user: { ...user, password: undefined } });
   } catch (err) {
     console.error('Erro ao salvar arquivos:', err);
@@ -73,15 +130,22 @@ router.post('/approve-submission', autenticar, ehMestre, async (req, res) => {
   }
 });
 
-router.post('/reject-submission', autenticar, ehMestre, async (req, res) => {
-  const { submissionId } = req.body;
-  const index = submissions.findIndex(s => s.id === parseInt(submissionId));
+router.post('/:id/reject', autenticar, ehMestre, async (req, res) => {
+  const submissionId = parseInt(req.params.id);
+
+  console.log('[DEBUG] Rejeitando submissão:', submissionId);
+
+  const index = submissions.findIndex(s => s.id === submissionId);
   if (index === -1) {
     return res.status(404).json({ error: 'Submissão não encontrada' });
   }
-  submissions.splice(index, 1);
+
+  submissions[index].approved = false;
+  submissions[index].pending = false;
+
   try {
-    await fs.writeFile('submissions.json', JSON.stringify(submissions, null, 2));
+    await fs.writeFile(caminhoSubmissions, JSON.stringify(submissions, null, 2));
+    console.log('[DEBUG] Submissão rejeitada e arquivo salvo');
     res.json({ message: 'Submissão rejeitada' });
   } catch (err) {
     console.error('Erro ao salvar submissions.json:', err);

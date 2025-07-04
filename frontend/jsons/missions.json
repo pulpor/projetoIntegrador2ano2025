@@ -2,19 +2,33 @@
   {
     "id": 1,
     "title": "missao 1 - teste de aluno",
-    "description": "missao 1 - teste de aluno",
-    "xp": 1
+    "description": "missao 1 - teste de aluno oioioiasdasdasd",
+    "xp": 1,
+    "targetYear": null,
+    "targetClass": "geral"
   },
   {
     "id": 2,
     "title": "teste2",
     "description": "oi",
-    "xp": 500
+    "xp": 500,
+    "targetYear": 2,
+    "targetClass": "geral"
   },
   {
-    "id": 3,
-    "title": "asdas",
-    "description": "dasdasd",
-    "xp": 666
+    "id": 4,
+    "title": "oiii",
+    "description": "oiiii",
+    "xp": 55,
+    "targetYear": 1,
+    "targetClass": "Arqueiro do JavaScript"
+  },
+  {
+    "id": 5,
+    "title": "kkk",
+    "description": "kkk",
+    "xp": 30,
+    "targetYear": 3,
+    "targetClass": "geral"
   }
 ]

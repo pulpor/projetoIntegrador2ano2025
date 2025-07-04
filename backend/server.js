@@ -2,6 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 
+// Inicializar dados primeiro
+require('./inicializacao');
+
 const autenticacaoRotas = require('./routes/autenticacaoRotas');
 const missoesRotas = require('./routes/missoesRotas');
 const usuariosRotas = require('./routes/usuariosRotas');
@@ -12,16 +15,13 @@ const port = 3000;
 
 // Configurar CORS
 app.use(cors({
-  origin: ['http://127.0.0.1:5500', 'http://localhost:3000'],
-  methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  origin: ['http://127.0.0.1:5500', 'http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
 
 app.use(express.json());
-
-// Configura o diretório frontend/html como estático
-app.use(express.static('frontend/html'));
-app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
 // Middleware de logs
 app.use((req, res, next) => {
@@ -29,11 +29,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Página inicial
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'frontend', 'html', 'login.html'));
-});
-
+// Configurar rotas
 app.use('/auth', autenticacaoRotas);
 app.use('/missoes', missoesRotas);
 app.use('/usuarios', usuariosRotas);
@@ -44,6 +40,3 @@ app.use('/Uploads', express.static(path.join(__dirname, 'Uploads')));
 app.listen(port, () => {
   console.log(`Servidor rodando em http://localhost:${port}`);
 });
-
-// Carregar dados iniciais (importado do módulo)
-require('./inicializacao');
