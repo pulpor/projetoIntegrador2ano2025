@@ -4,9 +4,9 @@ const bcrypt = require('bcrypt');
 const { updateUserLevel } = require('./utils/levelSystem');
 
 // Caminhos absolutos para os arquivos JSON
-const caminhoUsers = path.join(__dirname, '..', 'frontend', 'jsons', 'users.json');
-const caminhoMissions = path.join(__dirname, '..', 'frontend', 'jsons', 'missions.json');
-const caminhoSubmissions = path.join(__dirname, '..', 'frontend', 'jsons', 'submissions.json');
+const caminhoUsers = path.join(__dirname, 'data', 'users.json');
+const caminhoMissions = path.join(__dirname, 'data', 'missions.json');
+const caminhoSubmissions = path.join(__dirname, 'data', 'submissions.json');
 
 let users = [];
 let missions = [];

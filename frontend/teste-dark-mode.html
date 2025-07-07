@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teste Dark/Light Mode - Sistema RPG</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../src/css/main.css" />
+    <link rel="stylesheet" href="../src/css/themes.css" />
+    <script src="../src/js/utils/themeManager.js"></script>
+  </head>
+  <body class="min-h-screen">
+    <div class="container mx-auto p-8">
+      <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-8">
+          <h1 class="text-3xl font-bold text-gray-900 mb-2">
+            🎮 Sistema RPG de Aprendizado
+          </h1>
+          <p class="text-gray-600">Teste de Dark/Light Mode</p>
+        </div>
+
+        <!-- Informações sobre o tema -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">
+            <i class="fas fa-palette mr-2"></i>
+            Sistema de Temas
+          </h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <h3 class="font-medium text-gray-700 mb-2">Como usar:</h3>
+              <ul class="text-sm text-gray-600 space-y-1">
+                <li>• Clique no botão ☀️/🌙 no canto superior direito</li>
+                <li>• O tema é salvo automaticamente</li>
+                <li>• Detecta preferência do sistema</li>
+                <li>• Funciona em todas as páginas</li>
+              </ul>
+            </div>
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <h3 class="font-medium text-gray-700 mb-2">Funcionalidades:</h3>
+              <ul class="text-sm text-gray-600 space-y-1">
+                <li>• Transições suaves</li>
+                <li>• Cores otimizadas</li>
+                <li>• Acessibilidade preservada</li>
+                <li>• Design responsivo</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cards de exemplo -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+          <!-- Card 1 - Missão -->
+          <div class="mission-card bg-white rounded-lg shadow-md p-6 border">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-semibold text-gray-800">Missão de Matemática</h3>
+              <span class="status-badge status-pending">Pendente</span>
+            </div>
+            <p class="text-gray-600 text-sm mb-4">
+              Resolva os exercícios de álgebra linear propostos no material de
+              apoio.
+            </p>
+            <div class="flex items-center justify-between">
+              <span class="difficulty-medium text-xs px-2 py-1 rounded"
+                >Médio</span
+              >
+              <span class="text-blue-600 font-medium">150 XP</span>
+            </div>
+          </div>
+
+          <!-- Card 2 - Usuário -->
+          <div class="bg-white rounded-lg shadow-md p-6 border">
+            <div class="flex items-center mb-4">
+              <div
+                class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold"
+              >
+                JD
+              </div>
+              <div class="ml-3">
+                <h3 class="font-semibold text-gray-800">João da Silva</h3>
+                <p class="text-gray-600 text-sm">Nível 5 - Arqueiro</p>
+              </div>
+            </div>
+            <div class="bg-gray-200 rounded-full h-2 mb-2">
+              <div
+                class="bg-blue-500 h-2 rounded-full"
+                style="width: 75%"
+              ></div>
+            </div>
+            <p class="text-xs text-gray-600">750/1000 XP até o próximo nível</p>
+          </div>
+
+          <!-- Card 3 - Status -->
+          <div class="bg-white rounded-lg shadow-md p-6 border">
+            <h3 class="font-semibold text-gray-800 mb-4">Status do Sistema</h3>
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-gray-600">Missões Ativas</span>
+                <span class="status-badge status-approved">12</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-gray-600">Submissões Hoje</span>
+                <span class="status-badge status-pending">8</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-gray-600">Usuários Online</span>
+                <span class="status-badge status-approved">25</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seção de filtros -->
+        <div class="filter-section p-6 rounded-lg shadow-md mb-6">
+          <h3 class="text-lg font-semibold mb-4 text-gray-800">
+            Filtros de Teste
+          </h3>
+          <div class="filter-grid grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Status</label
+              >
+              <select class="filter-input w-full p-2 border rounded-lg">
+                <option>Todos</option>
+                <option>Aprovado</option>
+                <option>Pendente</option>
+                <option>Rejeitado</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Dificuldade</label
+              >
+              <select class="filter-input w-full p-2 border rounded-lg">
+                <option>Todas</option>
+                <option>Fácil</option>
+                <option>Médio</option>
+                <option>Difícil</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Classe</label
+              >
+              <select class="filter-input w-full p-2 border rounded-lg">
+                <option>Todas</option>
+                <option>1º Ano</option>
+                <option>2º Ano</option>
+                <option>3º Ano</option>
+              </select>
+            </div>
+          </div>
+          <div class="filter-buttons flex gap-2">
+            <button
+              class="filter-button bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+            >
+              Aplicar Filtros
+            </button>
+            <button
+              class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
+            >
+              Limpar
+            </button>
+          </div>
+        </div>
+
+        <!-- Informações do tema atual -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h3 class="font-semibold text-gray-800 mb-4">Informações do Tema</h3>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div>
+              <span class="text-gray-600">Tema Atual:</span>
+              <span id="current-theme" class="font-medium block">Light</span>
+            </div>
+            <div>
+              <span class="text-gray-600">Preferência do Sistema:</span>
+              <span id="system-preference" class="font-medium block">-</span>
+            </div>
+            <div>
+              <span class="text-gray-600">Salvo em:</span>
+              <span class="font-medium block">localStorage</span>
+            </div>
+            <div>
+              <span class="text-gray-600">Transições:</span>
+              <span class="font-medium block">Ativadas</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Atualiza informações do tema
+      function updateThemeInfo() {
+        const currentTheme =
+          document.documentElement.getAttribute("data-theme") || "light";
+        const systemPrefers = window.matchMedia("(prefers-color-scheme: dark)")
+          .matches
+          ? "dark"
+          : "light";
+
+        document.getElementById("current-theme").textContent =
+          currentTheme === "dark" ? "Dark" : "Light";
+        document.getElementById("system-preference").textContent =
+          systemPrefers === "dark" ? "Dark" : "Light";
+      }
+
+      // Escuta mudanças de tema
+      window.addEventListener("themeChanged", updateThemeInfo);
+
+      // Atualiza na primeira carga
+      document.addEventListener("DOMContentLoaded", () => {
+        setTimeout(updateThemeInfo, 100);
+      });
+
+      // Atualiza quando preferência do sistema muda
+      window
+        .matchMedia("(prefers-color-scheme: dark)")
+        .addEventListener("change", updateThemeInfo);
+    </script>
+  </body>
+</html>

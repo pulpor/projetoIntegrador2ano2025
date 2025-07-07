@@ -12,10 +12,10 @@ try {
   process.exit(1);
 }
 
-const autenticacaoRotas = require('./routes/autenticacaoRotas');
-const missoesRotas = require('./routes/missoesRotas');
-const usuariosRotas = require('./routes/usuariosRotas');
-const submissoesRotas = require('./routes/submissoesRotas');
+const autenticacaoRotas = require('./routes/auth');
+const missoesRotas = require('./routes/missions');
+const usuariosRotas = require('./routes/users');
+const submissoesRotas = require('./routes/submissions');
 
 const app = express();
 const port = 3000;
@@ -48,7 +48,7 @@ app.use('/auth', autenticacaoRotas);
 app.use('/missoes', missoesRotas);
 app.use('/usuarios', usuariosRotas);
 app.use('/submissoes', submissoesRotas);
-app.use('/Uploads', express.static(path.join(__dirname, 'Uploads')));
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 console.log('[SERVER] ✅ Rotas configuradas');
 
 // Servir arquivos estáticos do frontend

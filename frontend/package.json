@@ -11,7 +11,8 @@
     "picomatch": "^4.0.2",
     "rollup": "^4.44.1",
     "source-map-js": "^1.2.1",
-    "tinyglobby": "^0.2.14"
+    "tinyglobby": "^0.2.14",
+    "toastify-js": "^1.12.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.11",

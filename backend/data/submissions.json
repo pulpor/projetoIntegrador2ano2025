@@ -1,0 +1,80 @@
+[
+  {
+    "id": 1,
+    "userId": 2,
+    "missionId": 6,
+    "filePaths": [
+      "C:\\Users\\uept02-user\\Documents\\leonardo\\projetoIntegrador2ano2025\\backend\\Uploads\\g_1gg_1751650456112.png"
+    ],
+    "submittedAt": "2025-07-04T17:34:16.137Z",
+    "pending": false,
+    "xp": 50,
+    "approved": true,
+    "feedback": ""
+  },
+  {
+    "id": 2,
+    "userId": 2,
+    "missionId": 6,
+    "filePaths": [
+      "C:\\Users\\uept02-user\\Documents\\leonardo\\projetoIntegrador2ano2025\\backend\\Uploads\\g_1gg_1751650817287.png"
+    ],
+    "submittedAt": "2025-07-04T17:40:17.296Z",
+    "pending": false,
+    "xp": 50,
+    "approved": false
+  },
+  {
+    "id": 3,
+    "userId": 2,
+    "missionId": 6,
+    "filePaths": [
+      "C:\\Users\\uept02-user\\Documents\\leonardo\\projetoIntegrador2ano2025\\backend\\Uploads\\g_1gg_1751655649370.png"
+    ],
+    "submittedAt": "2025-07-04T19:00:49.379Z",
+    "pending": false,
+    "xp": 50,
+    "approved": true,
+    "feedback": ""
+  },
+  {
+    "id": 4,
+    "userId": 2,
+    "missionId": 8,
+    "filePaths": [
+      "C:\\Users\\uept02-user\\Documents\\leonardo\\projetoIntegrador2ano2025\\backend\\Uploads\\g_1ga_1751655770524.png"
+    ],
+    "submittedAt": "2025-07-04T19:02:50.530Z",
+    "pending": false,
+    "xp": 20,
+    "approved": false
+  },
+  {
+    "id": 5,
+    "userId": 2,
+    "missionId": 1,
+    "filePaths": [
+      "C:\\Users\\Leonardo\\Documents\\projetoIntegrador2ano2025\\uploads\\g_complicado_1751896683735.jpeg"
+    ],
+    "submittedAt": "2025-07-07T13:58:03.739Z",
+    "pending": false,
+    "xp": 53,
+    "approved": false
+  },
+  {
+    "id": 6,
+    "userId": 2,
+    "missionId": 2,
+    "filePaths": [
+      "C:\\Users\\Leonardo\\Documents\\projetoIntegrador2ano2025\\uploads\\g_sadasdasd_1751898528731.jpeg",
+      "C:\\Users\\Leonardo\\Documents\\projetoIntegrador2ano2025\\uploads\\g_sadasdasd_1751898528736.jpeg",
+      "C:\\Users\\Leonardo\\Documents\\projetoIntegrador2ano2025\\uploads\\g_sadasdasd_1751898528739.jpeg",
+      "C:\\Users\\Leonardo\\Documents\\projetoIntegrador2ano2025\\uploads\\g_sadasdasd_1751898528741.pdf"
+    ],
+    "submittedAt": "2025-07-07T14:28:48.745Z",
+    "pending": false,
+    "xp": 30,
+    "approved": true,
+    "feedback": ""
+  }
+]

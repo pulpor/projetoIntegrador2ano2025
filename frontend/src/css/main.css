@@ -1,0 +1,200 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Estilos para filtros */
+.filter-section {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid #e2e8f0;
+}
+
+.filter-input:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: #3b82f6;
+}
+
+.filter-button {
+  transition: all 0.2s ease-in-out;
+}
+
+.filter-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.mission-card {
+  transition: all 0.3s ease;
+}
+
+.mission-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.status-pending {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.status-approved {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.status-rejected {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.difficulty-easy {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.difficulty-medium {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.difficulty-hard {
+  background-color: #fed7aa;
+  color: #9a3412;
+}
+
+.difficulty-very-hard {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+/* Animações para filtros */
+@keyframes filterApplied {
+  0% {
+    opacity: 0.5;
+    transform: scale(0.98);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: scale(1.02);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.filter-applied {
+  animation: filterApplied 0.3s ease-out;
+}
+
+/* Responsive design para filtros */
+@media (max-width: 768px) {
+  .filter-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .filter-buttons {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .filter-button {
+    width: 100%;
+  }
+}
+
+/* Estilos específicos para o painel do estudante */
+.progress-section {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+}
+
+.progress-section .text-gray-600 {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.progress-section .text-gray-500 {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.progress-section .text-blue-600 {
+  color: #fbbf24 !important;
+  font-weight: bold;
+}
+
+.xp-bar {
+  background: linear-gradient(90deg, #fbbf24, #f59e0b);
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
+}
+
+.tab-button {
+  transition: all 0.2s ease;
+}
+
+.tab-button:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.tab-button.active {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.submission-container {
+  border: 2px solid #e5e7eb;
+  transition: border-color 0.3s ease;
+}
+
+.submission-container:hover {
+  border-color: #3b82f6;
+}
+
+.upload-area {
+  transition: all 0.3s ease;
+}
+
+.upload-area:hover {
+  transform: scale(1.02);
+  border-color: #2563eb !important;
+  background-color: #dbeafe !important;
+}
+
+/* Cards responsivos para missões e histórico */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Dark mode específico para painel do estudante */
+[data-theme="dark"] .progress-section {
+  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+}
+
+[data-theme="dark"] .submission-container {
+  border-color: #4b5563;
+}
+
+[data-theme="dark"] .submission-container:hover {
+  border-color: #60a5fa;
+}

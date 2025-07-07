@@ -1,0 +1,90 @@
+[
+  {
+    "id": 1,
+    "username": "mestre",
+    "password": "$2b$10$w4lNjfROKuiCyp6JGGTYv.w8fcOXjQ1qz372Etu/YtZ4FvZzk7/Fu",
+    "class": "Mestre Fullstack",
+    "year": null,
+    "isMaster": true,
+    "level": 1,
+    "xp": 0,
+    "pending": false
+  },
+  {
+    "id": 2,
+    "username": "g",
+    "fullname": "g",
+    "password": "$2b$10$w4lNjfROKuiCyp6JGGTYv.w8fcOXjQ1qz372Etu/YtZ4FvZzk7/Fu",
+    "class": "Arqueiro do JavaScript",
+    "year": 1,
+    "isMaster": false,
+    "level": 3,
+    "xp": 295,
+    "pending": false,
+    "history": [
+      {
+        "type": "penalty",
+        "amount": 5,
+        "reason": "teste",
+        "oldXp": 300,
+        "newXp": 295,
+        "appliedBy": 1,
+        "appliedAt": "2025-07-07T11:23:09.562Z"
+      },
+      {
+        "type": "reward",
+        "amount": 5,
+        "reason": "teste",
+        "oldXp": 295,
+        "newXp": 300,
+        "appliedBy": 1,
+        "appliedAt": "2025-07-07T12:56:07.545Z"
+      },
+      {
+        "type": "penalty",
+        "amount": 5,
+        "reason": "cola",
+        "oldXp": 300,
+        "newXp": 295,
+        "appliedBy": 1,
+        "appliedAt": "2025-07-07T15:04:51.258Z"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "username": "gg",
+    "fullname": "gg",
+    "password": "$2b$10$w4lNjfROKuiCyp6JGGTYv.w8fcOXjQ1qz372Etu/YtZ4FvZzk7/Fu",
+    "class": "Arqueiro do JavaScript",
+    "year": 1,
+    "isMaster": false,
+    "level": 1,
+    "xp": 0,
+    "pending": false
+  },
+  {
+    "id": 5,
+    "username": "a",
+    "fullname": "a",
+    "password": "$2b$10$w4lNjfROKuiCyp6JGGTYv.w8fcOXjQ1qz372Etu/YtZ4FvZzk7/Fu",
+    "class": "Arqueiro do JavaScript",
+    "year": 1,
+    "isMaster": false,
+    "level": 1,
+    "xp": 0,
+    "pending": false
+  },
+  {
+    "id": 6,
+    "username": "bb",
+    "fullname": "bb",
+    "password": "$2b$10$2nMDaKDb5QPlsatmyqrHO.NSIy4Cp.JWB/knoPxd1FSzCFZhTcU9i",
+    "class": "Bárbaro do Back-end",
+    "year": 3,
+    "isMaster": false,
+    "level": 1,
+    "xp": 0,
+    "pending": false
+  }
+]

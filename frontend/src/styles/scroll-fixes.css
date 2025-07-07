@@ -1,0 +1,228 @@
+/* Fixes para controle de scroll - Sistema RPG */
+
+/* Reset global para evitar problemas de altura */
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* Páginas principais - layout flexbox com altura controlada */
+.page-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.page-header {
+    flex-shrink: 0;
+}
+
+.page-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0;
+}
+
+/* Container principal do painel */
+.main-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.main-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-bottom: 2rem;
+}
+
+/* Container do painel com altura fixa */
+.panel-wrapper {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-bottom: 2rem;
+}
+
+/* Containers de tabs e seções com scroll */
+.tab-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.tab-header {
+    flex-shrink: 0;
+    margin-bottom: 1rem;
+}
+
+.tab-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-bottom: 1rem;
+}
+
+/* Container de conteúdo das tabs */
+.tabs-wrapper {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Listas com scroll limitado */
+.scrollable-list {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 1fr;
+    margin-bottom: 2rem;
+}
+
+.scrollable-list-small {
+    max-height: 300px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 1fr;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.scrollable-list-mini {
+    max-height: 200px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 1fr;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+/* Seções de filtros - sempre visíveis */
+.filter-section {
+    flex-shrink: 0;
+}
+
+/* Grid de cards com scroll */
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+    padding: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+/* Grid específico para cards de estudantes */
+.students-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+    padding: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+/* Área de form de missão com scroll controlado */
+.mission-form-container {
+    margin-bottom: 2rem;
+}
+
+/* Seção de progresso - sempre visível */
+.progress-section {
+    flex-shrink: 0;
+    margin-bottom: 1rem;
+}
+
+/* Container de submissão - altura fixa */
+.submission-container {
+    margin-bottom: 2rem;
+}
+
+/* Hover effects para cards */
+.card-hover {
+    transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Customização da scrollbar para melhor visual */
+.tab-content::-webkit-scrollbar,
+.scrollable-list::-webkit-scrollbar,
+.cards-grid::-webkit-scrollbar {
+    width: 6px;
+}
+
+.tab-content::-webkit-scrollbar-track,
+.scrollable-list::-webkit-scrollbar-track,
+.cards-grid::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.tab-content::-webkit-scrollbar-thumb,
+.scrollable-list::-webkit-scrollbar-thumb,
+.cards-grid::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.tab-content::-webkit-scrollbar-thumb:hover,
+.scrollable-list::-webkit-scrollbar-thumb:hover,
+.cards-grid::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Animações suaves para scroll */
+.smooth-scroll {
+    scroll-behavior: smooth;
+}
+
+/* Media queries para dispositivos móveis */
+@media (max-width: 768px) {
+    .cards-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .students-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .scrollable-list-small {
+        max-height: 250px;
+    }
+
+    .scrollable-list-mini {
+        max-height: 150px;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-content {
+        padding-bottom: 2rem;
+    }
+
+    .tab-content {
+        padding-bottom: 2rem;
+    }
+
+    .scrollable-list-small {
+        max-height: 200px;
+    }
+
+    .scrollable-list-mini {
+        max-height: 120px;
+    }
+}

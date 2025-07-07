@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1,
+    "title": "complicado",
+    "description": "asdasdasdasd",
+    "xp": 53,
+    "targetYear": null,
+    "targetClass": "Mago do CSS",
+    "status": "ativa"
+  },
+  {
+    "id": 2,
+    "title": "sadasdasd",
+    "description": "asdasdasd",
+    "xp": 30,
+    "targetYear": null,
+    "targetClass": "Bárbaro do Back-end",
+    "status": "ativa"
+  },
+  {
+    "id": 3,
+    "title": "oi",
+    "description": "oi",
+    "xp": 600,
+    "targetYear": null,
+    "targetClass": "geral",
+    "status": "ativa"
+  }
+]

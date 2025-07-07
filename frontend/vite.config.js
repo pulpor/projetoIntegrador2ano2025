@@ -7,8 +7,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         index: './index.html',
-        master: './master.html',
-        student: './student.html',
+        master: './src/pages/master.html',
+        student: './src/pages/student.html',
       },
     },
   },
