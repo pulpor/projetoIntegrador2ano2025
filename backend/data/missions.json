@@ -19,11 +19,20 @@
   },
   {
     "id": 3,
-    "title": "oi",
-    "description": "oi",
-    "xp": 600,
+    "title": "Missão Geral - Teste",
+    "description": "Uma missão de teste disponível para todas as classes",
+    "xp": 100,
     "targetYear": null,
     "targetClass": "geral",
+    "status": "ativa"
+  },
+  {
+    "id": 4,
+    "title": "Missão JavaScript",
+    "description": "Missão específica para Arqueiros do JavaScript",
+    "xp": 75,
+    "targetYear": null,
+    "targetClass": "Arqueiro do JavaScript",
     "status": "ativa"
   }
 ]

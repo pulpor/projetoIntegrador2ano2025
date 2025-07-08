@@ -1,6 +1,3 @@
-// Importar o CSS para que o Vite processe o Tailwind CSS
-import '../css/main.css';
-
 // Importar módulos utilitários 
 import { validateAuthentication, apiRequest } from './utils/auth.js';
 import { setupTabs, setupLogout } from './utils/interface.js';
@@ -149,7 +146,10 @@ function renderPendingUsers(users) {
 
 function renderStudents(students) {
   const container = document.getElementById('students-list');
-  if (!container) return;
+  if (!container) {
+    console.error('[ERROR] Container students-list não encontrado!');
+    return;
+  }
 
   if (students.length === 0) {
     container.innerHTML = '<p class="text-gray-500 py-4">Nenhum aluno encontrado.</p>';
@@ -507,12 +507,31 @@ async function editMission(missionId) {
       return;
     }
 
+    // Verificar se os elementos do formulário existem
+    const titleEl = document.getElementById('mission-title');
+    const descriptionEl = document.getElementById('mission-description');
+    const xpEl = document.getElementById('mission-xp');
+    const yearEl = document.getElementById('mission-year');
+    const classEl = document.getElementById('mission-class');
+
+    if (!titleEl || !descriptionEl || !xpEl || !yearEl || !classEl) {
+      showError('Formulário de missão não encontrado. Recarregue a página.');
+      console.error('Elementos do formulário não encontrados:', {
+        titleEl: !!titleEl,
+        descriptionEl: !!descriptionEl,
+        xpEl: !!xpEl,
+        yearEl: !!yearEl,
+        classEl: !!classEl
+      });
+      return;
+    }
+
     // Preencher os campos do formulário com os dados da missão
-    document.getElementById('mission-title').value = mission.title || '';
-    document.getElementById('mission-description').value = mission.description || '';
-    document.getElementById('mission-xp').value = mission.xp || '';
-    document.getElementById('mission-year').value = mission.targetYear || '';
-    document.getElementById('mission-class').value = mission.targetClass || 'geral';
+    titleEl.value = mission.title || '';
+    descriptionEl.value = mission.description || '';
+    xpEl.value = mission.xp || '';
+    yearEl.value = mission.targetYear || '';
+    classEl.value = mission.targetClass || 'geral';
 
     // Mudar o botão para modo de edição
     const createBtn = document.getElementById('create-mission-btn');
@@ -520,7 +539,7 @@ async function editMission(missionId) {
 
     if (createBtn && cancelBtn) {
       createBtn.textContent = '✏️ Atualizar Missão';
-      createBtn.className = 'w-full bg-orange-600 text-white p-3 rounded-lg hover:bg-orange-700 transition';
+      createBtn.className = 'flex-1 bg-orange-600 text-white px-4 py-3 rounded-lg hover:bg-orange-700 transition font-medium';
       createBtn.dataset.editingId = missionId;
 
       cancelBtn.style.display = 'block';
@@ -528,10 +547,13 @@ async function editMission(missionId) {
     }
 
     // Scroll para o formulário
-    document.querySelector('#missions-content .bg-white').scrollIntoView({
-      behavior: 'smooth',
-      block: 'start'
-    });
+    const formElement = document.querySelector('#missions-content .bg-white');
+    if (formElement) {
+      formElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
 
     showSuccess('Dados da missão carregados para edição');
 
@@ -683,43 +705,56 @@ function setupMissionCreation() {
 }
 
 async function handleMissionSubmit() {
-  // Obter valores dos campos individuais
-  const title = document.getElementById('mission-title').value.trim();
-  const description = document.getElementById('mission-description').value.trim();
-  const xpReward = parseInt(document.getElementById('mission-xp').value);
-  const year = document.getElementById('mission-year').value;
-  const missionClass = document.getElementById('mission-class').value;
-
-  // Verificar se estamos editando
-  const createBtn = document.getElementById('create-mission-btn');
-  const isEditing = createBtn && createBtn.dataset.editingId;
-  const missionId = isEditing ? parseInt(createBtn.dataset.editingId) : null;
-
-  // Validações
-  if (!title) {
-    showError('Título da missão é obrigatório');
-    return;
-  }
-
-  if (!description) {
-    showError('Descrição da missão é obrigatória');
-    return;
-  }
-
-  if (!xpReward || xpReward <= 0) {
-    showError('XP da missão deve ser um número positivo');
-    return;
-  }
-
-  const missionData = {
-    titulo: title,
-    descricao: description,
-    xp: xpReward,
-    targetYear: year ? parseInt(year) : null,
-    targetClass: missionClass || 'geral'
-  };
-
   try {
+    // Verificar se os elementos do formulário existem
+    const titleEl = document.getElementById('mission-title');
+    const descriptionEl = document.getElementById('mission-description');
+    const xpEl = document.getElementById('mission-xp');
+    const yearEl = document.getElementById('mission-year');
+    const classEl = document.getElementById('mission-class');
+
+    if (!titleEl || !descriptionEl || !xpEl || !yearEl || !classEl) {
+      showError('Formulário de missão não encontrado. Recarregue a página.');
+      console.error('Elementos do formulário não encontrados');
+      return;
+    }
+
+    // Obter valores dos campos individuais
+    const title = titleEl.value.trim();
+    const description = descriptionEl.value.trim();
+    const xpReward = parseInt(xpEl.value);
+    const year = yearEl.value;
+    const missionClass = classEl.value;
+
+    // Verificar se estamos editando
+    const createBtn = document.getElementById('create-mission-btn');
+    const isEditing = createBtn && createBtn.dataset.editingId;
+    const missionId = isEditing ? parseInt(createBtn.dataset.editingId) : null;
+
+    // Validações
+    if (!title) {
+      showError('Título da missão é obrigatório');
+      return;
+    }
+
+    if (!description) {
+      showError('Descrição da missão é obrigatória');
+      return;
+    }
+
+    if (!xpReward || xpReward <= 0) {
+      showError('XP da missão deve ser um número positivo');
+      return;
+    }
+
+    const missionData = {
+      titulo: title,
+      descricao: description,
+      xp: xpReward,
+      targetYear: year ? parseInt(year) : null,
+      targetClass: missionClass || 'geral'
+    };
+
     let response;
     let successMessage;
 
@@ -778,26 +813,38 @@ window.missionAction = missionAction;
 window.cancelEdit = cancelEdit;
 
 function cancelEdit() {
-  // Limpar os campos
-  document.getElementById('mission-title').value = '';
-  document.getElementById('mission-description').value = '';
-  document.getElementById('mission-xp').value = '';
-  document.getElementById('mission-year').value = '';
-  document.getElementById('mission-class').value = 'geral';
+  try {
+    // Verificar se os elementos existem antes de tentar usá-los
+    const titleEl = document.getElementById('mission-title');
+    const descriptionEl = document.getElementById('mission-description');
+    const xpEl = document.getElementById('mission-xp');
+    const yearEl = document.getElementById('mission-year');
+    const classEl = document.getElementById('mission-class');
 
-  // Restaurar o botão para modo de criação
-  const createBtn = document.getElementById('create-mission-btn');
-  const cancelBtn = document.getElementById('cancel-edit-btn');
+    // Limpar os campos se existirem
+    if (titleEl) titleEl.value = '';
+    if (descriptionEl) descriptionEl.value = '';
+    if (xpEl) xpEl.value = '';
+    if (yearEl) yearEl.value = '';
+    if (classEl) classEl.value = 'geral';
 
-  if (createBtn) {
-    createBtn.textContent = '➕ Criar Missão';
-    createBtn.className = 'w-full bg-purple-600 text-white p-3 rounded-lg hover:bg-purple-700 transition';
-    delete createBtn.dataset.editingId;
+    // Restaurar o botão para modo de criação
+    const createBtn = document.getElementById('create-mission-btn');
+    const cancelBtn = document.getElementById('cancel-edit-btn');
+
+    if (createBtn) {
+      createBtn.innerHTML = '<i class="fas fa-plus mr-2"></i>Criar Missão';
+      createBtn.className = 'flex-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-lg transition font-medium';
+      delete createBtn.dataset.editingId;
+    }
+
+    if (cancelBtn) {
+      cancelBtn.style.display = 'none';
+    }
+
+    showSuccess('Edição cancelada');
+  } catch (err) {
+    console.error('Erro ao cancelar edição:', err);
+    showError('Erro ao cancelar edição');
   }
-
-  if (cancelBtn) {
-    cancelBtn.style.display = 'none';
-  }
-
-  showSuccess('Edição cancelada');
 }

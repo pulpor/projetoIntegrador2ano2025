@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teste Visual - Sistema de Tema</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+
+    <script>
+      // Prevenir flash de tema
+      (function () {
+        const t = localStorage.getItem("theme") || "light";
+        document.documentElement.setAttribute("data-theme", t);
+      })();
+    </script>
+
+    <style>
+      /* Reset e base */
+      * {
+        transition: background-color 0.3s ease, color 0.3s ease,
+          border-color 0.3s ease;
+      }
+
+      /* ===== TEMA LIGHT (PADRÃO) ===== */
+      html:not([data-theme]),
+      html[data-theme="light"] {
+        background: #f8fafc;
+      }
+
+      html:not([data-theme]) body,
+      html[data-theme="light"] body {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        color: #0f172a;
+      }
+
+      html:not([data-theme]) .bg-white,
+      html[data-theme="light"] .bg-white {
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1),
+          0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
+      }
+
+      html:not([data-theme]) input,
+      html:not([data-theme]) select,
+      html[data-theme="light"] input,
+      html[data-theme="light"] select {
+        background: #ffffff !important;
+        border: 2px solid #e2e8f0 !important;
+        color: #0f172a !important;
+      }
+
+      html:not([data-theme]) input:focus,
+      html:not([data-theme]) select:focus,
+      html[data-theme="light"] input:focus,
+      html[data-theme="light"] select:focus {
+        border-color: #8b5cf6 !important;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1) !important;
+      }
+
+      /* ===== TEMA DARK ===== */
+      html[data-theme="dark"] body {
+        background: linear-gradient(
+          135deg,
+          #0f172a 0%,
+          #1e293b 50%,
+          #334155 100%
+        );
+        color: #f8fafc;
+      }
+
+      html[data-theme="dark"] .bg-white {
+        background: linear-gradient(
+          135deg,
+          #1e293b 0%,
+          #334155 100%
+        ) !important;
+        border: 1px solid #475569 !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4),
+          0 2px 4px -1px rgba(0, 0, 0, 0.3) !important;
+      }
+
+      html[data-theme="dark"] input,
+      html[data-theme="dark"] select {
+        background: #1e293b !important;
+        border: 2px solid #475569 !important;
+        color: #f8fafc !important;
+      }
+
+      html[data-theme="dark"] input:focus,
+      html[data-theme="dark"] select:focus {
+        border-color: #8b5cf6 !important;
+        background: #334155 !important;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2) !important;
+      }
+
+      /* Cores de texto */
+      html:not([data-theme]) .text-gray-800,
+      html[data-theme="light"] .text-gray-800 {
+        color: #1e293b !important;
+      }
+
+      html[data-theme="dark"] .text-gray-800 {
+        color: #f8fafc !important;
+      }
+
+      html:not([data-theme]) .text-gray-600,
+      html[data-theme="light"] .text-gray-600 {
+        color: #475569 !important;
+      }
+
+      html[data-theme="dark"] .text-gray-600 {
+        color: #e2e8f0 !important;
+      }
+
+      /* Botão de tema */
+      #theme-toggle {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+      }
+
+      html[data-theme="dark"] #theme-toggle {
+        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+        box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);
+      }
+    </style>
+  </head>
+  <body class="min-h-screen p-8">
+    <!-- Botão de tema -->
+    <button
+      id="theme-toggle"
+      class="fixed top-6 right-6 w-12 h-12 text-white shadow-lg hover:shadow-xl rounded-full transition-all duration-300 hover:scale-105 active:scale-95"
+      title="Alternar tema"
+    >
+      <i
+        id="theme-icon"
+        class="fas fa-moon text-lg transition-transform duration-300"
+      ></i>
+    </button>
+
+    <div class="max-w-4xl mx-auto space-y-6">
+      <!-- Título -->
+      <div class="text-center">
+        <h1 class="text-4xl font-bold text-gray-800 mb-2">
+          Sistema de Tema Limpo
+        </h1>
+        <p class="text-gray-600">Teste visual do light/dark mode</p>
+      </div>
+
+      <!-- Card principal -->
+      <div class="bg-white rounded-xl shadow-lg p-8">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-6">
+          <i class="fas fa-palette mr-3 text-purple-600"></i>
+          Teste Visual de Componentes
+        </h2>
+
+        <!-- Grid de inputs -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-2"
+              >Campo de Texto</label
+            >
+            <input
+              type="text"
+              placeholder="Digite algo aqui..."
+              class="w-full p-3 rounded-lg"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-2"
+              >Seleção</label
+            >
+            <select class="w-full p-3 rounded-lg">
+              <option>Opção 1</option>
+              <option>Opção 2</option>
+              <option>Opção 3</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Botões de teste -->
+        <div class="mt-8 flex gap-4">
+          <button
+            class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition-colors"
+          >
+            <i class="fas fa-check mr-2"></i>Botão Primário
+          </button>
+          <button
+            class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-3 rounded-lg transition-colors"
+          >
+            <i class="fas fa-times mr-2"></i>Botão Secundário
+          </button>
+        </div>
+      </div>
+
+      <!-- Cards de informação -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white rounded-lg shadow-lg p-6 text-center">
+          <div
+            class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4"
+          >
+            <i class="fas fa-eye text-blue-600 text-xl"></i>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-800 mb-2">Visual Clean</h3>
+          <p class="text-gray-600">Interface limpa e moderna</p>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-lg p-6 text-center">
+          <div
+            class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4"
+          >
+            <i class="fas fa-check-circle text-green-600 text-xl"></i>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-800 mb-2">Legibilidade</h3>
+          <p class="text-gray-600">Texto sempre legível</p>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-lg p-6 text-center">
+          <div
+            class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4"
+          >
+            <i class="fas fa-magic text-purple-600 text-xl"></i>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-800 mb-2">Transições</h3>
+          <p class="text-gray-600">Mudanças suaves de tema</p>
+        </div>
+      </div>
+
+      <!-- Instruções -->
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <h3 class="text-xl font-semibold text-gray-800 mb-4">
+          <i class="fas fa-info-circle mr-2 text-blue-600"></i>
+          Como Testar
+        </h3>
+        <ul class="text-gray-600 space-y-2">
+          <li class="flex items-center">
+            <i class="fas fa-arrow-right mr-2 text-purple-600"></i>
+            Clique no botão de tema no canto superior direito
+          </li>
+          <li class="flex items-center">
+            <i class="fas fa-arrow-right mr-2 text-purple-600"></i>
+            Observe a mudança suave entre light e dark mode
+          </li>
+          <li class="flex items-center">
+            <i class="fas fa-arrow-right mr-2 text-purple-600"></i>
+            Teste os inputs em ambos os temas
+          </li>
+          <li class="flex items-center">
+            <i class="fas fa-arrow-right mr-2 text-purple-600"></i>
+            Verifique se o tema persiste ao recarregar
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <script>
+      // Sistema de tema
+      function initTheme() {
+        const savedTheme = localStorage.getItem("theme") || "light";
+        document.documentElement.setAttribute("data-theme", savedTheme);
+        updateThemeIcon(savedTheme);
+      }
+
+      function toggleTheme() {
+        const currentTheme =
+          document.documentElement.getAttribute("data-theme") || "light";
+        const newTheme = currentTheme === "light" ? "dark" : "light";
+
+        document.documentElement.setAttribute("data-theme", newTheme);
+        localStorage.setItem("theme", newTheme);
+        updateThemeIcon(newTheme);
+      }
+
+      function updateThemeIcon(theme) {
+        const icon = document.getElementById("theme-icon");
+        if (theme === "dark") {
+          icon.className =
+            "fas fa-sun text-lg transition-transform duration-300";
+        } else {
+          icon.className =
+            "fas fa-moon text-lg transition-transform duration-300";
+        }
+      }
+
+      // Inicializar
+      initTheme();
+      document
+        .getElementById("theme-toggle")
+        .addEventListener("click", toggleTheme);
+    </script>
+  </body>
+</html>

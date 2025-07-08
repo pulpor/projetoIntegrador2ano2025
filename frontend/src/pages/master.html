@@ -4,23 +4,22 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Painel do Mestre - Sistema RPG</title>
-    <!-- Tailwind CSS - CDN para desenvolvimento, será substituído na build -->
+    <!-- Tailwind CSS - CDN para desenvolvimento -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
     />
     <!-- CSS Files -->
-    <link rel="stylesheet" href="../css/main.css" />
-    <link rel="stylesheet" href="../css/themes.css" />
-    <link rel="stylesheet" href="../styles/scroll-final.css" />
+    <link rel="stylesheet" href="../css/styles.css" />
   </head>
-  <body class="bg-gray-50 font-sans page-container">
+  <body class="bg-gray-50 font-sans page-container navbar-fixed">
     <!-- Theme Toggle Button -->
     <button class="theme-toggle" onclick="toggleTheme()" title="Alternar tema">
-        <span id="theme-icon">🌙</span>
+      <span id="theme-icon">🌙</span>
     </button>
 
+    <!-- Navbar -->
     <nav class="bg-purple-600 text-white p-4 shadow-md page-header">
       <div class="container mx-auto flex justify-between items-center">
         <h1 class="text-xl font-bold">Painel do Mestre</h1>
@@ -33,452 +32,675 @@
       </div>
     </nav>
 
-    <div class="page-content">
-      <div class="container mx-auto p-4 panel-wrapper">
-        <div class="tab-header mb-6 border-b border-gray-200">
-          <div class="flex space-x-4">
-            <button
-              id="tab-pending"
-              class="tab-button active px-4 py-2 font-medium border-b-2 border-purple-500 text-purple-600"
-            >
-              Pendentes
-            </button>
-            <button
-              id="tab-students"
-              class="tab-button px-4 py-2 font-medium text-gray-500 hover:text-gray-700"
-            >
-              Alunos
-            </button>
-            <button
-              id="tab-submissions"
-              class="tab-button px-4 py-2 font-medium text-gray-500 hover:text-gray-700"
-            >
-              Submissões
-            </button>
-            <button
-              id="tab-missions"
-              class="tab-button px-4 py-2 font-medium text-gray-500 hover:text-gray-700"
-            >
-              Missões
-            </button>
-          </div>
-        </div>
-
-        <div class="tabs-wrapper">
-
-          <div id="pending-content" class="tab-content">
-            <h2 class="text-xl font-bold mb-4">Usuários Pendentes</h2>
-            
-            <!-- Aviso de teste de scroll -->
-            <div class="bg-blue-100 border border-blue-400 rounded-lg p-4 mb-6">
-              <h3 class="font-bold text-blue-800">
-                <i class="fas fa-info-circle mr-2"></i>Teste de Scroll
-              </h3>
-              <p class="text-blue-700 mt-2">
-                Se você conseguir rolar para baixo e ver mais cards, o scroll está funcionando!
-              </p>
-            </div>
-            
-            <div id="pending-users" class="cards-grid">
-              <!-- Cards de exemplo para teste de scroll -->
-              <div class="bg-white p-6 rounded-lg shadow">
-                <h3 class="font-bold mb-2">Usuário Pendente 1</h3>
-                <p class="text-gray-600">Aguardando aprovação do mestre</p>
-                <p class="text-sm text-gray-500 mt-2">Email: usuario1@teste.com</p>
-              </div>
-              <div class="bg-white p-6 rounded-lg shadow">
-                <h3 class="font-bold mb-2">Usuário Pendente 2</h3>
-                <p class="text-gray-600">Aguardando aprovação do mestre</p>
-                <p class="text-sm text-gray-500 mt-2">Email: usuario2@teste.com</p>
-              </div>
-              <div class="bg-white p-6 rounded-lg shadow">
-                <h3 class="font-bold mb-2">Usuário Pendente 3</h3>
-                <p class="text-gray-600">Aguardando aprovação do mestre</p>
-                <p class="text-sm text-gray-500 mt-2">Email: usuario3@teste.com</p>
-              </div>
-              <div class="bg-white p-6 rounded-lg shadow">
-                <h3 class="font-bold mb-2">Usuário Pendente 4</h3>
-                <p class="text-gray-600">Aguardando aprovação do mestre</p>
-                <p class="text-sm text-gray-500 mt-2">Email: usuario4@teste.com</p>
-              </div>
-              <div class="bg-white p-6 rounded-lg shadow">
-                <h3 class="font-bold mb-2">Usuário Pendente 5</h3>
-                <p class="text-gray-600">Aguardando aprovação do mestre</p>
-                <p class="text-sm text-gray-500 mt-2">Email: usuario5@teste.com</p>
-              </div>
-              <div class="bg-white p-6 rounded-lg shadow">
-                <h3 class="font-bold mb-2">Usuário Pendente 6</h3>
-                <p class="text-gray-600">Aguardando aprovação do mestre</p>
-                <p class="text-sm text-gray-500 mt-2">Email: usuario6@teste.com</p>
-              </div>
-            </div>
-          </div>
-
-          <div id="students-content" class="tab-content hidden">
-            <h2 class="text-xl font-bold mb-4">Gerenciar Alunos</h2>
-
-            <!-- Filtros para Alunos -->
-            <div class="filter-section bg-white p-4 rounded-lg shadow mb-6">
-              <h3 class="text-lg font-semibold mb-4">
-                <i class="fas fa-filter mr-2"></i>Filtros de Alunos
-              </h3>
-              <div class="filter-grid grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2"
-                >Ano</label
-              >
-              <select
-                id="filter-student-year"
-                class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
-              >
-                <option value="">Todos os anos</option>
-                <option value="1">1º ano - Front-end</option>
-                <option value="2">2º ano - Back-end</option>
-                <option value="3">3º ano - Mobile</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2"
-                >Classe</label
-              >
-              <select
-                id="filter-student-class"
-                class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
-              >
-                <option value="">Todas as classes</option>
-                <option value="Arqueiro do JavaScript">
-                  Arqueiro do JavaScript
-                </option>
-                <option value="Cafeicultor do Java">Cafeicultor do Java</option>
-                <option value="Mago do CSS">Mago do CSS</option>
-                <option value="Guerreiro do HTML">Guerreiro do HTML</option>
-                <option value="Xamã do React">Xamã do React</option>
-                <option value="Necromante do Node.js">
-                  Necromante do Node.js
-                </option>
-                <option value="Paladino do Python">Paladino do Python</option>
-                <option value="Druida do Banco de Dados">
-                  Druida do Banco de Dados
-                </option>
-                <option value="Assassino do Android">
-                  Assassino do Android
-                </option>
-                <option value="Bardo do iOS">Bardo do iOS</option>
-                <option value="Bárbaro do Back-end">Bárbaro do Back-end</option>
-                <option value="Domador de Dados">Domador de Dados</option>
-                <option value="Elfo do Front-end">Elfo do Front-end</option>
-                <option value="Caçador de Bugs">Caçador de Bugs</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2"
-                >XP</label
-              >
-              <select
-                id="filter-student-xp"
-                class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
-              >
-                <option value="">Qualquer XP</option>
-                <option value="0-100">0 - 100 XP</option>
-                <option value="101-300">101 - 300 XP</option>
-                <option value="301-600">301 - 600 XP</option>
-                <option value="601-1000">601 - 1000 XP</option>
-                <option value="1001+">1001+ XP</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2"
-                >Nome</label
-              >
-              <input
-                type="text"
-                id="filter-student-name"
-                placeholder="Digite o nome do aluno"
-                class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
-              />
-            </div>
-          </div>
-          <div class="filter-buttons mt-4 flex space-x-2">
-            <button
-              id="apply-student-filters"
-              class="filter-button bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition"
-            >
-              <i class="fas fa-filter mr-2"></i>Aplicar Filtros
-            </button>
-            <button
-              id="clear-student-filters"
-              class="filter-button bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition"
-            >
-              <i class="fas fa-times mr-2"></i>Limpar Filtros
-            </button>
-          </div>
-        </div>
-
-        <div id="students-list" class="students-grid"></div>
+    <!-- Tabs de Navegação -->
+    <div class="tab-header">
+      <div class="container mx-auto flex space-x-4">
+        <button
+          id="tab-pending"
+          class="tab-button active px-4 py-2 font-medium border-b-2 border-purple-500 text-purple-600"
+        >
+          Pendentes
+        </button>
+        <button
+          id="tab-students"
+          class="tab-button px-4 py-2 font-medium text-gray-500"
+        >
+          Alunos
+        </button>
+        <button
+          id="tab-submissions"
+          class="tab-button px-4 py-2 font-medium text-gray-500"
+        >
+          Submissões
+        </button>
+        <button
+          id="tab-missions"
+          class="tab-button px-4 py-2 font-medium text-gray-500"
+        >
+          Missões
+        </button>
       </div>
+    </div>
 
-      <div id="submissions-content" class="tab-content hidden">
-        <h2 class="text-xl font-bold mb-4">Submissões</h2>
-
-        <!-- Filtros para Submissões -->
-        <div class="filter-section p-4 rounded-lg shadow mb-6">
-          <h3 class="text-lg font-semibold mb-4">Filtros</h3>
-          <div class="filter-grid grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2"
-                >Status</label
-              >
-              <select
-                id="filter-submission-status"
-                class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
-              >
-                <option value="">Todos os status</option>
-                <option value="pending">Pendente</option>
-                <option value="approved">Aprovado</option>
-                <option value="rejected">Rejeitado</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2"
-                >Aluno</label
-              >
-              <input
-                type="text"
-                id="filter-submission-student"
-                placeholder="Nome do aluno"
-                class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2"
-                >Missão</label
-              >
-              <select
-                id="filter-submission-mission"
-                class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
-              >
-                <option value="">Todas as missões</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2"
-                >Data</label
-              >
-              <input
-                type="date"
-                id="filter-submission-date"
-                class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
-              />
-            </div>
-          </div>
-          <div class="filter-buttons mt-4 flex space-x-2">
-            <button
-              id="apply-submission-filters"
-              class="filter-button bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition"
-            >
-              <i class="fas fa-filter mr-2"></i>Aplicar Filtros
-            </button>
-            <button
-              id="clear-submission-filters"
-              class="filter-button bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition"
-            >
-              <i class="fas fa-times mr-2"></i>Limpar
-            </button>
-          </div>
-        </div>
-
-        <div id="submissions-list" class="cards-grid"></div>
-      </div>
-
-      <div id="missions-content" class="tab-content hidden">
-        <h2 class="text-xl font-bold mb-4">Criar Nova Missão</h2>
-
-        <!-- Filtros para Missões -->
-        <div class="filter-section p-4 rounded-lg shadow mb-6">
-          <h3 class="text-lg font-semibold mb-4">Filtrar Missões Existentes</h3>
-          <div class="filter-grid grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2"
-                >Ano</label
-              >
-              <select
-                id="filter-mission-year"
-                class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
-              >
-                <option value="">Todos os anos</option>
-                <option value="1">1º ano - Front-end</option>
-                <option value="2">2º ano - Back-end</option>
-                <option value="3">3º ano - Mobile</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2"
-                >Classe</label
-              >
-              <select
-                id="filter-mission-class"
-                class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
-              >
-                <option value="">Todas as classes</option>
-                <option value="geral">Geral</option>
-                <option value="Arqueiro do JavaScript">
-                  Arqueiro do JavaScript
-                </option>
-                <option value="Cafeicultor do Java">Cafeicultor do Java</option>
-                <option value="Mago do CSS">Mago do CSS</option>
-                <option value="Guerreiro do HTML">Guerreiro do HTML</option>
-                <option value="Xamã do React">Xamã do React</option>
-                <option value="Necromante do Node.js">
-                  Necromante do Node.js
-                </option>
-                <option value="Paladino do Python">Paladino do Python</option>
-                <option value="Druida do Banco de Dados">
-                  Druida do Banco de Dados
-                </option>
-                <option value="Assassino do Android">
-                  Assassino do Android
-                </option>
-                <option value="Bardo do iOS">Bardo do iOS</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2"
-                >XP</label
-              >
-              <select
-                id="filter-mission-xp"
-                class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
-              >
-                <option value="">Qualquer XP</option>
-                <option value="0-50">0 - 50 XP</option>
-                <option value="51-100">51 - 100 XP</option>
-                <option value="101-200">101 - 200 XP</option>
-                <option value="201+">201+ XP</option>
-              </select>
-            </div>
-          </div>
-          <div class="filter-buttons mt-4 flex space-x-2">
-            <button
-              id="apply-mission-filters"
-              class="filter-button bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition"
-            >
-              <i class="fas fa-filter mr-2"></i>Aplicar Filtros
-            </button>
-            <button
-              id="clear-mission-filters"
-              class="filter-button bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition"
-            >
-              <i class="fas fa-times mr-2"></i>Limpar
-            </button>
-          </div>
-        </div>
-
-        <!-- Lista de Missões Existentes -->
-        <div class="bg-white p-4 rounded-lg shadow mb-6">
-          <h3 class="text-lg font-semibold mb-4">Missões Existentes</h3>
-          <div id="existing-missions-list" class="scrollable-list-small"></div>
-        </div>
-
-        <div class="bg-white p-6 rounded-lg shadow mission-form-container">
-          <input
-            id="mission-title"
-            type="text"
-            placeholder="Título da missão"
-            class="w-full p-3 mb-4 border rounded-lg focus:ring-2 focus:ring-purple-200"
-          />
-          <textarea
-            id="mission-description"
-            placeholder="Descrição da missão"
-            class="w-full p-3 mb-4 border rounded-lg focus:ring-2 focus:ring-purple-200"
-            rows="4"
-          ></textarea>
-          <input
-            id="mission-xp"
-            type="number"
-            placeholder="XP da missão"
-            class="w-full p-3 mb-4 border rounded-lg focus:ring-2 focus:ring-purple-200"
-          />
-          <select
-            id="mission-year"
-            class="w-full p-3 mb-4 border rounded-lg focus:ring-2 focus:ring-purple-200"
+    <!-- Filtros (mostrados condicionalmente) -->
+    <div id="students-filters" class="filter-section" style="display: none">
+      <h3 class="text-lg font-semibold mb-4">
+        <i class="fas fa-filter mr-2"></i>Filtros de Alunos
+      </h3>
+      <div class="filter-grid grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2"
+            >Ano</label
           >
-            <option value="">Ano (opcional - para todas as séries)</option>
+          <select
+            id="filter-student-year"
+            class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
+          >
+            <option value="">Todos os anos</option>
             <option value="1">1º ano - Front-end</option>
             <option value="2">2º ano - Back-end</option>
             <option value="3">3º ano - Mobile</option>
           </select>
-          <select
-            id="mission-class"
-            class="w-full p-3 mb-4 border rounded-lg focus:ring-2 focus:ring-purple-200"
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2"
+            >Classe</label
           >
-            <option value="geral" selected>Geral (todas as classes)</option>
+          <select
+            id="filter-student-class"
+            class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
+          >
+            <option value="">Todas as classes</option>
             <option value="Arqueiro do JavaScript">
               Arqueiro do JavaScript
             </option>
             <option value="Cafeicultor do Java">Cafeicultor do Java</option>
             <option value="Mago do CSS">Mago do CSS</option>
-            <option value="Paladino do HTML">Paladino do HTML</option>
-            <option value="Bárbaro do Back-end">Bárbaro do Back-end</option>
-            <option value="Domador de Dados">Domador de Dados</option>
-            <option value="Elfo do Front-end">Elfo do Front-end</option>
-            <option value="Caçador de Bugs">Caçador de Bugs</option>
+            <option value="Guerreiro do HTML">Guerreiro do HTML</option>
           </select>
-          <button
-            id="create-mission-btn"
-            class="w-full bg-purple-600 text-white p-3 rounded-lg hover:bg-purple-700 transition"
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">XP</label>
+          <select
+            id="filter-student-xp"
+            class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
           >
-            <i class="fas fa-plus-circle mr-2"></i>Criar Missão
-          </button>
+            <option value="">Todos os níveis</option>
+            <option value="0-99">0-99 XP</option>
+            <option value="100-299">100-299 XP</option>
+            <option value="300-599">300-599 XP</option>
+            <option value="600+">600+ XP</option>
+          </select>
+        </div>
+        <div>
           <button
-            id="cancel-edit-btn"
-            class="w-full bg-gray-500 text-white p-3 rounded-lg hover:bg-gray-600 transition mt-2 hidden"
+            id="apply-student-filters"
+            class="filter-button bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition mt-6"
           >
-            <i class="fas fa-times mr-2"></i>Cancelar Edição
+            <i class="fas fa-search mr-2"></i>Aplicar Filtros
           </button>
-          <div id="missions-list" class="mt-4 scrollable-list-mini"></div>
         </div>
       </div>
     </div>
+
+    <div id="submissions-filters" class="filter-section" style="display: none">
+      <h3 class="text-lg font-semibold mb-4">
+        <i class="fas fa-filter mr-2"></i>Filtros de Submissões
+      </h3>
+      <div class="filter-grid grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2"
+            >Status</label
+          >
+          <select
+            id="filter-submission-status"
+            class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
+          >
+            <option value="">Todos os status</option>
+            <option value="pending">Pendente</option>
+            <option value="approved">Aprovado</option>
+            <option value="rejected">Rejeitado</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2"
+            >Aluno</label
+          >
+          <input
+            type="text"
+            id="filter-submission-student"
+            placeholder="Nome do aluno"
+            class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2"
+            >Missão</label
+          >
+          <input
+            type="text"
+            id="filter-submission-mission"
+            placeholder="Nome da missão"
+            class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
+          />
+        </div>
+        <div>
+          <button
+            id="apply-submission-filters"
+            class="filter-button bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition mt-6"
+          >
+            <i class="fas fa-search mr-2"></i>Aplicar Filtros
+          </button>
+        </div>
+      </div>
     </div>
+
+    <div id="missions-filters" class="filter-section" style="display: none">
+      <h3 class="text-lg font-semibold mb-4">
+        <i class="fas fa-filter mr-2"></i>Filtros de Missões
+      </h3>
+      <div class="filter-grid grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2"
+            >Ano</label
+          >
+          <select
+            id="filter-mission-year"
+            class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
+          >
+            <option value="">Todos os anos</option>
+            <option value="1">1º ano - Front-end</option>
+            <option value="2">2º ano - Back-end</option>
+            <option value="3">3º ano - Mobile</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2"
+            >Dificuldade</label
+          >
+          <select
+            id="filter-mission-difficulty"
+            class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
+          >
+            <option value="">Todas as dificuldades</option>
+            <option value="easy">Fácil</option>
+            <option value="medium">Médio</option>
+            <option value="hard">Difícil</option>
+            <option value="very-hard">Muito Difícil</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">XP</label>
+          <select
+            id="filter-mission-xp"
+            class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
+          >
+            <option value="">Todos os XP</option>
+            <option value="0-49">0-49 XP</option>
+            <option value="50-99">50-99 XP</option>
+            <option value="100+">100+ XP</option>
+          </select>
+        </div>
+        <div>
+          <button
+            id="apply-mission-filters"
+            class="filter-button bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition mt-6"
+          >
+            <i class="fas fa-search mr-2"></i>Aplicar Filtros
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Conteúdo das Tabs -->
+    <div class="page-content">
+      <div class="container mx-auto panel-wrapper">
+        <div class="tabs-wrapper">
+          <!-- Tab: Usuários Pendentes -->
+          <div id="pending-content" class="tab-content active">
+            <h2 class="text-xl font-bold mb-4">Usuários Pendentes</h2>
+            <div id="pending-users" class="cards-grid">
+              <!-- Conteúdo será carregado via JavaScript -->
+              <div class="card">
+                <h3 class="font-bold mb-2">João Silva</h3>
+                <p class="text-gray-600">Aguardando aprovação do mestre</p>
+                <p class="text-sm text-gray-500 mt-2">Email: joao@teste.com</p>
+                <div class="mt-4 flex gap-2">
+                  <button
+                    class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
+                  >
+                    Aprovar
+                  </button>
+                  <button
+                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
+                  >
+                    Rejeitar
+                  </button>
+                </div>
+              </div>
+              <div class="card">
+                <h3 class="font-bold mb-2">Maria Santos</h3>
+                <p class="text-gray-600">Aguardando aprovação do mestre</p>
+                <p class="text-sm text-gray-500 mt-2">Email: maria@teste.com</p>
+                <div class="mt-4 flex gap-2">
+                  <button
+                    class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
+                  >
+                    Aprovar
+                  </button>
+                  <button
+                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
+                  >
+                    Rejeitar
+                  </button>
+                </div>
+              </div>
+              <div class="card">
+                <h3 class="font-bold mb-2">Pedro Oliveira</h3>
+                <p class="text-gray-600">Aguardando aprovação do mestre</p>
+                <p class="text-sm text-gray-500 mt-2">Email: pedro@teste.com</p>
+                <div class="mt-4 flex gap-2">
+                  <button
+                    class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
+                  >
+                    Aprovar
+                  </button>
+                  <button
+                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
+                  >
+                    Rejeitar
+                  </button>
+                </div>
+              </div>
+              <div class="card">
+                <h3 class="font-bold mb-2">Ana Costa</h3>
+                <p class="text-gray-600">Aguardando aprovação do mestre</p>
+                <p class="text-sm text-gray-500 mt-2">Email: ana@teste.com</p>
+                <div class="mt-4 flex gap-2">
+                  <button
+                    class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
+                  >
+                    Aprovar
+                  </button>
+                  <button
+                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
+                  >
+                    Rejeitar
+                  </button>
+                </div>
+              </div>
+              <div class="card">
+                <h3 class="font-bold mb-2">Carlos Lima</h3>
+                <p class="text-gray-600">Aguardando aprovação do mestre</p>
+                <p class="text-sm text-gray-500 mt-2">
+                  Email: carlos@teste.com
+                </p>
+                <div class="mt-4 flex gap-2">
+                  <button
+                    class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
+                  >
+                    Aprovar
+                  </button>
+                  <button
+                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
+                  >
+                    Rejeitar
+                  </button>
+                </div>
+              </div>
+              <div class="card">
+                <h3 class="font-bold mb-2">Lucia Rodrigues</h3>
+                <p class="text-gray-600">Aguardando aprovação do mestre</p>
+                <p class="text-sm text-gray-500 mt-2">Email: lucia@teste.com</p>
+                <div class="mt-4 flex gap-2">
+                  <button
+                    class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
+                  >
+                    Aprovar
+                  </button>
+                  <button
+                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
+                  >
+                    Rejeitar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab: Alunos -->
+          <div id="students-content" class="tab-content">
+            <h2 class="text-xl font-bold mb-4">Gerenciar Alunos</h2>
+            <div id="students-list" class="cards-grid">
+              <!-- Conteúdo será carregado via JavaScript -->
+            </div>
+          </div>
+
+          <!-- Tab: Submissões -->
+          <div id="submissions-content" class="tab-content">
+            <h2 class="text-xl font-bold mb-4">Avaliar Submissões</h2>
+            <div id="submissions-list" class="cards-grid">
+              <!-- Conteúdo será carregado via JavaScript -->
+              <div class="card">
+                <h3 class="font-bold mb-2">Exemplo - Submissão</h3>
+                <p class="text-gray-600">Missão: Criar página de login</p>
+                <p class="text-sm text-gray-500 mt-2">Aluno: João Silva</p>
+                <div class="mt-2">
+                  <span
+                    class="inline-block bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded"
+                  >
+                    Pendente
+                  </span>
+                </div>
+                <div class="mt-4 flex gap-2">
+                  <button
+                    class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
+                  >
+                    Aprovar
+                  </button>
+                  <button
+                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
+                  >
+                    Rejeitar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab: Missões -->
+          <div id="missions-content" class="tab-content">
+            <h2 class="text-xl font-bold mb-4">Gerenciar Missões</h2>
+
+            <!-- Formulário de Criação/Edição de Missões -->
+            <div class="bg-white p-6 rounded-lg shadow mb-6">
+              <h3 class="text-lg font-semibold mb-4">Criar Nova Missão</h3>
+              <div class="space-y-4">
+                <input
+                  id="mission-title"
+                  type="text"
+                  placeholder="Título da missão"
+                  class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-200"
+                />
+                <textarea
+                  id="mission-description"
+                  placeholder="Descrição da missão"
+                  class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-200"
+                  rows="4"
+                ></textarea>
+                <input
+                  id="mission-xp"
+                  type="number"
+                  placeholder="XP da missão"
+                  class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-200"
+                />
+                <select
+                  id="mission-year"
+                  class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-200"
+                >
+                  <option value="">
+                    Ano (opcional - para todas as séries)
+                  </option>
+                  <option value="1">1º ano - Front-end</option>
+                  <option value="2">2º ano - Back-end</option>
+                  <option value="3">3º ano - Mobile</option>
+                </select>
+                <select
+                  id="mission-class"
+                  class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-200"
+                >
+                  <option value="geral" selected>
+                    Geral (todas as classes)
+                  </option>
+                  <option value="Arqueiro do JavaScript">
+                    Arqueiro do JavaScript
+                  </option>
+                  <option value="Cafeicultor do Java">
+                    Cafeicultor do Java
+                  </option>
+                  <option value="Mago do CSS">Mago do CSS</option>
+                  <option value="Paladino do HTML">Paladino do HTML</option>
+                  <option value="Bárbaro do Back-end">
+                    Bárbaro do Back-end
+                  </option>
+                  <option value="Domador de Dados">Domador de Dados</option>
+                  <option value="Elfo do Front-end">Elfo do Front-end</option>
+                  <option value="Caçador de Bugs">Caçador de Bugs</option>
+                </select>
+                <div class="flex gap-3">
+                  <button
+                    id="create-mission-btn"
+                    class="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-lg transition font-medium"
+                  >
+                    <i class="fas fa-plus mr-2"></i>Criar Missão
+                  </button>
+                  <button
+                    id="cancel-edit-btn"
+                    class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg transition font-medium"
+                    style="display: none"
+                  >
+                    <i class="fas fa-times mr-2"></i>Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Lista de Missões Existentes -->
+            <div class="bg-white p-4 rounded-lg shadow mb-6">
+              <h3 class="text-lg font-semibold mb-4">Missões Existentes</h3>
+              <div id="missions-list" class="cards-grid">
+                <!-- Conteúdo será carregado via JavaScript -->
+                <div class="card">
+                  <h3 class="font-bold mb-2">Exemplo - Missão</h3>
+                  <p class="text-gray-600">Criar página de login responsiva</p>
+                  <div class="mt-2 flex gap-2">
+                    <span
+                      class="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded"
+                    >
+                      Fácil
+                    </span>
+                    <span
+                      class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
+                    >
+                      50 XP
+                    </span>
+                  </div>
+                  <div class="mt-4 flex gap-2">
+                    <button
+                      class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
+                    >
+                      Excluir
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- JavaScript -->
     <script type="module">
       import "../js/master.js";
     </script>
-    
+
     <script>
       // Theme toggle function
       function toggleTheme() {
         const html = document.documentElement;
-        const icon = document.getElementById('theme-icon');
-        
-        if (html.getAttribute('data-theme') === 'dark') {
-            html.removeAttribute('data-theme');
-            icon.textContent = '🌙';
-            localStorage.setItem('theme', 'light');
+        const icon = document.getElementById("theme-icon");
+
+        if (html.getAttribute("data-theme") === "dark") {
+          html.setAttribute("data-theme", "light");
+          icon.textContent = "🌙";
+          localStorage.setItem("theme", "light");
         } else {
-            html.setAttribute('data-theme', 'dark');
-            icon.textContent = '☀️';
-            localStorage.setItem('theme', 'dark');
+          html.setAttribute("data-theme", "dark");
+          icon.textContent = "☀️";
+          localStorage.setItem("theme", "dark");
         }
       }
-      
+
       // Initialize theme on page load
       function initTheme() {
-        const savedTheme = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
-        
-        document.documentElement.setAttribute('data-theme', initialTheme);
-        
-        const themeIcon = document.getElementById('theme-icon');
+        const savedTheme = localStorage.getItem("theme");
+        const prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)"
+        ).matches;
+        const initialTheme = savedTheme || (prefersDark ? "dark" : "light");
+
+        document.documentElement.setAttribute("data-theme", initialTheme);
+
+        const themeIcon = document.getElementById("theme-icon");
         if (themeIcon) {
-            themeIcon.textContent = initialTheme === 'dark' ? '☀️' : '🌙';
+          themeIcon.textContent = initialTheme === "dark" ? "☀️" : "🌙";
         }
       }
-      
-      // Load saved theme on page load
-      document.addEventListener('DOMContentLoaded', function() {
+
+      // Tab management for fixed layout
+      function initTabs() {
+        const tabButtons = document.querySelectorAll(".tab-button");
+        const tabContents = document.querySelectorAll(".tab-content");
+        const filtersMap = {
+          students: "students-filters",
+          submissions: "submissions-filters",
+          missions: "missions-filters",
+        };
+
+        tabButtons.forEach((button) => {
+          button.addEventListener("click", () => {
+            // Remove active from all buttons and contents
+            tabButtons.forEach((btn) => {
+              btn.classList.remove(
+                "active",
+                "border-purple-500",
+                "text-purple-600"
+              );
+              btn.classList.add("text-gray-500");
+            });
+            tabContents.forEach((content) => {
+              content.classList.remove("active", "has-active-filters");
+            });
+
+            // Hide all filters
+            Object.values(filtersMap).forEach((filterId) => {
+              const filterElement = document.getElementById(filterId);
+              if (filterElement) {
+                filterElement.style.display = "none";
+              }
+            });
+
+            // Add active to clicked button
+            button.classList.add(
+              "active",
+              "border-purple-500",
+              "text-purple-600"
+            );
+            button.classList.remove("text-gray-500");
+
+            // Show corresponding content
+            const targetId = button.id.replace("tab-", "") + "-content";
+            const targetContent = document.getElementById(targetId);
+            if (targetContent) {
+              targetContent.classList.add("active");
+            }
+
+            // Show corresponding filters if they exist
+            const tabName = button.id.replace("tab-", "");
+            const filterKey = filtersMap[tabName];
+            if (filterKey) {
+              const filterElement = document.getElementById(filterKey);
+              if (filterElement) {
+                filterElement.style.display = "block";
+              }
+            }
+
+            // Carregar dados específicos da aba quando ela for ativada
+            if (tabName === "students" && window.loadApprovedStudents) {
+              console.log("[DEBUG] Aba de alunos ativada, carregando dados...");
+              window.loadApprovedStudents();
+            } else if (tabName === "submissions" && window.loadSubmissions) {
+              console.log(
+                "[DEBUG] Aba de submissões ativada, carregando dados..."
+              );
+              window.loadSubmissions();
+            } else if (tabName === "missions" && window.loadMissions) {
+              console.log(
+                "[DEBUG] Aba de missões ativada, carregando dados..."
+              );
+              window.loadMissions();
+            } else if (tabName === "pending" && window.loadPendingUsers) {
+              console.log(
+                "[DEBUG] Aba de pendentes ativada, carregando dados..."
+              );
+              window.loadPendingUsers();
+            }
+
+            // Atualizar espaçamento dos filtros
+            updateFilterSpacing();
+          });
+        });
+      }
+
+      // Initialize everything when DOM is loaded
+      document.addEventListener("DOMContentLoaded", function () {
         initTheme();
+        initTabs();
+        initFilterSpacing();
       });
+
+      // Função para gerenciar espaçamento quando filtros aparecem
+      function initFilterSpacing() {
+        const filterSections = document.querySelectorAll(".filter-section");
+        const tabContents = document.querySelectorAll(".tab-content");
+
+        // Observer para detectar mudanças na visibilidade dos filtros
+        const observer = new MutationObserver(function (mutations) {
+          let hasVisibleFilter = false;
+
+          filterSections.forEach((filter) => {
+            const isVisible =
+              filter.style.display === "block" ||
+              filter.classList.contains("active") ||
+              filter.classList.contains("show-filters");
+            if (isVisible) {
+              hasVisibleFilter = true;
+            }
+          });
+
+          // Aplicar ou remover classe baseado na visibilidade dos filtros
+          tabContents.forEach((tabContent) => {
+            if (hasVisibleFilter) {
+              tabContent.classList.add("has-active-filters");
+            } else {
+              tabContent.classList.remove("has-active-filters");
+            }
+          });
+        });
+
+        // Observar mudanças em todos os filtros
+        filterSections.forEach((filter) => {
+          observer.observe(filter, {
+            attributes: true,
+            attributeFilter: ["style", "class"],
+          });
+        });
+
+        // Verificação inicial
+        updateFilterSpacing();
+      }
+
+      // Função auxiliar para atualizar espaçamento
+      function updateFilterSpacing() {
+        const filterSections = document.querySelectorAll(".filter-section");
+        const tabContents = document.querySelectorAll(".tab-content");
+        let hasVisibleFilter = false;
+
+        filterSections.forEach((filter) => {
+          const isVisible =
+            filter.style.display === "block" ||
+            filter.classList.contains("active") ||
+            filter.classList.contains("show-filters");
+          if (isVisible) {
+            hasVisibleFilter = true;
+          }
+        });
+
+        // Aplicar ou remover classe para todos os tab-contents
+        tabContents.forEach((tabContent) => {
+          if (hasVisibleFilter) {
+            tabContent.classList.add("has-active-filters");
+          } else {
+            tabContent.classList.remove("has-active-filters");
+          }
+        });
+      }
     </script>
   </body>
 </html>

@@ -1,1055 +1,969 @@
-// Importar o CSS para que o Vite processe o Tailwind CSS
-import '../css/main.css';
-import { showError, showSuccess, showWarning } from './utils/toast.js';
+// Sistema de Painel do Estudante
+// Arquivo: student.js
 
-const API_URL = 'http://localhost:3000';
-
-document.addEventListener('DOMContentLoaded', async () => {
-  console.log('[DEBUG STUDENT] DOM carregado, iniciando aplicação student');
-
-  const token = localStorage.getItem('token');
-  const username = localStorage.getItem('username');
-  const isMaster = localStorage.getItem('isMaster');
-
-  console.log('[DEBUG STUDENT] Token:', token);
-  console.log('[DEBUG STUDENT] Username:', username);
-  console.log('[DEBUG STUDENT] IsMaster:', isMaster);
-
-  if (!token) {
-    console.error('[DEBUG STUDENT] Token não encontrado');
-    showError('Acesso negado. Faça login como aluno.');
-    setTimeout(() => window.location.href = './index.html', 2000);
-    return;
-  }
-
-  if (!username) {
-    console.error('[DEBUG STUDENT] Username não encontrado');
-    showError('Acesso negado. Dados de usuário não encontrados.');
-    setTimeout(() => window.location.href = './index.html', 2000);
-    return;
-  }
-
-  if (isMaster === 'true') {
-    showWarning('Acesso negado. Esta área é exclusiva para alunos.');
-    setTimeout(() => window.location.href = './master.html', 2000);
-    return;
-  }
-
-  await loadStudentInfo();
-  console.log('[DEBUG STUDENT] Informações do aluno carregadas, agora carregando missões...');
-
-  // Carregar missões após carregar informações do aluno para garantir que a filtragem funcione
-  await loadMissions();
-  loadSubmissionHistory();
-  setupTabs();
-});
-
-async function loadStudentInfo() {
-  console.log('[DEBUG STUDENT] Iniciando loadStudentInfo');
-
-  // Definir nome do usuário do localStorage
-  const username = localStorage.getItem('username');
-  if (username) {
-    document.getElementById('student-name').textContent = username;
-  }
-
-  document.getElementById('student-class').textContent = 'Carregando...';
-
-  const token = localStorage.getItem('token');
-  if (!token) {
-    console.error('[DEBUG STUDENT] Token não encontrado no loadStudentInfo');
-    document.getElementById('student-class').textContent = 'Erro: não autenticado';
-    return;
-  }
-
-  try {
-    console.log('[DEBUG STUDENT] Fazendo requisição para /usuarios/me');
-    const res = await fetch(`${API_URL}/usuarios/me`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    console.log('[DEBUG STUDENT] Resposta /usuarios/me:', res.status);
-
-    if (!res.ok) {
-      throw new Error(`HTTP ${res.status}`);
+// Estado global da aplicação
+const AppState = {
+    data: {},
+    set(key, value) {
+        this.data[key] = value;
+        console.log(`Estado atualizado: ${key}`, value);
+    },
+    get(key) {
+        return this.data[key];
     }
+};
 
-    const data = await res.json();
-    console.log('[DEBUG STUDENT] Dados do usuário:', data);
+// Sistema de notificações Toast
+const Toast = {
+    container: null,
 
-    // Armazenar informações do aluno globalmente
-    studentInfo = data;
-    console.log('[DEBUG STUDENT] studentInfo definida:', studentInfo);
-
-    if (data) {
-      document.getElementById('student-class').textContent = data.class || 'Classe não definida';
-
-      // Exibir ano do estudante
-      if (data.year) {
-        const yearLabels = { 1: '1º ano - Front-end', 2: '2º ano - Back-end', 3: '3º ano - Mobile' };
-        document.getElementById('student-year').textContent = yearLabels[data.year] || `${data.year}º ano`;
-      } else {
-        document.getElementById('student-year').textContent = '';
-      }
-
-      document.getElementById('student-level').textContent = data.level || 1;
-      document.getElementById('total-xp').textContent = data.xp || 0;
-
-      // Usar informações detalhadas do nível se disponíveis
-      if (data.levelInfo) {
-        const levelInfo = data.levelInfo;
-        document.getElementById('current-xp').textContent = levelInfo.xpProgressInCurrentLevel;
-        document.getElementById('next-level-xp').textContent = levelInfo.xpNeededForCurrentLevel;
-        document.getElementById('progress-percentage').textContent = `${levelInfo.progressPercentage}%`;
-
-        // Barra de XP baseada no progresso do nível atual
-        const porcentagem = levelInfo.progressPercentage || 0;
-        const xpBar = document.getElementById('xp-bar');
-        if (xpBar) {
-          xpBar.style.width = `${Math.min(porcentagem, 100)}%`;
+    init() {
+        if (!this.container) {
+            this.container = document.createElement("div");
+            this.container.id = "toast-container";
+            this.container.className = "fixed top-4 right-4 z-50 space-y-2";
+            document.body.appendChild(this.container);
         }
+    },
 
-        // Exibir informações adicionais se for nível máximo
-        if (levelInfo.isMaxLevel) {
-          document.getElementById('next-level-xp').textContent = 'MAX';
-          document.getElementById('progress-percentage').textContent = 'Nível Máximo!';
-        }
-      } else {
-        // Fallback para sistema antigo
-        document.getElementById('current-xp').textContent = data.xp || 0;
-        document.getElementById('next-level-xp').textContent = 100;
-        document.getElementById('progress-percentage').textContent = '0%';
+    show(message, type = "info") {
+        this.init();
 
-        // Barra de XP
-        const porcentagem = ((data.xp || 0) / 100) * 100;
-        const xpBar = document.getElementById('xp-bar');
-        if (xpBar) {
-          xpBar.style.width = `${Math.min(porcentagem, 100)}%`;
-        }
-      }
-    }
-  } catch (err) {
-    console.error('[DEBUG STUDENT] Erro ao carregar informações do estudante:', err);
-    document.getElementById('student-class').textContent = 'Erro ao carregar';
-  }
-}
+        const types = {
+            error: { class: "bg-red-500", icon: "exclamation-triangle" },
+            success: { class: "bg-green-500", icon: "check-circle" },
+            warning: { class: "bg-yellow-500", icon: "exclamation-circle" },
+            info: { class: "bg-blue-500", icon: "info-circle" }
+        };
 
-async function loadMissions() {
-  console.log('[DEBUG STUDENT] Iniciando loadMissions');
+        const config = types[type] || types.info;
+        const toast = document.createElement("div");
+        toast.className = `${config.class} text-white px-4 py-3 rounded-lg shadow-lg transform transition-all duration-300 translate-x-full opacity-0`;
+        toast.innerHTML = `
+      <div class="flex items-center">
+        <i class="fas fa-${config.icon} mr-2"></i>
+        <span>${message}</span>
+      </div>
+    `;
 
-  const token = localStorage.getItem('token');
-  if (!token) {
-    console.error('[DEBUG STUDENT] Token não encontrado');
-    return;
-  }
+        this.container.appendChild(toast);
 
-  // Carregar primeiro as missões já submetidas
-  console.log('[DEBUG STUDENT] Carregando missões completadas primeiro...');
-  await loadCompletedMissions();
-  console.log('[DEBUG STUDENT] Missões completadas carregadas:', studentCompletedMissions);
-
-  try {
-    console.log('[DEBUG STUDENT] Fazendo requisição para missões');
-    const res = await fetch(`${API_URL}/missoes`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    console.log('[DEBUG STUDENT] Resposta da requisição:', res.status);
-
-    if (!res.ok) {
-      console.error('[DEBUG STUDENT] Erro na resposta:', res.status, res.statusText);
-      throw new Error(`HTTP ${res.status}`);
-    }
-
-    const data = await res.json();
-    console.log('[DEBUG STUDENT] Missões recebidas:', data);
-
-    // Filtrar missões por ano/classe do aluno
-    let filteredMissions = data;
-    if (studentInfo) {
-      console.log('[DEBUG STUDENT] Filtrando missões para:');
-      console.log('[DEBUG STUDENT] - Aluno ano:', studentInfo.year);
-      console.log('[DEBUG STUDENT] - Aluno classe:', studentInfo.class);
-
-      filteredMissions = data.filter(mission => {
-        // Missão é geral (para todos) ou específica para o ano/classe do aluno
-        const isForStudentYear = !mission.targetYear || mission.targetYear === studentInfo.year;
-        const isForStudentClass = !mission.targetClass || mission.targetClass === 'geral' || mission.targetClass === studentInfo.class;
-
-        const canSee = isForStudentYear && isForStudentClass;
-        console.log(`[DEBUG STUDENT] Missão "${mission.title}":`, {
-          targetYear: mission.targetYear,
-          targetClass: mission.targetClass,
-          isForStudentYear,
-          isForStudentClass,
-          canSee
+        // Animar entrada
+        requestAnimationFrame(() => {
+            toast.classList.remove("translate-x-full", "opacity-0");
         });
 
-        return canSee;
-      });
-      console.log('[DEBUG STUDENT] Missões filtradas por ano/classe:', filteredMissions.length, 'de', data.length);
-    } else {
-      console.log('[DEBUG STUDENT] Informações do aluno não disponíveis ainda, mostrando todas as missões');
+        // Remover após 3 segundos
+        setTimeout(() => {
+            toast.classList.add("translate-x-full", "opacity-0");
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        }, 3000);
     }
+};
 
-    // Filtrar missões pendentes ou aprovadas - elas só ficam no histórico
-    // Missões rejeitadas voltam para o painel para nova submissão
-    console.log('[DEBUG STUDENT] Verificando missões já submetidas...');
-    console.log('[DEBUG STUDENT] studentCompletedMissions (pendentes + aprovadas):', studentCompletedMissions);
-    console.log('[DEBUG STUDENT] Missões antes do filtro de submissões:', filteredMissions.map(m => `${m.id}: ${m.title}`));
+// API - Sistema de requisições
+const API = {
+    async request(endpoint, options = {}) {
+        console.log(`API Request: ${endpoint}`);
 
-    if (studentCompletedMissions && studentCompletedMissions.length > 0) {
-      const beforeFilter = filteredMissions.length;
-      filteredMissions = filteredMissions.filter(mission => {
-        const isCompleted = studentCompletedMissions.includes(mission.id);
-        console.log(`[DEBUG STUDENT] Missão ${mission.id} (${mission.title}): já submetida = ${isCompleted}`);
-        return !isCompleted;
-      });
-      console.log('[DEBUG STUDENT] Removidas missões pendentes/aprovadas:', beforeFilter - filteredMissions.length);
-      console.log('[DEBUG STUDENT] Missões pendentes/aprovadas:', studentCompletedMissions);
-      console.log('[DEBUG STUDENT] Missões finais a exibir (incluindo rejeitadas):', filteredMissions.map(m => `${m.id}: ${m.title}`));
-    } else {
-      console.log('[DEBUG STUDENT] Nenhuma missão pendente/aprovada encontrada, exibindo todas as missões disponíveis');
+        // Simular delay de rede
+        await new Promise(resolve => setTimeout(resolve, 300));
+
+        try {
+            // Dados simulados para desenvolvimento
+            if (endpoint === "/missoes") {
+                return [
+                    {
+                        id: 1,
+                        title: "Fundamentos JavaScript",
+                        description: "Crie funções básicas para manipulação de arrays, objetos e estruturas de dados em JavaScript.",
+                        xp: 75,
+                        targetClass: "Arqueiro do JavaScript",
+                        targetYear: 1,
+                        status: "ativa"
+                    },
+                    {
+                        id: 2,
+                        title: "Layout Responsivo",
+                        description: "Desenvolva uma página web responsiva usando HTML5, CSS3 e Flexbox/Grid.",
+                        xp: 60,
+                        targetClass: "Mago do CSS",
+                        targetYear: null,
+                        status: "ativa"
+                    },
+                    {
+                        id: 3,
+                        title: "API REST",
+                        description: "Construa uma API RESTful completa com autenticação e CRUD.",
+                        xp: 150,
+                        targetClass: "Bárbaro do Back-end",
+                        targetYear: 2,
+                        status: "ativa"
+                    },
+                    {
+                        id: 4,
+                        title: "Projeto Final",
+                        description: "Integração completa frontend-backend com deploy em produção.",
+                        xp: 250,
+                        targetClass: "geral",
+                        targetYear: null,
+                        status: "ativa"
+                    },
+                    {
+                        id: 5,
+                        title: "Data Analysis",
+                        description: "Análise de dados com Python, pandas e visualizações.",
+                        xp: 120,
+                        targetClass: "Mago do Python",
+                        targetYear: 2,
+                        status: "ativa"
+                    }
+                ];
+            }
+
+            if (endpoint === "/usuarios/me") {
+                return {
+                    id: 999,
+                    username: "Aluno Teste",
+                    class: "Arqueiro do JavaScript",
+                    year: 1,
+                    level: 3,
+                    xp: 295
+                };
+            }
+
+            if (endpoint === "/submissoes/my-submissions") {
+                const userSubmissions = JSON.parse(localStorage.getItem("userSubmissions") || "[]");
+                const defaultSubmissions = [
+                    {
+                        id: 1,
+                        missionId: 1,
+                        missionTitle: "Fundamentos JavaScript",
+                        status: "approved",
+                        xp: 75,
+                        submittedAt: "2024-12-01T10:00:00Z",
+                        filePaths: ["script.js", "utils.js"],
+                        feedback: "Excelente trabalho! Código bem estruturado e funcional."
+                    },
+                    {
+                        id: 2,
+                        missionId: 2,
+                        missionTitle: "Layout Responsivo",
+                        status: "pending",
+                        xp: 60,
+                        submittedAt: "2024-12-05T14:30:00Z",
+                        filePaths: ["index.html", "styles.css", "responsive.css"],
+                        feedback: null
+                    },
+                    {
+                        id: 3,
+                        missionId: 3,
+                        missionTitle: "API REST",
+                        status: "rejected",
+                        xp: 0,
+                        submittedAt: "2024-12-03T16:45:00Z",
+                        filePaths: ["server.js"],
+                        feedback: "Precisa melhorar a validação de dados e tratamento de erros."
+                    }
+                ];
+
+                return [...userSubmissions, ...defaultSubmissions].sort((a, b) =>
+                    new Date(b.submittedAt) - new Date(a.submittedAt)
+                );
+            }
+
+            return {};
+        } catch (error) {
+            console.error(`Erro na API ${endpoint}:`, error);
+            throw error;
+        }
+    },
+
+    saveSubmission(submission) {
+        const submissions = JSON.parse(localStorage.getItem("userSubmissions") || "[]");
+        submissions.unshift(submission);
+        localStorage.setItem("userSubmissions", JSON.stringify(submissions));
+    },
+
+    async uploadFiles(endpoint, formData) {
+        console.log(`API Upload: ${endpoint}`);
+
+        // Simular delay de upload
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        try {
+            // Simular upload bem-sucedido para desenvolvimento
+            const files = formData.getAll('files');
+            const missionId = formData.get('missionId');
+
+            console.log(`Simulando upload de ${files.length} arquivo(s) para missão ${missionId}`);
+
+            // Criar submissão simulada
+            const submission = {
+                id: Date.now(),
+                missionId: parseInt(missionId),
+                files: files.map(file => ({
+                    name: file.name,
+                    size: file.size,
+                    type: file.type
+                })),
+                status: 'pending',
+                submittedAt: new Date().toISOString(),
+                feedback: null
+            };
+
+            // Salvar no localStorage
+            this.saveSubmission(submission);
+
+            return submission;
+        } catch (error) {
+            console.error(`Erro no upload ${endpoint}:`, error);
+            throw error;
+        }
     }
+};
 
-    const missionsDiv = document.getElementById('missions');
-    const select = document.getElementById('mission-select');
+// UI - Sistema de interface
+const UI = {
+    // Renderizar missões
+    renderMissions(missions) {
+        console.log("Renderizando missões:", missions?.length);
 
-    if (!missionsDiv || !select) {
-      console.error('[DEBUG STUDENT] Elementos não encontrados:', { missionsDiv, select });
-      return;
-    }
+        const container = document.getElementById("missions");
+        const selectElement = document.getElementById("mission-select");
 
-    missionsDiv.innerHTML = '';
-    select.innerHTML = `<option value="">Selecione uma missão</option>`;
+        if (!container) {
+            console.error("Container 'missions' não encontrado!");
+            Toast.show("Erro: elemento 'missions' não encontrado na página", "error");
+            return;
+        }
 
-    if (filteredMissions.length === 0) {
-      missionsDiv.innerHTML = '<p class="text-gray-500 py-4">Nenhuma missão disponível para sua classe/ano no momento.</p>';
-      console.log('[DEBUG STUDENT] Nenhuma missão encontrada para o aluno');
-      return;
-    }
+        // Garantir que missions é um array
+        if (!Array.isArray(missions)) {
+            missions = [];
+        }
 
-    filteredMissions.forEach(mission => {
-      console.log('[DEBUG STUDENT] Renderizando missão:', mission.title);
+        // Atualizar contador
+        const totalElement = document.getElementById("total-missions");
+        if (totalElement) {
+            totalElement.textContent = missions.length.toString();
+        }
 
-      // Verificar se esta missão foi rejeitada anteriormente
-      const wasRejected = studentRejectedMissions.includes(mission.id);
-      console.log(`[DEBUG STUDENT] Missão ${mission.id} foi rejeitada anteriormente:`, wasRejected);
+        // Limpar containers
+        container.innerHTML = "";
+        if (selectElement) {
+            selectElement.innerHTML = '<option value="">Selecione uma missão para enviar</option>';
+        }
 
-      const card = document.createElement('div');
-      card.className = `bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition mb-4 ${wasRejected ? 'border-l-4 border-orange-400' : ''}`;
-
-      const rejectedBadge = wasRejected ?
-        '<span class="inline-block bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full ml-2">Rejeitada - Reenvie</span>' : '';
-
-      card.innerHTML = `
-        <h3 class="font-bold text-lg text-purple-700">
-          ${mission.title}
-          ${rejectedBadge}
-        </h3>
-        <p class="text-gray-600 mb-2">${mission.description}</p>
-        <span class="inline-block bg-green-100 text-green-800 text-sm px-2 py-1 rounded-full">XP: ${mission.xp}</span>
-        ${wasRejected ? '<p class="text-orange-600 text-sm mt-2"><i class="fas fa-exclamation-triangle mr-1"></i>Esta missão foi rejeitada. Você pode submeter novamente.</p>' : ''}
-      `;
-      missionsDiv.appendChild(card);
-
-      const opt = document.createElement('option');
-      opt.value = mission.id;
-      opt.textContent = mission.title;
-      select.appendChild(opt);
-    });
-
-    console.log('[DEBUG STUDENT] Missões renderizadas com sucesso');
-
-    // Carregar dados para filtros após renderizar as missões
-    await loadMissionsForFilters();
-
-  } catch (err) {
-    console.error('[DEBUG STUDENT] Erro ao carregar missões:', err);
-    const missionsDiv = document.getElementById('missions');
-    if (missionsDiv) {
-      missionsDiv.innerHTML = `<p class="text-red-500 py-4">Erro ao carregar missões: ${err.message}</p>`;
-    }
-  }
-}
-
-async function loadSubmissionHistory() {
-  console.log('[DEBUG STUDENT] Iniciando loadSubmissionHistory');
-
-  const token = localStorage.getItem('token');
-  if (!token) {
-    console.error('[DEBUG STUDENT] Token não encontrado');
-    return;
-  }
-
-  try {
-    console.log('[DEBUG STUDENT] Fazendo requisição para histórico de submissões');
-    const res = await fetch(`${API_URL}/submissoes/my-submissions`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    console.log('[DEBUG STUDENT] Resposta da requisição:', res.status);
-
-    if (!res.ok) {
-      console.error('[DEBUG STUDENT] Erro na resposta:', res.status, res.statusText);
-      throw new Error(`HTTP ${res.status}`);
-    }
-
-    const submissions = await res.json();
-    console.log('[DEBUG STUDENT] Histórico de submissões recebido:', submissions);
-
-    displaySubmissionHistory(submissions);
-  } catch (err) {
-    console.error('[DEBUG STUDENT] Erro ao carregar histórico:', err);
-    const historyDiv = document.getElementById('submission-history');
-    if (historyDiv) {
-      historyDiv.innerHTML = `<p class="text-red-500 py-4">Erro ao carregar histórico: ${err.message}</p>`;
-    }
-  }
-}
-
-function displaySubmissionHistory(submissions) {
-  console.log('[DEBUG STUDENT] Exibindo histórico de submissões:', submissions);
-
-  const historyDiv = document.getElementById('submission-history');
-  if (!historyDiv) {
-    console.error('[DEBUG STUDENT] Container submission-history não encontrado');
-    return;
-  }
-
-  if (submissions.length === 0) {
-    historyDiv.innerHTML = `
-      <div class="text-center py-8">
-        <i class="fas fa-inbox text-6xl text-gray-400 mb-4"></i>
-        <p class="text-gray-500 text-lg">Nenhuma submissão realizada ainda</p>
-        <p class="text-gray-400 text-sm">Suas submissões aparecerão aqui após serem enviadas</p>
-      </div>
-    `;
-    return;
-  }
-
-  historyDiv.innerHTML = submissions.map(submission => {
-    const statusInfo = getSubmissionStatus(submission);
-    const submittedDate = new Date(submission.submittedAt).toLocaleString('pt-BR');
-
-    return `
-      <div class="bg-white p-6 rounded-lg shadow border-l-4 ${statusInfo.borderColor}">
-        <div class="flex justify-between items-start">
-          <div class="flex-1">
-            <h3 class="text-lg font-semibold text-gray-800">${submission.missionTitle}</h3>
-            <p class="text-gray-600 text-sm mb-3">${submission.missionDescription}</p>
-            
-            <div class="grid grid-cols-2 gap-4 text-sm mb-3">
-              <div>
-                <span class="text-gray-500">Data de envio:</span>
-                <p class="font-medium">${submittedDate}</p>
-              </div>
-              <div>
-                <span class="text-gray-500">XP da missão:</span>
-                <p class="font-medium text-purple-600">${submission.xp} XP</p>
-              </div>
-            </div>
-
-            ${submission.filePaths && submission.filePaths.length > 0 ? `
-              <div class="mb-3">
-                <span class="text-gray-500 text-sm">Arquivos enviados:</span>
-                <div class="flex flex-wrap gap-1 mt-1">
-                  ${submission.filePaths.map(filePath => {
-      const fileName = filePath.split('/').pop().split('\\').pop();
-      const cleanFileName = fileName.split('_').slice(-1)[0].includes('.') ?
-        fileName.split('_').slice(-1)[0] : fileName;
-      return `<span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">${cleanFileName}</span>`;
-    }).join('')}
+        if (missions.length === 0) {
+            container.innerHTML = `
+                <div class="col-span-full text-center py-12">
+                    <i class="fas fa-info-circle text-4xl text-gray-400 mb-4"></i>
+                    <p class="text-gray-500 dark:text-gray-400 text-lg">Nenhuma missão disponível</p>
+                    <p class="text-gray-400 dark:text-gray-500 text-sm mt-2">Verifique os filtros ou entre em contato com o professor</p>
                 </div>
-              </div>
-            ` : ''}
+            `;
+            return;
+        }
 
-            ${submission.feedback ? `
-              <div class="bg-blue-50 border border-blue-200 rounded p-3 mb-3">
-                <span class="text-blue-800 text-sm font-medium">Feedback do professor:</span>
-                <p class="text-blue-700 text-sm mt-1">${submission.feedback}</p>
-              </div>
-            ` : ''}
-          </div>
-          
-          <div class="ml-4">
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${statusInfo.bgColor} ${statusInfo.textColor}">
-              <i class="${statusInfo.icon} mr-1"></i>
-              ${statusInfo.label}
-            </span>
-          </div>
+        const submissions = AppState.get("submissions") || [];
+        const submittedMissionIds = submissions
+            .filter(s => ["approved", "pending"].includes(s.status))
+            .map(s => s.missionId);
+
+        missions.forEach((mission, index) => {
+            try {
+                // Criar card da missão
+                const card = this.createMissionCard(mission);
+                container.appendChild(card);
+
+                // Adicionar ao select se existir
+                if (selectElement) {
+                    const option = document.createElement("option");
+                    option.value = mission.id;
+
+                    if (submittedMissionIds.includes(mission.id)) {
+                        const submission = submissions.find(s => s.missionId === mission.id);
+                        const status = submission?.status;
+                        option.textContent = `${mission.title} (${status === "pending" ? "🕒 Pendente" : "✅ Aprovada"})`;
+                        option.disabled = true;
+                        option.className = "text-gray-400";
+                    } else {
+                        option.textContent = mission.title;
+                    }
+
+                    selectElement.appendChild(option);
+                }
+
+            } catch (error) {
+                console.error(`Erro ao renderizar missão ${mission.title}:`, error);
+            }
+        });
+
+        console.log(`${missions.length} missões renderizadas`);
+        Toast.show(`${missions.length} missões carregadas`, "success");
+    },
+
+    // Criar card de missão
+    createMissionCard(mission) {
+        const submissions = AppState.get("submissions") || [];
+        const submission = submissions.find(s => s.missionId === mission.id);
+        const status = submission ? submission.status : "available";
+
+        const card = document.createElement("div");
+        card.className = `bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer ${status === "approved" || status === "pending" ? "opacity-70" :
+            status === "rejected" ? "border-2 border-red-400" : ""
+            }`;
+
+        // Header do status
+        let statusHeader = "";
+        if (status === "approved") {
+            statusHeader = '<div class="absolute top-0 right-0 left-0 bg-green-500 text-white text-xs px-3 py-1 text-center">✓ Aprovada</div>';
+        } else if (status === "pending") {
+            statusHeader = '<div class="absolute top-0 right-0 left-0 bg-blue-500 text-white text-xs px-3 py-1 text-center">🕒 Pendente de avaliação</div>';
+        } else if (status === "rejected") {
+            statusHeader = '<div class="absolute top-0 right-0 left-0 bg-red-500 text-white text-xs px-3 py-1 text-center">⟳ Rejeitada - Pode reenviar</div>';
+        }
+
+        // Determinar dificuldade
+        const difficulty = this.getDifficulty(mission.xp);
+
+        // Botão de ação
+        let actionButton;
+        if (status === "approved" || status === "pending") {
+            actionButton = '<span class="text-xs text-gray-500 dark:text-gray-400 italic">Aguarde a avaliação</span>';
+        } else {
+            const isRejected = status === "rejected";
+            actionButton = `
+        <button onclick="Missions.showDetails(${mission.id})" 
+                class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isRejected ? "animate-pulse" : ""}">
+          <i class="fas fa-${isRejected ? "redo" : "eye"} mr-1"></i>
+          ${isRejected ? "Reenviar" : "Ver Detalhes"}
+        </button>
+      `;
+        }
+
+        // Feedback anterior se rejeitada
+        const feedbackSection = (status === "rejected" && submission?.feedback) ? `
+      <div class="mt-3 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-sm text-red-800 dark:text-red-200">
+        <strong>Feedback anterior:</strong> ${submission.feedback}
+      </div>
+    ` : "";
+
+        card.innerHTML = `
+      <div class="p-6 relative pt-8">
+        ${statusHeader}
+        <div class="flex justify-between items-start mb-3">
+          <h3 class="font-bold text-xl text-gray-800 dark:text-white line-clamp-2 ${status === "approved" || status === "pending" ? "opacity-70" : ""}">${mission.title}</h3>
+          <span class="ml-2 text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full whitespace-nowrap">${mission.targetClass || "Geral"}</span>
         </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-4 line-clamp-2 text-sm leading-relaxed">${mission.description}</p>
+        <div class="flex justify-between items-center mb-4">
+          <div class="flex items-center">
+            <i class="fas fa-star text-yellow-400 mr-1"></i>
+            <span class="font-bold text-lg text-gray-800 dark:text-white">${mission.xp}</span>
+            <span class="text-gray-500 dark:text-gray-400 text-sm ml-1">XP</span>
+          </div>
+          <span class="${difficulty.color} text-white text-xs px-2 py-1 rounded-full font-medium">${difficulty.text}</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+            <i class="fas fa-graduation-cap mr-1"></i>
+            <span>Ano: ${mission.targetYear || "Todos"}</span>
+          </div>
+          ${actionButton}
+        </div>
+        ${feedbackSection}
       </div>
     `;
-  }).join('');
-}
 
-function getSubmissionStatus(submission) {
-  if (submission.pending) {
-    return {
-      label: 'Pendente',
-      icon: 'fas fa-clock',
-      bgColor: 'bg-yellow-100',
-      textColor: 'text-yellow-800',
-      borderColor: 'border-yellow-400'
-    };
-  } else if (submission.approved) {
-    return {
-      label: 'Aprovada',
-      icon: 'fas fa-check-circle',
-      bgColor: 'bg-green-100',
-      textColor: 'text-green-800',
-      borderColor: 'border-green-400'
-    };
-  } else {
-    return {
-      label: 'Rejeitada',
-      icon: 'fas fa-times-circle',
-      bgColor: 'bg-red-100',
-      textColor: 'text-red-800',
-      borderColor: 'border-red-400'
-    };
-  }
-}
+        return card;
+    },
 
-async function submitCode() {
-  console.log('[DEBUG STUDENT] Iniciando submitCode');
+    // Determinar dificuldade baseada no XP
+    getDifficulty(xp) {
+        if (xp <= 50) return { text: "Fácil", color: "bg-green-500" };
+        if (xp <= 100) return { text: "Médio", color: "bg-yellow-500" };
+        if (xp <= 200) return { text: "Difícil", color: "bg-orange-500" };
+        return { text: "Muito Difícil", color: "bg-red-500" };
+    },
 
-  const token = localStorage.getItem('token');
-  const missionId = document.getElementById('mission-select').value;
-  const files = document.getElementById('code-upload').files;
+    // Atualizar barra de progresso do estudante
+    updateProgressBar(studentInfo) {
+        if (!studentInfo) return;
 
-  console.log('[DEBUG STUDENT] Dados para submissão:', {
-    token: token ? 'Token presente' : 'Token ausente',
-    missionId,
-    filesCount: files.length
-  });
+        const elements = {
+            level: document.getElementById("student-level"),
+            totalXp: document.getElementById("total-xp"),
+            currentXp: document.getElementById("current-xp"),
+            nextLevelXp: document.getElementById("next-level-xp"),
+            progressBar: document.getElementById("xp-bar"),
+            percentage: document.getElementById("progress-percentage"),
+            studentClass: document.getElementById("student-class"),
+            studentYear: document.getElementById("student-year"),
+            studentName: document.getElementById("student-name")
+        };
 
-  if (!token) {
-    showError('Erro: Você não está autenticado. Faça login novamente.');
-    return;
-  }
+        // Calcular XP do nível atual
+        const currentLevelXp = 200 + (studentInfo.level - 1) * 100;
+        const nextLevelXp = 200 + studentInfo.level * 100;
+        const currentProgress = Math.max(0, studentInfo.xp - currentLevelXp);
+        const totalNeeded = nextLevelXp - currentLevelXp;
+        const percentage = Math.min(100, Math.max(0, (currentProgress / totalNeeded) * 100));
 
-  if (!missionId) {
-    showWarning('Por favor, selecione uma missão.');
-    return;
-  }
+        // Atualizar elementos
+        if (elements.level) elements.level.textContent = studentInfo.level || 1;
+        if (elements.totalXp) elements.totalXp.textContent = studentInfo.xp || 0;
+        if (elements.currentXp) elements.currentXp.textContent = currentProgress;
+        if (elements.nextLevelXp) elements.nextLevelXp.textContent = totalNeeded;
+        if (elements.progressBar) elements.progressBar.style.width = `${percentage}%`;
+        if (elements.percentage) elements.percentage.textContent = `${Math.round(percentage)}%`;
+        if (elements.studentClass) elements.studentClass.textContent = studentInfo.class || "";
+        if (elements.studentYear) elements.studentYear.textContent = studentInfo.year ? `${studentInfo.year}º` : "";
+        if (elements.studentName) elements.studentName.textContent = studentInfo.username || "Aluno";
+    },
 
-  if (files.length === 0) {
-    showWarning('Por favor, selecione pelo menos um arquivo de código.');
-    return;
-  }
+    renderSubmissions(submissions) {
+        console.log('Renderizando histórico de submissões:', submissions);
+        const container = document.getElementById("submission-history");
 
-  try {
-    const formData = new FormData();
-    formData.append('missionId', missionId);
+        if (!container) {
+            console.error("Container de histórico não encontrado!");
+            return;
+        }
 
-    // Adicionar arquivos com o nome correto esperado pelo backend
-    for (const file of files) {
-      formData.append('code', file);
-      console.log('[DEBUG STUDENT] Arquivo adicionado:', file.name);
+        if (!submissions || submissions.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-12">
+                    <i class="fas fa-inbox text-4xl text-gray-400 mb-4"></i>
+                    <p class="text-gray-500 dark:text-gray-400 text-lg">Nenhuma submissão encontrada</p>
+                    <p class="text-gray-400 dark:text-gray-500 text-sm mt-2">Suas submissões aparecerão aqui</p>
+                </div>
+            `;
+            return;
+        }
+
+        const submissionsHTML = submissions.map(submission => {
+            const statusConfig = {
+                pending: { class: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200', text: 'Pendente', icon: 'clock' },
+                approved: { class: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200', text: 'Aprovada', icon: 'check-circle' },
+                rejected: { class: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200', text: 'Rejeitada', icon: 'times-circle' }
+            };
+
+            const status = statusConfig[submission.status] || statusConfig.pending;
+            const submissionDate = new Date(submission.submittedAt).toLocaleDateString('pt-BR');
+            const submissionTime = new Date(submission.submittedAt).toLocaleTimeString('pt-BR');
+
+            return `
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="font-semibold text-gray-800 dark:text-white">Missão #${submission.missionId}</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">${submissionDate} às ${submissionTime}</p>
+                        </div>
+                        <span class="${status.class} px-3 py-1 rounded-full text-sm font-medium">
+                            <i class="fas fa-${status.icon} mr-1"></i>
+                            ${status.text}
+                        </span>
+                    </div>
+                    
+                    ${submission.files ? `
+                        <div class="mb-3">
+                            <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Arquivos enviados:</p>
+                            <div class="flex flex-wrap gap-2">
+                                ${submission.files.map(file => `
+                                    <span class="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded text-xs">
+                                        <i class="fas fa-file-code mr-1"></i>
+                                        ${file.name}
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    ${submission.feedback ? `
+                        <div class="mt-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Feedback:</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">${submission.feedback}</p>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }).join('');
+
+        container.innerHTML = submissionsHTML;
     }
+};
 
-    console.log('[DEBUG STUDENT] Fazendo requisição para submissão');
-    const res = await fetch(`${API_URL}/submissoes/submit`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`
-        // Não adicionar Content-Type para FormData, o browser define automaticamente
-      },
-      body: formData
-    });
+// Data - Sistema de carregamento de dados
+const Data = {
+    async fetchData(endpoint, stateKey, callback, errorMessage) {
+        try {
+            console.log(`Carregando dados: ${stateKey}`);
+            const data = await API.request(endpoint);
+            AppState.set(stateKey, data);
+            if (callback) callback(data);
+            return data;
+        } catch (error) {
+            console.error(`Erro ao carregar ${stateKey}:`, error);
+            Toast.show(errorMessage || "Erro ao carregar dados", "error");
+            return null;
+        }
+    },
 
-    console.log('[DEBUG STUDENT] Resposta da submissão:', res.status);
+    async loadStudentInfo() {
+        const data = await this.fetchData(
+            "/usuarios/me",
+            "studentInfo",
+            (data) => UI.updateProgressBar(data),
+            "Erro ao carregar dados do usuário"
+        );
 
-    if (res.ok) {
-      const data = await res.json();
-      console.log('[DEBUG STUDENT] Submissão enviada com sucesso:', data);
-      showSuccess('Código enviado com sucesso!');
+        if (data?.class) {
+            const classOption = document.getElementById("student-class-option");
+            if (classOption) {
+                classOption.value = data.class;
+                classOption.textContent = data.class;
+            }
+        }
+    },
 
-      // Limpar formulário
-      document.getElementById('mission-select').value = '';
-      document.getElementById('code-upload').value = '';
+    async loadMissions() {
+        console.log("Carregando missões...");
 
-      // Limpar display de arquivos selecionados
-      const filesDisplay = document.getElementById('selected-files-display');
-      if (filesDisplay) {
-        filesDisplay.innerHTML = '';
-      }
+        try {
+            // Verificar se o container existe
+            const container = document.getElementById("missions");
+            if (!container) {
+                console.error("Container 'missions' não encontrado!");
+                Toast.show("Erro: Container de missões não encontrado", "error");
+                return;
+            }
 
-      // Recarregar missões para remover a missão submetida do painel
-      console.log('[DEBUG STUDENT] Recarregando missões após submissão...');
+            const data = await this.fetchData(
+                "/missoes",
+                "missions",
+                null,
+                "Erro ao carregar missões"
+            );
 
-      // Aguardar um pouco para o backend processar
-      await new Promise(resolve => setTimeout(resolve, 500));
+            if (data && Array.isArray(data)) {
+                AppState.set("filteredMissions", data);
+                UI.renderMissions(data);
+            } else {
+                console.error("Dados inválidos recebidos da API");
+                Toast.show("Erro nos dados das missões", "error");
+                UI.renderMissions([]);
+            }
 
-      await loadCompletedMissions(); // Atualizar lista de missões submetidas
-      console.log('[DEBUG STUDENT] Missões completadas atualizadas, recarregando painel...');
+        } catch (error) {
+            console.error("Erro no carregamento de missões:", error);
+            Toast.show("Erro ao carregar missões", "error");
+            UI.renderMissions([]);
+        }
+    },
 
-      await loadMissions(); // Recarregar painel de missões
-      console.log('[DEBUG STUDENT] Painel de missões recarregado com sucesso');
+    async loadSubmissions() {
+        const historyContainer = document.getElementById("submission-history");
+        if (historyContainer) {
+            historyContainer.innerHTML = `
+        <div class="text-center py-12">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p class="text-gray-500 dark:text-gray-400">Carregando histórico...</p>
+        </div>
+      `;
+        }
 
-      // Também recarregar o histórico para mostrar a nova submissão
-      loadSubmissionHistory();
-    } else {
-      const errorData = await res.json().catch(() => ({ error: 'Erro desconhecido' }));
-      console.error('[DEBUG STUDENT] Erro na submissão:', res.status, errorData);
-      showError(`Erro ao enviar submissão: ${errorData.error || 'Erro desconhecido'}`);
+        const data = await this.fetchData(
+            "/submissoes/my-submissions",
+            "submissions",
+            null,
+            "Erro ao carregar histórico"
+        );
+
+        if (data) {
+            AppState.set("filteredSubmissions", data);
+            UI.renderSubmissions(data);
+            Toast.show(`${data.length} submissões carregadas`, "success");
+        } else if (historyContainer) {
+            historyContainer.innerHTML = `
+        <div class="text-center py-12">
+          <i class="fas fa-exclamation-triangle text-4xl text-red-400 mb-4"></i>
+          <p class="text-red-500 dark:text-red-400 text-lg">Erro ao carregar histórico</p>
+          <button onclick="Data.loadSubmissions()" class="mt-4 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+            Tentar Novamente
+          </button>
+        </div>
+      `;
+        }
+    },
+
+    // Alias para compatibilidade
+    async loadSubmissionHistory() {
+        console.log('Carregando histórico de submissões...');
+        return await this.loadSubmissions();
     }
-  } catch (err) {
-    console.error('[DEBUG STUDENT] Erro na requisição de submissão:', err);
-    showError('Erro ao conectar com o servidor.');
-  }
-}
+};
 
-function setupTabs() {
-  const tabs = document.querySelectorAll('.tab-button');
-  const contents = document.querySelectorAll('.tab-content');
+// Missions - Sistema de gerenciamento de missões
+const Missions = {
+    showDetails(missionId) {
+        const missions = AppState.get("missions") || [];
+        const mission = missions.find(m => m.id === missionId);
 
-  tabs.forEach((tab, index) => {
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active', 'border-b-2', 'text-blue-600'));
-      contents.forEach(c => c.classList.add('hidden'));
+        if (!mission) {
+            Toast.show("Missão não encontrada", "error");
+            return;
+        }
 
-      tab.classList.add('active', 'border-b-2', 'text-blue-600');
-      contents[index].classList.remove('hidden');
+        const difficulty = UI.getDifficulty(mission.xp);
 
-      // Carregar dados específicos da aba
-      const tabId = tab.id;
-      if (tabId === 'tab-missions') {
-        loadMissions();
-      } else if (tabId === 'tab-history') {
-        loadSubmissionHistory();
-      }
-    });
-  });
-}
-
-// Configurar event listeners adicionais após o DOM ser carregado
-document.addEventListener('DOMContentLoaded', () => {
-  // Event listener para o botão de logout
-  const logoutBtn = document.getElementById('logout-btn');
-  if (logoutBtn) {
-    import('./auth.js').then(module => {
-      logoutBtn.addEventListener('click', module.logout);
-    });
-  }
-
-  // Event listener para o botão de submeter código
-  const submitCodeBtn = document.getElementById('submit-code-btn');
-  if (submitCodeBtn) {
-    submitCodeBtn.addEventListener('click', submitCode);
-  }
-
-  // Event listener para mostrar arquivos selecionados
-  const fileInput = document.getElementById('code-upload');
-  if (fileInput) {
-    fileInput.addEventListener('change', displaySelectedFiles);
-
-    // Adicionar funcionalidade de drag & drop
-    const dropZone = fileInput.parentElement;
-
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-      dropZone.addEventListener(eventName, preventDefaults, false);
-    });
-
-    function preventDefaults(e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-
-    ['dragenter', 'dragover'].forEach(eventName => {
-      dropZone.addEventListener(eventName, highlight, false);
-    });
-
-    ['dragleave', 'drop'].forEach(eventName => {
-      dropZone.addEventListener(eventName, unhighlight, false);
-    });
-
-    function highlight(e) {
-      dropZone.classList.add('border-blue-500', 'bg-blue-100');
-    }
-
-    function unhighlight(e) {
-      dropZone.classList.remove('border-blue-500', 'bg-blue-100');
-    }
-
-    dropZone.addEventListener('drop', handleDrop, false);
-
-    function handleDrop(e) {
-      const dt = e.dataTransfer;
-      const files = dt.files;
-      fileInput.files = files;
-      displaySelectedFiles();
-    }
-  }
-});
-
-function displaySelectedFiles() {
-  const fileInput = document.getElementById('code-upload');
-  const files = fileInput.files;
-
-  // Criar ou encontrar o container para mostrar os arquivos
-  let filesDisplay = document.getElementById('selected-files-display');
-  if (!filesDisplay) {
-    filesDisplay = document.createElement('div');
-    filesDisplay.id = 'selected-files-display';
-    filesDisplay.className = 'mt-2';
-    fileInput.parentNode.insertBefore(filesDisplay, fileInput.nextSibling);
-  }
-
-  if (files.length === 0) {
-    filesDisplay.innerHTML = '';
-    return;
-  }
-
-  console.log('[DEBUG STUDENT] Arquivos selecionados:', files.length);
-
-  // Calcular tamanho total
-  let totalSize = 0;
-  for (let file of files) {
-    totalSize += file.size;
-  }
-
-  const formatFileSize = (bytes) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
-
-  filesDisplay.innerHTML = `
-    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
-      <div class="flex items-center justify-between mb-2">
-        <span class="text-sm font-medium text-blue-800">
-          <i class="fas fa-files mr-1"></i>
-          ${files.length} arquivo(s) selecionado(s)
-        </span>
-        <span class="text-sm text-blue-600">
-          Total: ${formatFileSize(totalSize)}
-        </span>
-      </div>
-      <div class="space-y-1">
-        ${Array.from(files).map((file, index) => `
-          <div class="flex items-center justify-between bg-white p-2 rounded border">
-            <div class="flex items-center space-x-2">
-              <i class="fas fa-file-code text-gray-400"></i>
-              <span class="text-sm text-gray-700">${file.name}</span>
+        const modal = document.createElement("div");
+        modal.className = "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50";
+        modal.innerHTML = `
+      <div class="bg-white dark:bg-gray-800 rounded-lg max-w-lg w-full">
+        <div class="p-6">
+          <div class="flex justify-between items-start mb-4">
+            <h2 class="text-xl font-bold text-gray-800 dark:text-white">${mission.title}</h2>
+            <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="space-y-4">
+            <div>
+              <h3 class="font-semibold text-gray-700 dark:text-gray-300 mb-2">Descrição:</h3>
+              <p class="text-gray-600 dark:text-gray-400 leading-relaxed">${mission.description}</p>
             </div>
-            <div class="flex items-center space-x-2">
-              <span class="text-xs text-gray-500">${formatFileSize(file.size)}</span>
-              <button onclick="removeFile(${index})" class="text-red-500 hover:text-red-700 text-xs">
-                <i class="fas fa-times"></i>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <h3 class="font-semibold text-gray-700 dark:text-gray-300 mb-1">XP:</h3>
+                <span class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">${mission.xp}</span>
+              </div>
+              <div>
+                <h3 class="font-semibold text-gray-700 dark:text-gray-300 mb-1">Classe:</h3>
+                <span class="text-purple-600 dark:text-purple-400 font-medium">${mission.targetClass || "Geral"}</span>
+              </div>
+              <div>
+                <h3 class="font-semibold text-gray-700 dark:text-gray-300 mb-1">Ano:</h3>
+                <span class="text-blue-600 dark:text-blue-400 font-medium">${mission.targetYear || "Todos"}</span>
+              </div>
+              <div>
+                <h3 class="font-semibold text-gray-700 dark:text-gray-300 mb-1">Dificuldade:</h3>
+                <span class="text-green-600 dark:text-green-400 font-medium">${difficulty.text}</span>
+              </div>
+            </div>
+            <div class="mt-6 flex justify-end">
+              <button onclick="Missions.selectForSubmission(${mission.id}); this.closest('.fixed').remove();" 
+                      class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
+                <i class="fas fa-upload mr-2"></i>Selecionar para Envio
               </button>
             </div>
           </div>
-        `).join('')}
-      </div>
-    </div>
-  `;
-}
-
-function removeFile(index) {
-  const fileInput = document.getElementById('code-upload');
-  const dt = new DataTransfer();
-
-  // Recriar a lista de arquivos sem o arquivo removido
-  for (let i = 0; i < fileInput.files.length; i++) {
-    if (i !== index) {
-      dt.items.add(fileInput.files[i]);
-    }
-  }
-
-  fileInput.files = dt.files;
-  displaySelectedFiles();
-}
-
-// Variables para armazenar dados originais
-let originalMissions = [];
-let originalSubmissionHistory = [];
-let studentCompletedMissions = []; // IDs das missões já completadas pelo aluno (pendentes + aprovadas)
-let studentRejectedMissions = []; // IDs das missões rejeitadas (que voltam para o painel)
-let studentInfo = null; // Informações do aluno atual (ano, classe, etc.)
-
-// Funções de filtro para missões (aluno)
-function setupMissionFiltersStudent() {
-  const applyBtn = document.getElementById('apply-mission-filters-student');
-  const clearBtn = document.getElementById('clear-mission-filters-student');
-
-  applyBtn?.addEventListener('click', applyMissionFiltersStudent);
-  clearBtn?.addEventListener('click', clearMissionFiltersStudent);
-}
-
-function applyMissionFiltersStudent() {
-  const difficultyFilter = document.getElementById('filter-mission-difficulty').value;
-  const classFilter = document.getElementById('filter-mission-target-class').value;
-
-  let filteredMissions = [...originalMissions];
-
-  // Filtrar por dificuldade (XP)
-  if (difficultyFilter) {
-    filteredMissions = filteredMissions.filter(mission => {
-      const xp = mission.xp;
-      switch (difficultyFilter) {
-        case '0-50':
-          return xp >= 0 && xp <= 50;
-        case '51-100':
-          return xp >= 51 && xp <= 100;
-        case '101-200':
-          return xp >= 101 && xp <= 200;
-        case '201+':
-          return xp >= 201;
-        default:
-          return true;
-      }
-    });
-  }
-
-  // Filtrar por classe alvo
-  if (classFilter) {
-    filteredMissions = filteredMissions.filter(mission =>
-      mission.targetClass === classFilter || mission.targetClass === 'geral'
-    );
-  }
-
-  displayFilteredMissionsStudent(filteredMissions);
-}
-
-function clearMissionFiltersStudent() {
-  document.getElementById('filter-mission-difficulty').value = '';
-  document.getElementById('filter-mission-target-class').value = '';
-  displayFilteredMissionsStudent(originalMissions);
-}
-
-function displayFilteredMissionsStudent(missions) {
-  const container = document.getElementById('missions');
-  container.innerHTML = '';
-
-  if (missions.length === 0) {
-    container.innerHTML = '<p class="text-gray-500 py-4">Nenhuma missão disponível no momento. Verifique seu histórico para ver missões já submetidas. Missões rejeitadas voltarão a aparecer aqui.</p>';
-    return;
-  }
-
-  missions.forEach(mission => {
-    const difficultyColor = mission.xp <= 50 ? 'text-green-600' :
-      mission.xp <= 100 ? 'text-yellow-600' :
-        mission.xp <= 200 ? 'text-orange-600' : 'text-red-600';
-
-    const difficultyText = mission.xp <= 50 ? 'Fácil' :
-      mission.xp <= 100 ? 'Médio' :
-        mission.xp <= 200 ? 'Difícil' : 'Muito Difícil';
-
-    const card = document.createElement('div');
-    card.className = 'bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition border-l-4 border-blue-500';
-
-    card.innerHTML = `
-      <div class="flex justify-between items-start mb-4">
-        <div class="flex-1">
-          <div class="flex items-center space-x-2 mb-2">
-            <h3 class="text-xl font-bold">${mission.title}</h3>
-            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">✓ Disponível</span>
-          </div>
-          <p class="text-gray-600 mb-3">${mission.description}</p>
-          <div class="flex flex-wrap gap-3 text-sm">
-            <span class="${difficultyColor} font-semibold">
-              <i class="fas fa-star mr-1"></i>${mission.xp} XP - ${difficultyText}
-            </span>
-            <span class="text-blue-600">
-              <i class="fas fa-graduation-cap mr-1"></i>${mission.targetYear ? `${mission.targetYear}º ano` : 'Todos os anos'}
-            </span>
-            <span class="text-purple-600">
-              <i class="fas fa-shield-alt mr-1"></i>${mission.targetClass}
-            </span>
-          </div>
         </div>
       </div>
     `;
 
-    container.appendChild(card);
-  });
-}
+        document.body.appendChild(modal);
 
-// Funções de filtro para histórico
-function setupHistoryFilters() {
-  const applyBtn = document.getElementById('apply-history-filters');
-  const clearBtn = document.getElementById('clear-history-filters');
-
-  applyBtn?.addEventListener('click', applyHistoryFilters);
-  clearBtn?.addEventListener('click', clearHistoryFilters);
-}
-
-function applyHistoryFilters() {
-  const statusFilter = document.getElementById('filter-history-status').value;
-  const periodFilter = document.getElementById('filter-history-period').value;
-  const missionFilter = document.getElementById('filter-history-mission').value.toLowerCase();
-
-  let filteredHistory = [...originalSubmissionHistory];
-
-  // Filtrar por status
-  if (statusFilter) {
-    filteredHistory = filteredHistory.filter(submission =>
-      submission.status === statusFilter
-    );
-  }
-
-  // Filtrar por período
-  if (periodFilter) {
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-    filteredHistory = filteredHistory.filter(submission => {
-      const submissionDate = new Date(submission.createdAt);
-
-      switch (periodFilter) {
-        case 'today':
-          return submissionDate >= today;
-        case 'week':
-          const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-          return submissionDate >= weekAgo;
-        case 'month':
-          const monthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
-          return submissionDate >= monthAgo;
-        case 'year':
-          const yearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
-          return submissionDate >= yearAgo;
-        default:
-          return true;
-      }
-    });
-  }
-
-  // Filtrar por nome da missão
-  if (missionFilter) {
-    filteredHistory = filteredHistory.filter(submission =>
-      submission.missionTitle?.toLowerCase().includes(missionFilter)
-    );
-  }
-
-  displayFilteredHistory(filteredHistory);
-}
-
-function clearHistoryFilters() {
-  document.getElementById('filter-history-status').value = '';
-  document.getElementById('filter-history-period').value = '';
-  document.getElementById('filter-history-mission').value = '';
-  displayFilteredHistory(originalSubmissionHistory);
-}
-
-function displayFilteredHistory(history) {
-  const container = document.getElementById('submission-history');
-  container.innerHTML = '';
-
-  if (history.length === 0) {
-    container.innerHTML = '<p class="text-gray-500 py-4">Nenhuma submissão encontrada com os filtros aplicados.</p>';
-    return;
-  }
-
-  history.forEach(submission => {
-    const statusColor = submission.status === 'approved' ? 'text-green-600' :
-      submission.status === 'rejected' ? 'text-red-600' : 'text-yellow-600';
-
-    const statusIcon = submission.status === 'approved' ? 'fa-check-circle' :
-      submission.status === 'rejected' ? 'fa-times-circle' : 'fa-clock';
-
-    const statusText = submission.status === 'approved' ? 'Aprovado' :
-      submission.status === 'rejected' ? 'Rejeitado' : 'Pendente';
-
-    const card = document.createElement('div');
-    card.className = 'bg-white p-4 rounded-lg shadow hover:shadow-md transition border-l-4 ' +
-      (submission.status === 'approved' ? 'border-green-500' :
-        submission.status === 'rejected' ? 'border-red-500' : 'border-yellow-500');
-
-    card.innerHTML = `
-      <div class="flex justify-between items-start">
-        <div class="flex-1">
-          <h4 class="font-semibold text-lg mb-2">${submission.missionTitle || 'Missão não encontrada'}</h4>
-          <div class="space-y-1 text-sm text-gray-600">
-            <p><i class="fas fa-calendar mr-2"></i>Enviado em: ${new Date(submission.createdAt).toLocaleDateString('pt-BR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })}</p>
-            <p class="${statusColor} font-medium">
-              <i class="fas ${statusIcon} mr-2"></i>Status: ${statusText}
-            </p>
-            ${submission.feedback ? `<p class="text-gray-700 mt-2"><strong>Feedback:</strong> ${submission.feedback}</p>` : ''}
-          </div>
-        </div>
-        <div class="ml-4">
-          <button onclick="viewSubmissionDetails(${submission.id})" 
-                  class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition">
-            <i class="fas fa-eye mr-1"></i>Ver Detalhes
-          </button>
-        </div>
-      </div>
-    `;
-
-    container.appendChild(card);
-  });
-}
-
-// Função para carregar missões completadas/submetidas
-async function loadCompletedMissions() {
-  console.log('[DEBUG STUDENT] Iniciando loadCompletedMissions...');
-
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      console.error('[DEBUG STUDENT] Token não encontrado em loadCompletedMissions');
-      return;
-    }
-
-    console.log('[DEBUG STUDENT] Fazendo requisição para my-submissions...');
-    const res = await fetch(`${API_URL}/submissoes/my-submissions`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-
-    console.log('[DEBUG STUDENT] Resposta da requisição my-submissions:', res.status, res.ok);
-
-    if (res.ok) {
-      const submissions = await res.json();
-      console.log('[DEBUG STUDENT] Submissões recebidas:', submissions);
-
-      // Incluir apenas missões pendentes ou aprovadas (removidas do painel)
-      // Missões rejeitadas voltam para o painel para nova submissão
-      const previousLength = studentCompletedMissions ? studentCompletedMissions.length : 0;
-      studentCompletedMissions = submissions
-        .filter(sub => sub.pending || sub.approved) // Apenas pendentes ou aprovadas
-        .map(sub => sub.missionId);
-
-      // Armazenar também as missões rejeitadas para indicação visual
-      studentRejectedMissions = submissions
-        .filter(sub => !sub.pending && !sub.approved) // Rejeitadas
-        .map(sub => sub.missionId);
-
-      console.log('[DEBUG STUDENT] Submissões por status:');
-      const pending = submissions.filter(sub => sub.pending);
-      const approved = submissions.filter(sub => sub.approved);
-      const rejected = submissions.filter(sub => !sub.pending && !sub.approved);
-
-      console.log('[DEBUG STUDENT] - Pendentes:', pending.length, pending.map(s => `${s.missionId}(${s.missionTitle})`));
-      console.log('[DEBUG STUDENT] - Aprovadas:', approved.length, approved.map(s => `${s.missionId}(${s.missionTitle})`));
-      console.log('[DEBUG STUDENT] - Rejeitadas:', rejected.length, rejected.map(s => `${s.missionId}(${s.missionTitle})`));
-
-      console.log('[DEBUG STUDENT] Missões removidas do painel (pendentes + aprovadas):', studentCompletedMissions);
-      console.log('[DEBUG STUDENT] Missões que voltam para o painel (rejeitadas):', studentRejectedMissions);
-      console.log('[DEBUG STUDENT] Total de missões removidas do painel:', studentCompletedMissions.length, '(anteriormente:', previousLength, ')');
-    } else {
-      const errorText = await res.text().catch(() => 'Erro desconhecido');
-      console.error('[DEBUG STUDENT] Erro na requisição my-submissions:', res.status, errorText);
-      // Manter array vazio se houver erro
-      studentCompletedMissions = studentCompletedMissions || [];
-    }
-  } catch (error) {
-    console.error('[DEBUG STUDENT] Erro ao carregar missões completadas:', error);
-    // Manter array vazio se houver erro
-    studentCompletedMissions = studentCompletedMissions || [];
-  }
-}
-
-// Função para atualizar opções dos filtros baseado nas missões disponíveis para o aluno
-function updateFilterOptions() {
-  if (!originalMissions || !studentInfo) return;
-
-  console.log('[DEBUG STUDENT] Atualizando opções dos filtros para', originalMissions.length, 'missões');
-
-  // Atualizar filtro de classe - apenas mostrar as classes que têm missões disponíveis para o aluno
-  const classFilter = document.getElementById('filter-mission-target-class');
-  if (classFilter) {
-    // Manter apenas as opções relevantes (sem "Todas as classes")
-    const defaultOptions = `
-      <option value="">Selecione uma classe</option>
-      <option value="geral">Geral</option>
-    `;
-
-    // Adicionar apenas as classes que aparecem nas missões disponíveis
-    const availableClasses = [...new Set(
-      originalMissions
-        .map(mission => mission.targetClass)
-        .filter(targetClass => targetClass && targetClass !== 'geral')
-    )];
-
-    const classOptions = availableClasses.map(className =>
-      `<option value="${className}">${className}</option>`
-    ).join('');
-
-    classFilter.innerHTML = defaultOptions + classOptions;
-    console.log('[DEBUG STUDENT] Classes disponíveis nos filtros:', availableClasses);
-  }
-}
-
-// Função para carregar dados para filtros
-async function loadMissionsForFilters() {
-  try {
-    const token = localStorage.getItem('token');
-    const res = await fetch(`${API_URL}/missoes`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-
-    if (res.ok) {
-      const allMissions = await res.json();
-
-      // Filtrar missões por ano/classe do aluno antes de armazenar
-      if (studentInfo) {
-        let filteredForStudent = allMissions.filter(mission => {
-          const isForStudentYear = !mission.targetYear || mission.targetYear === studentInfo.year;
-          const isForStudentClass = !mission.targetClass || mission.targetClass === 'geral' || mission.targetClass === studentInfo.class;
-          return isForStudentYear && isForStudentClass;
+        // Fechar ao clicar fora
+        modal.addEventListener("click", (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
         });
+    },
 
-        // Remover apenas missões pendentes ou aprovadas dos filtros (rejeitadas ficam disponíveis)
-        if (studentCompletedMissions && studentCompletedMissions.length > 0) {
-          filteredForStudent = filteredForStudent.filter(mission =>
-            !studentCompletedMissions.includes(mission.id)
-          );
+    selectForSubmission(missionId) {
+        const select = document.getElementById("mission-select");
+        if (select) {
+            select.value = missionId;
+            select.closest(".bg-gradient-to-r")?.scrollIntoView({ behavior: "smooth" });
+            Toast.show("Missão selecionada", "success");
+        }
+    }
+};
+
+// Sistema de envio de submissões
+const Submission = {
+    selectedMissionId: null,
+    selectedFiles: [],
+
+    init() {
+        this.setupSubmissionForm();
+        this.setupMissionSelect();
+        this.setupFileUpload();
+    },
+
+    setupMissionSelect() {
+        const missionSelect = document.getElementById('mission-select');
+        if (missionSelect) {
+            missionSelect.addEventListener('change', (e) => {
+                this.selectedMissionId = e.target.value;
+                console.log('Missão selecionada:', this.selectedMissionId);
+
+                // Habilitar/desabilitar botão de envio baseado na seleção
+                this.updateSubmitButton();
+            });
+        }
+    },
+
+    setupFileUpload() {
+        const fileInput = document.getElementById('code-upload');
+        if (fileInput) {
+            fileInput.addEventListener('change', (e) => {
+                this.selectedFiles = Array.from(e.target.files);
+                console.log('Arquivos selecionados:', this.selectedFiles.length);
+                this.updateSubmitButton();
+            });
+        }
+    },
+
+    setupSubmissionForm() {
+        const submitBtn = document.getElementById('submit-code-btn');
+
+        if (submitBtn) {
+            submitBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.handleSubmit();
+            });
+        }
+    },
+
+    updateSubmitButton() {
+        const submitBtn = document.getElementById('submit-code-btn');
+        if (submitBtn) {
+            const canSubmit = this.selectedMissionId && this.selectedFiles.length > 0;
+            submitBtn.disabled = !canSubmit;
+
+            if (canSubmit) {
+                submitBtn.className = 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-6 py-3 rounded-lg font-medium transition-all hover:scale-105';
+            } else {
+                submitBtn.className = 'bg-gray-400 text-gray-600 px-6 py-3 rounded-lg font-medium cursor-not-allowed';
+            }
+        }
+    },
+
+    handleSubmit() {
+        // Validar se missão foi selecionada
+        if (!this.selectedMissionId) {
+            Toast.show('Por favor, selecione uma missão antes de enviar!', 'warning');
+            return;
         }
 
-        originalMissions = filteredForStudent;
-        console.log('[DEBUG STUDENT] Missões filtradas para filtros:', originalMissions.length, 'de', allMissions.length);
-      } else {
-        originalMissions = allMissions;
-      }
+        // Validar se arquivos foram selecionados
+        if (this.selectedFiles.length === 0) {
+            Toast.show('Por favor, selecione pelo menos um arquivo de código!', 'warning');
+            return;
+        }
 
-      displayFilteredMissionsStudent(originalMissions);
-      setupMissionFiltersStudent();
-      updateFilterOptions();
+        this.submitFiles(this.selectedMissionId, this.selectedFiles);
+    },
+
+    async submitFiles(missionId, files) {
+        try {
+            Toast.show('Enviando submissão...', 'info');
+
+            // Criar FormData para upload
+            const formData = new FormData();
+            formData.append('missionId', missionId);
+            formData.append('submittedAt', new Date().toISOString());
+
+            // Adicionar arquivos
+            files.forEach((file, index) => {
+                formData.append(`files`, file);
+            });
+
+            const response = await API.uploadFiles('/submissoes', formData);
+
+            if (response) {
+                Toast.show('Submissão enviada com sucesso!', 'success');
+
+                // Limpar formulário
+                this.clearForm();
+
+                // Recarregar histórico
+                Data.loadSubmissionHistory();
+
+                // Recarregar missões para atualizar status
+                Data.loadMissions();
+            }
+        } catch (error) {
+            console.error('Erro ao enviar submissão:', error);
+            Toast.show('Erro ao enviar submissão. Tente novamente.', 'error');
+        }
+    },
+
+    clearForm() {
+        const fileInput = document.getElementById('code-upload');
+        const missionSelect = document.getElementById('mission-select');
+
+        if (fileInput) fileInput.value = '';
+        if (missionSelect) {
+            missionSelect.value = '';
+            this.selectedMissionId = null;
+        }
+
+        this.selectedFiles = [];
+        this.updateSubmitButton();
     }
-  } catch (error) {
-    console.error('Erro ao carregar missões para filtros:', error);
-  }
+};
+
+// Sistema de tema (padronizado com o painel do mestre)
+function initTheme() {
+    const savedTheme = localStorage.getItem("theme") || "light";
+    document.documentElement.setAttribute("data-theme", savedTheme);
+    updateThemeIcon(savedTheme);
+    console.log("🎨 Tema inicializado:", savedTheme);
 }
 
-// Função para carregar histórico para filtros
-async function loadSubmissionHistoryForFilters() {
-  await loadSubmissionHistory();
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
+    const newTheme = currentTheme === "light" ? "dark" : "light";
 
-  try {
-    const token = localStorage.getItem('token');
-    const res = await fetch(`${API_URL}/submissoes/my-submissions`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-
-    if (res.ok) {
-      originalSubmissionHistory = await res.json();
-      displayFilteredHistory(originalSubmissionHistory);
-      setupHistoryFilters();
-    }
-  } catch (error) {
-    console.error('Erro ao carregar histórico para filtros:', error);
-  }
+    document.documentElement.setAttribute("data-theme", newTheme);
+    localStorage.setItem("theme", newTheme);
+    updateThemeIcon(newTheme);
+    
+    console.log("🎨 Tema alterado de", currentTheme, "para", newTheme);
 }
+
+function updateThemeIcon(theme) {
+    const icon = document.getElementById("theme-icon");
+    if (icon) {
+        if (theme === "dark") {
+            icon.className = "fas fa-sun text-xl transition-transform duration-300";
+        } else {
+            icon.className = "fas fa-moon text-xl transition-transform duration-300";
+        }
+        console.log("🎨 Ícone do tema atualizado para:", theme);
+    } else {
+        console.error("❌ Ícone do tema não encontrado!");
+    }
+}
+
+// Sistema de inicialização
+const StudentApp = {
+    async init() {
+        console.log("Inicializando painel do estudante...");
+
+        try {
+            // Verificar se elementos principais existem
+            const missionsContainer = document.getElementById("missions");
+
+            if (!missionsContainer) {
+                console.error("Container 'missions' não encontrado!");
+                Toast.show("Erro: Container de missões não encontrado", "error");
+                return;
+            }
+
+            Toast.show("Carregando painel...", "info");
+
+            // Configurar dados de teste no localStorage
+            [
+                "token:token123",
+                "username:aluno-teste",
+                "isMaster:false"
+            ].forEach(item => {
+                const [key, value] = item.split(":");
+                localStorage.setItem(key, value);
+            });
+
+            // Configurar event listeners
+            this.setupEventListeners();
+
+            // Carregar dados em sequência
+            await Data.loadStudentInfo();
+            await Data.loadMissions();
+            await Data.loadSubmissions();
+
+            // Expor objetos globais para modais
+            window.Missions = Missions;
+            window.Data = Data;
+            window.UI = UI;
+
+            Toast.show("Painel carregado com sucesso!", "success");
+
+        } catch (error) {
+            console.error("Erro na inicialização:", error);
+            Toast.show("Erro ao inicializar painel", "error");
+        }
+    },
+
+    setupEventListeners() {
+        console.log("🔧 Configurando event listeners...");
+        
+        // Logout
+        const logoutBtn = document.getElementById("logout-btn");
+        if (logoutBtn) {
+            logoutBtn.addEventListener("click", () => {
+                localStorage.clear();
+                Toast.show("Logout realizado", "success");
+                setTimeout(() => {
+                    window.location.href = "./index.html";
+                }, 1500);
+            });
+            console.log("✅ Event listener do logout configurado");
+        }
+
+        // Botão de tema - configuração mais robusta
+        const themeToggle = document.getElementById("theme-toggle");
+        console.log("🔍 Procurando botão de tema...", themeToggle);
+        
+        if (themeToggle) {
+            // Remover listeners antigos se existirem
+            themeToggle.removeEventListener("click", toggleTheme);
+            
+            // Adicionar novo listener
+            themeToggle.addEventListener("click", function(e) {
+                e.preventDefault();
+                console.log("🖱️ Botão de tema clicado!");
+                toggleTheme();
+            });
+            
+            console.log("✅ Event listener do tema configurado com sucesso");
+        } else {
+            console.error("❌ Botão de tema não encontrado!");
+            
+            // Tentar encontrar novamente após um pequeno delay
+            setTimeout(() => {
+                const themeToggleDelayed = document.getElementById("theme-toggle");
+                if (themeToggleDelayed) {
+                    themeToggleDelayed.addEventListener("click", function(e) {
+                        e.preventDefault();
+                        console.log("🖱️ Botão de tema clicado (delayed)!");
+                        toggleTheme();
+                    });
+                    console.log("✅ Event listener do tema configurado (delayed)");
+                } else {
+                    console.error("❌ Botão de tema ainda não encontrado após delay!");
+                }
+            }, 500);
+        }
+
+        // Inicializar sistemas
+        initTheme();
+        Submission.init();
+
+        console.log("✅ Todos os event listeners configurados");
+    }
+};
+
+// Inicializar quando o DOM estiver pronto
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("DOM carregado, iniciando aplicação...");
+    StudentApp.init();
+});
+
+// Expor objetos globais para debug
+window.AppState = AppState;
+window.Toast = Toast;
+window.StudentApp = StudentApp;
+window.UI = UI;
+window.Data = Data;
+window.API = API;
+window.Submission = Submission;
+window.initTheme = initTheme;

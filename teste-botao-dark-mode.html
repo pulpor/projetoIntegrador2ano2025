@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Botão Dark Mode - Estudante</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    
+    <script>
+      // Script de inicialização de tema
+      (function () {
+        const t = localStorage.getItem("theme") || "light";
+        document.documentElement.setAttribute("data-theme", t);
+      })();
+    </script>
+
+    <style>
+      /* CSS do painel do estudante */
+      * {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* LIGHT MODE */
+      html:not([data-theme]),
+      html[data-theme="light"] {
+        background: linear-gradient(135deg, #fafbff 0%, #f0f4f8 100%);
+      }
+
+      html:not([data-theme]) body,
+      html[data-theme="light"] body {
+        background: linear-gradient(135deg, #fafbff 0%, #f0f4f8 100%);
+        color: #1e293b;
+        min-height: 100vh;
+      }
+
+      html:not([data-theme]) .bg-white,
+      html[data-theme="light"] .bg-white {
+        background: linear-gradient(145deg, #ffffff 0%, #fafbff 100%) !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 
+                    0 2px 4px -1px rgba(0, 0, 0, 0.03),
+                    0 0 0 1px rgba(99, 102, 241, 0.05) !important;
+        backdrop-filter: blur(10px) !important;
+      }
+
+      /* DARK MODE */
+      html[data-theme="dark"] body {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+        color: #f8fafc;
+        min-height: 100vh;
+      }
+
+      html[data-theme="dark"] .bg-white {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;
+        border: 1px solid #475569 !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 
+                    0 2px 4px -1px rgba(0, 0, 0, 0.3) !important;
+      }
+
+      /* CORES DE TEXTO */
+      html:not([data-theme]) .text-gray-800,
+      html[data-theme="light"] .text-gray-800 {
+        color: #1e293b !important;
+      }
+
+      html[data-theme="dark"] .text-gray-800 {
+        color: #f8fafc !important;
+      }
+
+      html:not([data-theme]) .text-gray-600,
+      html[data-theme="light"] .text-gray-600 {
+        color: #475569 !important;
+      }
+
+      html[data-theme="dark"] .text-gray-600 {
+        color: #e2e8f0 !important;
+      }
+
+      /* BOTÃO DE TEMA */
+      #theme-toggle {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+      }
+
+      html[data-theme="dark"] #theme-toggle {
+        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+        box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);
+      }
+
+      #theme-toggle:hover {
+        transform: scale(1.1) !important;
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4) !important;
+      }
+
+      html[data-theme="dark"] #theme-toggle:hover {
+        box-shadow: 0 6px 20px rgba(251, 191, 36, 0.4) !important;
+      }
+    </style>
+</head>
+<body class="p-8">
+    <!-- Botão de tema (IGUAL AO DO PAINEL) -->
+    <button
+      id="theme-toggle"
+      class="fixed top-6 right-6 z-[1001] w-12 h-12 text-white shadow-lg hover:shadow-xl rounded-full transition-all duration-300 hover:scale-105 active:scale-95"
+      title="Alternar tema"
+    >
+      <i
+        id="theme-icon"
+        class="fas fa-moon text-lg transition-transform duration-300"
+      ></i>
+    </button>
+
+    <div class="max-w-4xl mx-auto space-y-6">
+        <div class="text-center">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">🔧 Teste Botão Dark Mode</h1>
+            <p class="text-gray-600">Verificando se o botão está funcionando no painel do estudante</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6">
+                <i class="fas fa-cog mr-3 text-blue-600"></i>
+                Status do Sistema
+            </h2>
+            
+            <div class="space-y-4">
+                <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                    <span class="text-gray-600">Tema Atual:</span>
+                    <span id="current-theme" class="font-bold text-blue-600">light</span>
+                </div>
+                
+                <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                    <span class="text-gray-600">Event Listener:</span>
+                    <span id="event-status" class="font-bold text-red-600">❌ Não configurado</span>
+                </div>
+                
+                <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                    <span class="text-gray-600">LocalStorage:</span>
+                    <span id="storage-status" class="font-bold">-</span>
+                </div>
+            </div>
+
+            <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                <h3 class="font-semibold text-blue-800 mb-2">Instruções:</h3>
+                <ol class="text-blue-700 space-y-1">
+                    <li>1. Clique no botão de tema (canto superior direito)</li>
+                    <li>2. Verifique se o tema muda</li>
+                    <li>3. Recarregue a página e veja se persiste</li>
+                    <li>4. Observe se o ícone muda (lua ↔ sol)</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // FUNÇÕES IDENTICAS AO PAINEL DO ESTUDANTE
+        function initTheme() {
+            const savedTheme = localStorage.getItem("theme") || "light";
+            document.documentElement.setAttribute("data-theme", savedTheme);
+            updateThemeIcon(savedTheme);
+            updateStatus();
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
+            const newTheme = currentTheme === "light" ? "dark" : "light";
+            
+            document.documentElement.setAttribute("data-theme", newTheme);
+            localStorage.setItem("theme", newTheme);
+            updateThemeIcon(newTheme);
+            updateStatus();
+            
+            console.log("Tema alterado para:", newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById("theme-icon");
+            if (icon) {
+                if (theme === "dark") {
+                    icon.className = "fas fa-sun text-lg transition-transform duration-300";
+                } else {
+                    icon.className = "fas fa-moon text-lg transition-transform duration-300";
+                }
+            }
+        }
+
+        function updateStatus() {
+            const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
+            const savedTheme = localStorage.getItem("theme") || "Nenhum";
+            
+            document.getElementById("current-theme").textContent = currentTheme;
+            document.getElementById("storage-status").textContent = savedTheme;
+        }
+
+        // CONFIGURAR EVENT LISTENER
+        document.addEventListener("DOMContentLoaded", function() {
+            console.log("DOM carregado, configurando tema...");
+            
+            // Inicializar tema
+            initTheme();
+            
+            // Configurar botão
+            const themeToggle = document.getElementById("theme-toggle");
+            if (themeToggle) {
+                themeToggle.addEventListener("click", toggleTheme);
+                document.getElementById("event-status").innerHTML = '<span class="text-green-600">✅ Configurado</span>';
+                console.log("Event listener do tema configurado com sucesso!");
+            } else {
+                document.getElementById("event-status").innerHTML = '<span class="text-red-600">❌ Botão não encontrado</span>';
+                console.error("Botão de tema não encontrado!");
+            }
+            
+            updateStatus();
+        });
+    </script>
+</body>
+</html>

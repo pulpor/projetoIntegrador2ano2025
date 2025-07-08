@@ -4,390 +4,661 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Painel do Estudante - Sistema RPG</title>
-    <!-- Tailwind CSS - CDN para desenvolvimento -->
+
+    <!-- Prevenir flash de tema -->
+    <script>
+      (function () {
+        const t = localStorage.getItem("theme") || "light";
+        document.documentElement.setAttribute("data-theme", t);
+      })();
+    </script>
+
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
     />
-    <!-- Main CSS -->
-    <link rel="stylesheet" href="../css/main.css" />
-    <link rel="stylesheet" href="../css/themes.css" />
+    <link rel="stylesheet" href="../css/helper.css" />
+    <style>
+      /* Reset e transições */
+      * {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* Layout base */
+      .page-container {
+        padding-top: 120px;
+        min-height: calc(100vh - 120px);
+      }
+      .page-header {
+        z-index: 1000;
+        min-height: 80px;
+      }
+      @media (max-width: 768px) {
+        .page-header {
+          min-height: 100px;
+        }
+        .page-container {
+          padding-top: 140px;
+        }
+      }
+
+      /* ===== LIGHT MODE (BONITO E MODERNO) ===== */
+      html:not([data-theme]),
+      html[data-theme="light"] {
+        background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+      }
+
+      html:not([data-theme]) body,
+      html[data-theme="light"] body {
+        background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+        color: #1a202c;
+        min-height: 100vh;
+      }
+
+      /* Cards light mode - glassmorphism */
+      html:not([data-theme]) .bg-white,
+      html[data-theme="light"] .bg-white {
+        background: rgba(255, 255, 255, 0.7) !important;
+        backdrop-filter: blur(10px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15),
+                    0 2px 8px 0 rgba(31, 38, 135, 0.1) !important;
+      }
+
+      html:not([data-theme]) .bg-white:hover,
+      html[data-theme="light"] .bg-white:hover {
+        box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.2),
+                    0 4px 12px 0 rgba(31, 38, 135, 0.15) !important;
+        transform: translateY(-2px) !important;
+      }
+
+      /* Header light mode - glassmorphism */
+      html:not([data-theme]) header,
+      html[data-theme="light"] header {
+        background: rgba(255, 255, 255, 0.8) !important;
+        backdrop-filter: blur(20px) saturate(180%) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.05) !important;
+      }
+
+      /* Inputs light mode - mais elegantes */
+      html:not([data-theme]) input,
+      html:not([data-theme]) select,
+      html:not([data-theme]) textarea,
+      html[data-theme="light"] input,
+      html[data-theme="light"] select,
+      html[data-theme="light"] textarea {
+        background: rgba(255, 255, 255, 0.9) !important;
+        border: 2px solid rgba(99, 102, 241, 0.2) !important;
+        color: #1a202c !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+      }
+
+      html:not([data-theme]) input:focus,
+      html:not([data-theme]) select:focus,
+      html:not([data-theme]) textarea:focus,
+      html[data-theme="light"] input:focus,
+      html[data-theme="light"] select:focus,
+      html[data-theme="light"] textarea:focus {
+        border-color: #6366f1 !important;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1), 
+                    0 4px 20px rgba(99, 102, 241, 0.2) !important;
+        background: #ffffff !important;
+        transform: translateY(-1px) !important;
+      }
+
+      html:not([data-theme]) input::placeholder,
+      html[data-theme="light"] input::placeholder,
+      html:not([data-theme]) textarea::placeholder,
+      html[data-theme="light"] textarea::placeholder {
+        color: #64748b !important;
+      }
+
+      /* ===== TEMA DARK ===== */
+      html[data-theme="dark"] body {
+        background: linear-gradient(135deg, #0c0c0c 0%, #1a1a1a 50%, #2d3748 100%);
+        color: #f7fafc;
+      }
+
+      /* Cards em dark mode */
+      html[data-theme="dark"] .bg-white {
+        background: rgba(45, 55, 72, 0.8) !important;
+        backdrop-filter: blur(10px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4) !important;
+      }
+
+      /* Header em dark mode */
+      html[data-theme="dark"] header {
+        background: rgba(26, 32, 44, 0.9) !important;
+        backdrop-filter: blur(20px) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3) !important;
+      }
+
+      /* Inputs em dark mode */
+      html[data-theme="dark"] input,
+      html[data-theme="dark"] select,
+      html[data-theme="dark"] textarea {
+        background: rgba(45, 55, 72, 0.9) !important;
+        border: 2px solid rgba(255, 255, 255, 0.2) !important;
+        color: #f7fafc !important;
+      }
+
+      html[data-theme="dark"] input:focus,
+      html[data-theme="dark"] select:focus,
+      html[data-theme="dark"] textarea:focus {
+        border-color: #9f7aea !important;
+        background: #334155 !important;
+        box-shadow: 0 0 0 4px rgba(159, 122, 234, 0.2) !important;
+      }
+
+      html[data-theme="dark"] input::placeholder,
+      html[data-theme="dark"] textarea::placeholder {
+        color: #a0aec0 !important;
+      }
+
+      /* ===== CORES DE TEXTO RESPONSIVAS ===== */
+      html:not([data-theme]) .text-gray-800,
+      html[data-theme="light"] .text-gray-800 {
+        color: #1a202c !important;
+      }
+
+      html[data-theme="dark"] .text-gray-800 {
+        color: #f7fafc !important;
+      }
+
+      html:not([data-theme]) .text-gray-600,
+      html[data-theme="light"] .text-gray-600 {
+        color: #4a5568 !important;
+      }
+
+      html[data-theme="dark"] .text-gray-600 {
+        color: #e2e8f0 !important;
+      }
+
+      html:not([data-theme]) .text-gray-500,
+      html[data-theme="light"] .text-gray-500 {
+        color: #718096 !important;
+      }
+
+      html[data-theme="dark"] .text-gray-500 {
+        color: #cbd5e0 !important;
+      }
+
+      /* ===== COMPONENTES ESPECIAIS ===== */
+
+      /* ===== BOTÃO DE TEMA ===== */
+      #theme-toggle {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        border: none;
+      }
+
+      html[data-theme="dark"] #theme-toggle {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);
+      }
+
+      #theme-toggle:hover {
+        transform: scale(1.1) !important;
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6) !important;
+      }
+
+      html[data-theme="dark"] #theme-toggle:hover {
+        box-shadow: 0 6px 20px rgba(240, 147, 251, 0.6) !important;
+      }
+
+      /* Progress bar */
+      .progress-bar {
+        background: linear-gradient(90deg, #8b5cf6 0%, #06b6d4 100%);
+        border-radius: 9999px;
+        height: 12px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* File input */
+      html:not([data-theme]) .file-input-area,
+      html[data-theme="light"] .file-input-area {
+        background: #f8fafc !important;
+        border: 2px dashed #cbd5e1 !important;
+        color: #475569 !important;
+      }
+
+      html[data-theme="dark"] .file-input-area {
+        background: #1e293b !important;
+        border: 2px dashed #64748b !important;
+        color: #e2e8f0 !important;
+      }
+
+      html:not([data-theme]) .file-input-area:hover,
+      html[data-theme="light"] .file-input-area:hover {
+        background: #f1f5f9 !important;
+        border-color: #8b5cf6 !important;
+      }
+
+      html[data-theme="dark"] .file-input-area:hover {
+        background: #334155 !important;
+        border-color: #8b5cf6 !important;
+      }
+
+      /* Animações */
+      .fade-in {
+        animation: fadeIn 0.5s ease-in-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* UI Components */
+      .tab-button.active {
+        color: #2563eb;
+        border-bottom: 2px solid #2563eb;
+      }
+      .tab-content.hidden {
+        display: none;
+      }
+      .mission-card:hover {
+        transform: translateY(-2px);
+      }
+
+      /* Gradient cards */
+      .gradient-card {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      }
+      .gradient-card-green {
+        background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+      }
+      .gradient-card-orange {
+        background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+      }
+
+      /* Utility classes */
+      .progress-card {
+        height: 120px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+      .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+    </style>
   </head>
-  <body class="bg-gray-50 font-sans page-container">
+  <body class="bg-white min-h-screen transition-all duration-300">
     <!-- Theme Toggle Button -->
-    <button class="theme-toggle" onclick="toggleTheme()" title="Alternar tema">
-      <span id="theme-icon">🌙</span>
+    <button
+      id="theme-toggle"
+      class="fixed top-6 right-6 z-[1001] w-14 h-14 text-white shadow-lg hover:shadow-xl rounded-full transition-all duration-300 hover:scale-110 active:scale-95"
+      title="Alternar tema"
+    >
+      <i
+        id="theme-icon"
+        class="fas fa-moon text-xl transition-transform duration-300"
+      ></i>
     </button>
 
-    <!-- Barra de Navegação -->
-    <nav class="bg-blue-600 text-white p-4 shadow-md page-header">
-      <div class="container mx-auto flex justify-between items-center">
-        <h1 class="text-xl font-bold">Painel do Aluno</h1>
-        <div class="flex items-center space-x-4">
-          <span id="student-name" class="font-medium"></span>
-          <button
-            id="logout-btn"
-            class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded transition"
-          >
-            <i class="fas fa-sign-out-alt mr-1"></i> Sair
-          </button>
+    <!-- Header -->
+    <header class="bg-white shadow-lg fixed w-full top-0 z-50 page-header">
+      <div class="container mx-auto px-4 py-4">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+              <div
+                class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center"
+              >
+                <i class="fas fa-user-graduate text-white text-lg"></i>
+              </div>
+              <h1
+                class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent"
+              >
+                Painel do Estudante
+              </h1>
+            </div>
+          </div>
+          <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+              <div
+                class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center"
+              >
+                <i class="fas fa-user text-gray-600"></i>
+              </div>
+              <span class="text-gray-600">
+                Olá,
+                <span id="student-name" class="font-semibold text-purple-700"
+                  >Carregando...</span
+                >
+              </span>
+            </div>
+            <button
+              id="logout-btn"
+              class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+            >
+              <i class="fas fa-sign-out-alt mr-2"></i>Logout
+            </button>
+          </div>
         </div>
       </div>
-    </nav>
+    </header>
 
-    <div class="page-content">
-      <div class="container mx-auto p-4 panel-wrapper">
-        <!-- Barra de Progresso -->
-        <div class="bg-white p-6 rounded-lg shadow mb-6 progress-section">
-          <div class="flex justify-between items-center mb-2">
-            <h2 class="text-lg font-semibold">Seu Progresso</h2>
-            <div class="text-right">
-              <span class="text-blue-600 font-bold text-lg">
-                Nível <span id="student-level"></span>
-              </span>
-              <div class="text-sm text-gray-600">
-                Total: <span id="total-xp">0</span> XP
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8 page-container">
+      <!-- Progress Section -->
+      <div class="bg-white rounded-lg shadow-lg p-6 mb-6 fade-in progresso">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold text-gray-800">
+            <i class="fas fa-chart-line mr-2 text-purple-600"></i>
+            Progresso do Estudante
+          </h2>
+          <div class="flex items-center space-x-2">
+            <span class="text-sm text-gray-500">Nível</span>
+            <span
+              id="student-level"
+              class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full font-bold"
+              >3</span
+            >
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          <div class="text-center">
+            <div class="gradient-card text-white p-4 rounded-lg progress-card">
+              <i class="fas fa-star text-2xl mb-2"></i>
+              <div class="text-sm opacity-90">XP Total</div>
+              <div id="total-xp" class="text-2xl font-bold">295</div>
+            </div>
+          </div>
+          <div class="text-center">
+            <div
+              class="gradient-card-green text-white p-4 rounded-lg progress-card"
+            >
+              <i class="fas fa-trophy text-2xl mb-2"></i>
+              <div class="text-sm opacity-90">XP Atual</div>
+              <div id="current-xp" class="text-2xl font-bold">95</div>
+            </div>
+          </div>
+          <div class="text-center">
+            <div
+              class="gradient-card-orange text-white p-4 rounded-lg progress-card"
+            >
+              <i class="fas fa-target text-2xl mb-2"></i>
+              <div class="text-sm opacity-90">Próximo Nível</div>
+              <div id="next-level-xp" class="text-2xl font-bold">100</div>
+            </div>
+          </div>
+          <div class="text-center">
+            <div class="bg-gray-700 text-white p-4 rounded-lg progress-card">
+              <i class="fas fa-graduation-cap text-2xl mb-2"></i>
+              <div class="text-sm opacity-90">Classe</div>
+              <div id="student-class" class="text-lg font-bold">
+                Carregando...
               </div>
             </div>
           </div>
-          <div class="w-full bg-gray-200 rounded-full h-4">
-            <div
-              id="xp-bar"
-              class="bg-gradient-to-r from-yellow-400 to-yellow-600 h-4 rounded-full transition-all duration-300"
-            ></div>
-          </div>
-          <div class="flex justify-between mt-2 text-sm text-gray-600">
-            <span class="font-medium">
-              <span id="current-xp">0</span>/<span id="next-level-xp">100</span>
-              XP para o próximo nível
-            </span>
-            <div class="text-right">
-              <div id="student-class" class="font-medium"></div>
-              <div id="student-year" class="text-xs text-gray-500"></div>
-            </div>
-          </div>
-          <div class="mt-1 text-xs text-gray-500">
-            <span id="progress-percentage">0%</span> concluído neste nível
-          </div>
         </div>
 
-        <!-- Abas -->
-        <div class="tab-header mb-6 border-b border-gray-200">
-          <div class="flex space-x-4">
+        <div class="space-y-3">
+          <div class="flex justify-between items-center">
+            <span class="text-gray-600">Progresso para o próximo nível</span>
+            <span id="progress-percentage" class="font-bold text-purple-600"
+              >95%</span
+            >
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-3">
+            <div
+              id="xp-bar"
+              class="progress-bar rounded-full transition-all duration-500"
+              style="width: 95%"
+            ></div>
+          </div>
+          <div class="flex justify-between text-sm text-gray-500">
+            <span
+              >Ano: <span id="student-year" class="font-medium">1º</span></span
+            >
+            <span
+              >Faltam
+              <span id="remaining-xp" class="font-medium">5</span> XP</span
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs Section -->
+      <div class="bg-white rounded-lg shadow-lg overflow-hidden fade-in">
+        <div class="border-b border-gray-200">
+          <nav class="flex space-x-8 px-6">
             <button
               id="tab-missions"
-              class="tab-button active px-4 py-2 font-medium border-b-2 border-blue-500 text-blue-600"
+              class="tab-button py-4 px-2 border-b-2 font-medium transition-colors duration-200 active text-blue-600 border-blue-600"
             >
-              Missões
+              <i class="fas fa-tasks mr-2"></i>
+              Missões Disponíveis
             </button>
             <button
               id="tab-history"
-              class="tab-button px-4 py-2 font-medium text-gray-500 hover:text-gray-700"
+              class="tab-button py-4 px-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium transition-colors duration-200"
             >
-              Meu Histórico
+              <i class="fas fa-history mr-2"></i>
+              Histórico de Submissões
             </button>
-          </div>
+          </nav>
         </div>
 
-        <!-- Conteúdo das Abas -->
-        <div class="tabs-wrapper">
-          <div id="missions-content" class="tab-content">
-            <h2 class="text-xl font-bold mb-4">Missões Disponíveis</h2>
-            <div
-              class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6"
-            >
-              <div class="flex items-center">
-                <i class="fas fa-lightbulb text-green-600 mr-2"></i>
-                <p class="text-green-800 text-sm">
-                  Aqui você vê missões disponíveis para submissão. Missões
-                  pendentes ou aprovadas ficam no histórico. Missões rejeitadas
-                  voltam aqui para reenvio.
-                </p>
-              </div>
-            </div>
-
-            <!-- Filtros para Missões -->
-            <div class="filter-section bg-white p-4 rounded-lg shadow mb-6">
-              <h3 class="text-lg font-semibold mb-4">Filtros</h3>
-              <div class="filter-grid grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label
-                    for="filter-mission-difficulty"
-                    class="block text-sm font-medium text-gray-700 mb-2"
-                  >
-                    Dificuldade (XP)
-                  </label>
-                  <select
-                    id="filter-mission-difficulty"
-                    class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-200"
-                  >
-                    <option value="">Todas as dificuldades</option>
-                    <option value="0-50">Fácil (0-50 XP)</option>
-                    <option value="51-100">Médio (51-100 XP)</option>
-                    <option value="101-200">Difícil (101-200 XP)</option>
-                    <option value="201+">Muito Difícil (201+ XP)</option>
-                  </select>
+        <div class="p-6">
+          <!-- Missions Tab -->
+          <div id="missions-tab" class="tab-content">
+            <div class="space-y-6">
+              <!-- Mission Stats -->
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div
+                  class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4"
+                >
+                  <div class="flex items-center">
+                    <i
+                      class="fas fa-list-alt text-blue-600 dark:text-blue-400 text-xl mr-3"
+                    ></i>
+                    <div>
+                      <div class="text-sm text-blue-600 dark:text-blue-400">
+                        Total de Missões
+                      </div>
+                      <div
+                        id="total-missions"
+                        class="text-2xl font-bold text-blue-700 dark:text-blue-300"
+                      >
+                        -
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <label
-                    for="filter-mission-target-class"
-                    class="block text-sm font-medium text-gray-700 mb-2"
-                  >
-                    Classe Alvo
-                  </label>
-                  <select
-                    id="filter-mission-target-class"
-                    class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-200"
-                  >
-                    <option value="">Selecione uma classe</option>
-                    <option value="geral">Geral</option>
-                    <option value="Arqueiro do JavaScript">
-                      Arqueiro do JavaScript
-                    </option>
-                    <option value="Cafeicultor do Java">
-                      Cafeicultor do Java
-                    </option>
-                    <option value="Mago do CSS">Mago do CSS</option>
-                    <option value="Guerreiro do HTML">Guerreiro do HTML</option>
-                    <option value="Xamã do React">Xamã do React</option>
-                    <option value="Necromante do Node.js">
-                      Necromante do Node.js
-                    </option>
-                    <option value="Paladino do Python">
-                      Paladino do Python
-                    </option>
-                    <option value="Druida do Banco de Dados">
-                      Druida do Banco de Dados
-                    </option>
-                    <option value="Assassino do Android">
-                      Assassino do Android
-                    </option>
-                    <option value="Bardo do iOS">Bardo do iOS</option>
-                  </select>
+                <div
+                  class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4"
+                >
+                  <div class="flex items-center">
+                    <i
+                      class="fas fa-check-circle text-green-600 dark:text-green-400 text-xl mr-3"
+                    ></i>
+                    <div>
+                      <div class="text-sm text-green-600 dark:text-green-400">
+                        Concluídas
+                      </div>
+                      <div
+                        id="completed-missions"
+                        class="text-2xl font-bold text-green-700 dark:text-green-300"
+                      >
+                        -
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div class="filter-buttons mt-4 flex space-x-2">
-                <button
-                  id="apply-mission-filters-student"
-                  class="filter-button bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
+                <div
+                  class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4"
                 >
-                  <i class="fas fa-filter mr-2"></i>Aplicar Filtros
-                </button>
-                <button
-                  id="clear-mission-filters-student"
-                  class="filter-button bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition"
-                >
-                  <i class="fas fa-times mr-2"></i>Limpar
-                </button>
-              </div>
-            </div>
-
-            <!-- Grid de Missões -->
-            <div
-              id="missions"
-              class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6"
-            ></div>
-
-            <!-- Seção de Submissão -->
-            <div class="bg-white p-6 rounded-lg shadow submission-container">
-              <h2 class="text-xl font-bold mb-4">Submeter Código</h2>
-              <select
-                id="mission-select"
-                class="w-full p-3 mb-4 border rounded-lg focus:ring-2 focus:ring-blue-200"
-              >
-                <option value="">Selecione uma missão</option>
-              </select>
-              <div class="mb-4">
-                <label
-                  for="code-upload"
-                  class="block text-gray-700 mb-2 font-medium"
-                >
-                  <i class="fas fa-cloud-upload-alt mr-2 text-blue-600"></i>
-                  Arquivos de código (múltiplos arquivos permitidos):
-                </label>
-                <div class="relative">
-                  <input
-                    id="code-upload"
-                    type="file"
-                    multiple
-                    accept=".js,.html,.css,.py,.java,.cpp,.c,.cs,.php,.rb,.go,.rs,.txt,.json,.xml,.md,.png,.jpg,.jpeg,.gif,.pdf"
-                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                  />
-                  <div
-                    class="flex items-center justify-center w-full h-32 border-2 border-dashed border-blue-300 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors cursor-pointer"
-                  >
-                    <div class="text-center">
-                      <i
-                        class="fas fa-file-code text-4xl text-blue-400 mb-2"
-                      ></i>
-                      <p class="text-blue-600 font-medium">
-                        Clique para escolher arquivos
-                      </p>
-                      <p class="text-sm text-blue-500">
-                        ou arraste e solte aqui
-                      </p>
-                      <p class="text-xs text-gray-500 mt-1">
-                        Formatos suportados: JS, HTML, CSS, Python, Java, C++,
-                        etc.
-                      </p>
+                  <div class="flex items-center">
+                    <i
+                      class="fas fa-clock text-yellow-600 dark:text-yellow-400 text-xl mr-3"
+                    ></i>
+                    <div>
+                      <div class="text-sm text-yellow-600 dark:text-yellow-400">
+                        Pendentes
+                      </div>
+                      <div
+                        id="pending-missions"
+                        class="text-2xl font-bold text-yellow-700 dark:text-yellow-300"
+                      >
+                        -
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-              <button
-                id="submit-code-btn"
-                class="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition"
+
+              <!-- Missions Grid -->
+              <div
+                class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                id="missions"
               >
-                <i class="fas fa-upload mr-2"></i> Enviar Código
-              </button>
+                <!-- Loading placeholder -->
+                <div class="col-span-full text-center py-12">
+                  <div
+                    class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"
+                  ></div>
+                  <p class="text-gray-500 dark:text-gray-400">
+                    Carregando missões...
+                  </p>
+                </div>
+              </div>
+
+              <!-- Submit Mission -->
+              <div
+                class="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-700 border border-blue-200 dark:border-gray-600 rounded-lg p-6"
+              >
+                <h3 class="font-bold text-gray-800 dark:text-white mb-4">
+                  <i
+                    class="fas fa-upload mr-2 text-blue-600 dark:text-blue-400"
+                  ></i>
+                  Enviar Missão
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label
+                      for="mission-select"
+                      class="block font-medium text-gray-700 mb-2"
+                      >Selecionar Missão</label
+                    >
+                    <select
+                      id="mission-select"
+                      class="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white font-medium text-gray-700 shadow-sm hover:shadow-md transition-all"
+                    >
+                      <option value="">Selecione uma missão para enviar</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label
+                      for="code-upload"
+                      class="block font-medium text-gray-700 mb-2"
+                      >Arquivos de Código</label
+                    >
+                    <input
+                      type="file"
+                      id="code-upload"
+                      multiple
+                      accept=".js,.html,.css,.py,.java,.cpp,.c,.cs,.php,.rb,.go,.rs,.txt,.json,.xml,.md"
+                      class="file-input-area w-full p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-gray-50 dark:bg-gray-700 hover:bg-white dark:hover:bg-gray-600 transition-all cursor-pointer text-gray-700 dark:text-gray-200"
+                    />
+                  </div>
+                </div>
+                <div class="mt-4 flex justify-end">
+                  <button
+                    id="submit-code-btn"
+                    class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-6 py-3 rounded-lg font-medium transition-all hover:scale-105"
+                  >
+                    <i class="fas fa-paper-plane mr-2"></i>
+                    Enviar Código
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Aba do Histórico -->
-          <div id="history-content" class="tab-content hidden">
-            <h2 class="text-xl font-bold mb-4">Meu Histórico de Submissões</h2>
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-              <div class="flex items-center">
-                <i class="fas fa-info-circle text-blue-600 mr-2"></i>
-                <p class="text-blue-800 text-sm">
-                  Todas as missões que você submeter aparecem aqui no seu
-                  histórico. Missões pendentes e aprovadas ficam apenas no
-                  histórico, enquanto missões rejeitadas voltam ao painel
-                  principal para reenvio.
-                </p>
+          <!-- History Tab -->
+          <div id="history-tab" class="tab-content hidden">
+            <div class="space-y-6">
+              <!-- History Grid -->
+              <div class="space-y-4" id="submission-history">
+                <div class="text-center py-12">
+                  <div
+                    class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"
+                  ></div>
+                  <p class="text-gray-500 dark:text-gray-400">
+                    Carregando histórico...
+                  </p>
+                </div>
               </div>
             </div>
-
-            <!-- Filtros para Histórico -->
-            <div class="filter-section bg-white p-4 rounded-lg shadow mb-6">
-              <h3 class="text-lg font-semibold mb-4">Filtros</h3>
-              <div class="filter-grid grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label
-                    for="filter-history-status"
-                    class="block text-sm font-medium text-gray-700 mb-2"
-                    >Status</label
-                  >
-                  <select
-                    id="filter-history-status"
-                    class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-200"
-                  >
-                    <option value="">Todos os status</option>
-                    <option value="pending">Pendente</option>
-                    <option value="approved">Aprovado</option>
-                    <option value="rejected">Rejeitado</option>
-                  </select>
-                </div>
-                <div>
-                  <label
-                    for="filter-history-period"
-                    class="block text-sm font-medium text-gray-700 mb-2"
-                    >Período</label
-                  >
-                  <select
-                    id="filter-history-period"
-                    class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-200"
-                  >
-                    <option value="">Todos os períodos</option>
-                    <option value="today">Hoje</option>
-                    <option value="week">Esta semana</option>
-                    <option value="month">Este mês</option>
-                    <option value="year">Este ano</option>
-                  </select>
-                </div>
-                <div>
-                  <label
-                    for="filter-history-mission"
-                    class="block text-sm font-medium text-gray-700 mb-2"
-                    >Missão</label
-                  >
-                  <input
-                    type="text"
-                    id="filter-history-mission"
-                    placeholder="Nome da missão"
-                    class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-200"
-                  />
-                </div>
-              </div>
-              <div class="filter-buttons mt-4 flex space-x-2">
-                <button
-                  id="apply-history-filters"
-                  class="filter-button bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
-                >
-                  <i class="fas fa-filter mr-2"></i>Aplicar Filtros
-                </button>
-                <button
-                  id="clear-history-filters"
-                  class="filter-button bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition"
-                >
-                  <i class="fas fa-times mr-2"></i>Limpar
-                </button>
-              </div>
-            </div>
-
-            <!-- Grid do Histórico -->
-            <div
-              id="submission-history"
-              class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-            ></div>
           </div>
         </div>
       </div>
-    </div>
+    </main>
 
-    <!-- Scripts -->
-    <script type="module">
-      import "../js/student.js";
-    </script>
-
-    <!-- Theme System JavaScript -->
+    <!-- JavaScript -->
+    <script src="../js/student.js"></script>
+    
+    <!-- Script de backup para o botão de tema -->
     <script>
-      // Theme Toggle Function
-      function toggleTheme() {
-        const currentTheme =
-          document.documentElement.getAttribute("data-theme");
-        const newTheme = currentTheme === "dark" ? "light" : "dark";
-
-        document.documentElement.setAttribute("data-theme", newTheme);
-        localStorage.setItem("theme", newTheme);
-
-        // Update icon
-        const themeIcon = document.getElementById("theme-icon");
-        themeIcon.textContent = newTheme === "dark" ? "☀️" : "🌙";
-      }
-
-      // Initialize theme on page load
-      function initTheme() {
-        const savedTheme = localStorage.getItem("theme");
-        const prefersDark = window.matchMedia(
-          "(prefers-color-scheme: dark)"
-        ).matches;
-        const initialTheme = savedTheme || (prefersDark ? "dark" : "light");
-
-        document.documentElement.setAttribute("data-theme", initialTheme);
-
-        const themeIcon = document.getElementById("theme-icon");
-        if (themeIcon) {
-          themeIcon.textContent = initialTheme === "dark" ? "☀️" : "🌙";
-        }
-      }
-
-      // Initialize theme immediately
-      initTheme();
-
-      // Listen for system theme changes
-      window
-        .matchMedia("(prefers-color-scheme: dark)")
-        .addEventListener("change", (e) => {
-          if (!localStorage.getItem("theme")) {
-            const newTheme = e.matches ? "dark" : "light";
-            document.documentElement.setAttribute("data-theme", newTheme);
-            const themeIcon = document.getElementById("theme-icon");
-            if (themeIcon) {
-              themeIcon.textContent = newTheme === "dark" ? "☀️" : "🌙";
-            }
-          }
+        // Script de backup para garantir que o botão de tema funcione
+        document.addEventListener("DOMContentLoaded", function() {
+            console.log("🚀 Script de backup carregado");
+            
+            // Aguardar um momento para garantir que tudo foi carregado
+            setTimeout(function() {
+                const themeToggleBackup = document.getElementById("theme-toggle");
+                console.log("🔍 Botão de tema (backup):", themeToggleBackup);
+                
+                if (themeToggleBackup && !themeToggleBackup.hasAttribute('data-backup-configured')) {
+                    themeToggleBackup.setAttribute('data-backup-configured', 'true');
+                    
+                    themeToggleBackup.addEventListener("click", function(e) {
+                        e.preventDefault();
+                        console.log("🖱️ Botão de tema clicado (backup)!");
+                        
+                        // Função de toggle simplificada
+                        const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
+                        const newTheme = currentTheme === "light" ? "dark" : "light";
+                        
+                        document.documentElement.setAttribute("data-theme", newTheme);
+                        localStorage.setItem("theme", newTheme);
+                        
+                        // Atualizar ícone
+                        const icon = document.getElementById("theme-icon");
+                        if (icon) {
+                            if (newTheme === "dark") {
+                                icon.className = "fas fa-sun text-xl transition-transform duration-300";
+                            } else {
+                                icon.className = "fas fa-moon text-xl transition-transform duration-300";
+                            }
+                        }
+                        
+                        console.log("🎨 Tema alterado para:", newTheme);
+                    });
+                    
+                    console.log("✅ Event listener de backup configurado");
+                }
+            }, 100);
         });
     </script>
   </body>

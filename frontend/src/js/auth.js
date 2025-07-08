@@ -1,5 +1,3 @@
-// Importar o CSS para que o Vite processe o Tailwind CSS
-import '../css/main.css';
 import { showSuccess, showError, showWarning } from './utils/toast.js';
 
 // src/auth.js

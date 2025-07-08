@@ -7,8 +7,8 @@
     <!-- Tailwind CSS - CDN para desenvolvimento, será substituído na build -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- CSS Files -->
-    <link rel="stylesheet" href="./src/css/main.css" />
-    <link rel="stylesheet" href="./src/css/themes.css" />
+    <link rel="stylesheet" href="./src/css/styles.css" />
+    <link rel="stylesheet" href="./src/css/styles.css" />
   </head>
   <body class="bg-gray-100 font-sans h-screen overflow-hidden">
     <!-- Theme Toggle Button -->
@@ -117,6 +117,54 @@
         </div>
       </div>
     </div>
+
+    <!-- Script para tema (fora do módulo) -->
+    <script>
+      // Função para alternar tema (global)
+      function toggleTheme() {
+        const html = document.documentElement;
+        const icon = document.getElementById("theme-icon");
+        const currentTheme = html.getAttribute("data-theme") || "light";
+
+        console.log("Tema atual:", currentTheme);
+
+        if (currentTheme === "dark") {
+          html.setAttribute("data-theme", "light");
+          icon.textContent = "🌙";
+          localStorage.setItem("theme", "light");
+          console.log("Mudou para light mode");
+        } else {
+          html.setAttribute("data-theme", "dark");
+          icon.textContent = "☀️";
+          localStorage.setItem("theme", "dark");
+          console.log("Mudou para dark mode");
+        }
+      }
+
+      // Initialize theme on page load
+      function initTheme() {
+        const savedTheme = localStorage.getItem("theme");
+        const prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)"
+        ).matches;
+        const initialTheme = savedTheme || (prefersDark ? "dark" : "light");
+
+        console.log("Inicializando tema:", initialTheme);
+        document.documentElement.setAttribute("data-theme", initialTheme);
+
+        const themeIcon = document.getElementById("theme-icon");
+        if (themeIcon) {
+          themeIcon.textContent = initialTheme === "dark" ? "☀️" : "🌙";
+        }
+      }
+
+      // Carregar tema salvo ao inicializar
+      document.addEventListener("DOMContentLoaded", function () {
+        initTheme();
+      });
+    </script>
+
+    <!-- Script para autenticação (módulo) -->
     <script type="module">
       import {
         login,
@@ -160,43 +208,6 @@
             register();
           }
         });
-      });
-
-      // Função para alternar tema
-      function toggleTheme() {
-        const html = document.documentElement;
-        const icon = document.getElementById("theme-icon");
-
-        if (html.getAttribute("data-theme") === "dark") {
-          html.removeAttribute("data-theme");
-          icon.textContent = "🌙";
-          localStorage.setItem("theme", "light");
-        } else {
-          html.setAttribute("data-theme", "dark");
-          icon.textContent = "☀️";
-          localStorage.setItem("theme", "dark");
-        }
-      }
-
-      // Initialize theme on page load
-      function initTheme() {
-        const savedTheme = localStorage.getItem("theme");
-        const prefersDark = window.matchMedia(
-          "(prefers-color-scheme: dark)"
-        ).matches;
-        const initialTheme = savedTheme || (prefersDark ? "dark" : "light");
-
-        document.documentElement.setAttribute("data-theme", initialTheme);
-
-        const themeIcon = document.getElementById("theme-icon");
-        if (themeIcon) {
-          themeIcon.textContent = initialTheme === "dark" ? "☀️" : "🌙";
-        }
-      }
-
-      // Carregar tema salvo ao inicializar
-      document.addEventListener("DOMContentLoaded", function () {
-        initTheme();
       });
     </script>
   </body>
