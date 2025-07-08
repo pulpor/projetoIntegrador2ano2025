@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Painel dos Estudantes - Gestão de Turma</title>
+    <script src="http        <div class="mb-8">
+          <h1 class="text-2xl font-bold gradient-text">
+            <i class="fas fa-chalkboard-teacher mr-2"></i>
+            Painel do Professor
+          </h1>
+          <p class="text-gray-400 text-sm mt-1">Prof. Maria Santos - Gestão de Turmas</p>
+        </div>.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <style>
+      body {
+        background: linear-gradient(135deg, #0a0e27, #1a1f3a);
+        min-height: 100vh;
+      }
+
+      /* Layout do painel */
+      .panel-container {
+        background: rgba(15, 23, 42, 0.95);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .sidebar {
+        background: linear-gradient(
+          180deg,
+          rgba(15, 23, 42, 0.9),
+          rgba(30, 41, 59, 0.8)
+        );
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .nav-item {
+        transition: all 0.3s ease;
+        border-left: 3px solid transparent;
+      }
+
+      .nav-item:hover,
+      .nav-item.active {
+        background: rgba(14, 165, 233, 0.1);
+        border-left-color: #0ea5e9;
+      }
+
+      /* Estilos para cards futurísticos */
+      .mission-card {
+        background: linear-gradient(
+          135deg,
+          rgba(15, 15, 15, 0.9),
+          rgba(30, 30, 30, 0.8)
+        );
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      }
+
+      .mission-card:hover {
+        box-shadow: 0 12px 48px rgba(34, 197, 94, 0.2);
+        border-color: rgba(34, 197, 94, 0.3);
+      }
+
+      .mission-available {
+        background: linear-gradient(
+          135deg,
+          rgba(6, 78, 59, 0.4),
+          rgba(5, 46, 22, 0.6),
+          rgba(20, 83, 45, 0.3)
+        );
+      }
+
+      .mission-pending {
+        background: linear-gradient(
+          135deg,
+          rgba(120, 53, 15, 0.4),
+          rgba(146, 64, 14, 0.6),
+          rgba(180, 83, 9, 0.3)
+        );
+      }
+
+      .mission-approved {
+        background: linear-gradient(
+          135deg,
+          rgba(21, 128, 61, 0.4),
+          rgba(5, 46, 22, 0.6),
+          rgba(34, 197, 94, 0.3)
+        );
+      }
+
+      .mission-rejected {
+        background: linear-gradient(
+          135deg,
+          rgba(127, 29, 29, 0.4),
+          rgba(153, 27, 27, 0.6),
+          rgba(220, 38, 38, 0.3)
+        );
+      }
+
+      /* Partículas animadas */
+      .particles {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        pointer-events: none;
+      }
+
+      .particle {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: rgba(52, 211, 153, 0.8);
+        border-radius: 50%;
+        animation: particle-float 6s infinite ease-in-out;
+      }
+
+      .particle-1 {
+        top: 20%;
+        left: 10%;
+        animation-delay: 0s;
+      }
+      .particle-2 {
+        top: 40%;
+        left: 30%;
+        animation-delay: 1s;
+      }
+      .particle-3 {
+        top: 60%;
+        left: 50%;
+        animation-delay: 2s;
+      }
+      .particle-4 {
+        top: 80%;
+        left: 70%;
+        animation-delay: 3s;
+      }
+      .particle-5 {
+        top: 15%;
+        left: 80%;
+        animation-delay: 4s;
+      }
+      .particle-6 {
+        top: 35%;
+        left: 60%;
+        animation-delay: 5s;
+      }
+      .particle-7 {
+        top: 75%;
+        left: 20%;
+        animation-delay: 1.5s;
+      }
+      .particle-8 {
+        top: 55%;
+        left: 90%;
+        animation-delay: 2.5s;
+      }
+
+      @keyframes particle-float {
+        0%,
+        100% {
+          transform: translateY(0px) scale(1);
+          opacity: 0.8;
+        }
+        50% {
+          transform: translateY(-20px) scale(1.2);
+          opacity: 1;
+        }
+      }
+
+      /* Efeito de hover nos botões */
+      .mission-action-btn {
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .mission-action-btn::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: width 0.3s ease, height 0.3s ease;
+      }
+
+      .mission-action-btn:hover::before {
+        width: 300px;
+        height: 300px;
+      }
+
+      /* Tabs */
+      .tab-button {
+        transition: all 0.3s ease;
+        border-bottom: 2px solid transparent;
+      }
+
+      .tab-button.active {
+        background: rgba(14, 165, 233, 0.2);
+        border-bottom-color: #0ea5e9;
+        color: #0ea5e9;
+      }
+
+      /* Stats cards */
+      .stat-card {
+        background: linear-gradient(
+          135deg,
+          rgba(14, 165, 233, 0.1),
+          rgba(59, 130, 246, 0.05)
+        );
+        border: 1px solid rgba(14, 165, 233, 0.2);
+      }
+
+      /* Responsividade */
+      @media (max-width: 768px) {
+        .particle {
+          display: none;
+        }
+      }
+
+      /* Gradiente de texto */
+      .gradient-text {
+        background: linear-gradient(135deg, #06b6d4, #3b82f6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="flex h-screen">
+      <!-- Sidebar -->
+      <div class="sidebar w-64 p-6">
+        <div class="mb-8">
+          <h1 class="text-2xl font-bold gradient-text">
+            <i class="fas fa-user-graduate mr-2"></i>
+            Painel do Estudante
+          </h1>
+          <p class="text-gray-400 text-sm mt-1">João Silva - 2º Ano</p>
+        </div>
+
+        <nav>
+          <a
+            href="#"
+            class="nav-item active flex items-center p-3 rounded-lg mb-2 text-white"
+          >
+            <i class="fas fa-home mr-3"></i>
+            Dashboard
+          </a>
+          <a
+            href="#"
+            class="nav-item flex items-center p-3 rounded-lg mb-2 text-gray-400 hover:text-white"
+          >
+            <i class="fas fa-tasks mr-3"></i>
+            Missões
+          </a>
+          <a
+            href="#"
+            class="nav-item flex items-center p-3 rounded-lg mb-2 text-gray-400 hover:text-white"
+          >
+            <i class="fas fa-chart-line mr-3"></i>
+            Progresso
+          </a>
+          <a
+            href="#"
+            class="nav-item flex items-center p-3 rounded-lg mb-2 text-gray-400 hover:text-white"
+          >
+            <i class="fas fa-trophy mr-3"></i>
+            Conquistas
+          </a>
+          <a
+            href="#"
+            class="nav-item flex items-center p-3 rounded-lg mb-2 text-gray-400 hover:text-white"
+          >
+            <i class="fas fa-users mr-3"></i>
+            Ranking
+          </a>
+          <a
+            href="#"
+            class="nav-item flex items-center p-3 rounded-lg mb-2 text-gray-400 hover:text-white"
+          >
+            <i class="fas fa-cog mr-3"></i>
+            Configurações
+          </a>
+        </nav>
+
+        <!-- User Stats -->
+        <div class="mt-8 pt-6 border-t border-gray-600">
+          <div class="stat-card p-4 rounded-lg mb-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-xs text-gray-400">XP Total</p>
+                <p class="text-xl font-bold text-cyan-400">1,250</p>
+              </div>
+              <i class="fas fa-star text-yellow-400 text-2xl"></i>
+            </div>
+          </div>
+
+          <div class="stat-card p-4 rounded-lg">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-xs text-gray-400">Nível</p>
+                <p class="text-xl font-bold text-cyan-400">12</p>
+              </div>
+              <i class="fas fa-level-up-alt text-green-400 text-2xl"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="flex-1 flex flex-col">
+        <!-- Header -->
+        <header class="panel-container p-6 border-b border-gray-700">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-2xl font-bold text-white">Estudantes da Turma</h2>
+              <p class="text-gray-400">
+                Acompanhe o progresso e desempenho dos alunos
+              </p>
+            </div>
+
+            <div class="flex items-center space-x-4">
+              <button
+                class="bg-gradient-to-r from-cyan-600 to-blue-700 text-white px-4 py-2 rounded-lg hover:from-cyan-500 hover:to-blue-600 transition-all duration-300"
+              >
+                <i class="fas fa-filter mr-2"></i>
+                Filtros
+              </button>
+
+              <div class="relative">
+                <button
+                  class="bg-gray-700 text-white p-2 rounded-lg hover:bg-gray-600 transition-colors"
+                >
+                  <i class="fas fa-bell"></i>
+                </button>
+                <span
+                  class="absolute -top-1 -right-1 bg-red-500 text-xs rounded-full w-5 h-5 flex items-center justify-center"
+                  >3</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabs -->
+          <div class="flex space-x-6 mt-6">
+            <button
+              class="tab-button active px-4 py-2 font-medium"
+              onclick="showTab('all')"
+            >
+              <i class="fas fa-users mr-2"></i>Todos (12)
+            </button>
+            <button
+              class="tab-button px-4 py-2 font-medium text-gray-400"
+              onclick="showTab('active')"
+            >
+              <i class="fas fa-user-check mr-2"></i>Ativos (10)
+            </button>
+            <button
+              class="tab-button px-4 py-2 font-medium text-gray-400"
+              onclick="showTab('top')"
+            >
+              <i class="fas fa-trophy mr-2"></i>Top 5 XP
+            </button>
+            <button
+              class="tab-button px-4 py-2 font-medium text-gray-400"
+              onclick="showTab('needs-attention')"
+            >
+              <i class="fas fa-exclamation-triangle mr-2"></i>Atenção (2)
+            </button>
+          </div>
+        </header>
+
+        <!-- Content Area -->
+        <main class="flex-1 p-6 overflow-y-auto">
+          <!-- All Students -->
+          <div id="tab-all" class="tab-content">
+            <div
+              id="students-grid"
+              class="grid md:grid-cols-2 xl:grid-cols-3 gap-6"
+            >
+              <!-- Os cards de estudantes serão renderizados aqui pelo JavaScript -->
+            </div>
+          </div>
+
+          <!-- Active Students -->
+          <div id="tab-active" class="tab-content hidden">
+            <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+              <!-- Cards de estudantes ativos serão renderizados aqui -->
+            </div>
+          </div>
+
+          <!-- Top Students -->
+          <div id="tab-top" class="tab-content hidden">
+            <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+              <!-- Cards dos top estudantes serão renderizados aqui -->
+            </div>
+          </div>
+
+          <!-- Students Needing Attention -->
+          <div id="tab-needs-attention" class="tab-content hidden">
+            <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+              <!-- Cards de estudantes que precisam de atenção serão renderizados aqui -->
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      // Simular dados de estudantes
+      const students = [
+        {
+          id: 1,
+          name: "Ana Silva",
+          avatar: "AS",
+          xp: 1250,
+          level: 8,
+          class: "2º Ano A",
+          status: "active",
+          completedMissions: 12,
+          totalMissions: 15,
+          lastActivity: "2 horas atrás",
+          performance: "excelente"
+        },
+        {
+          id: 2,
+          name: "Bruno Santos",
+          avatar: "BS",
+          xp: 980,
+          level: 6,
+          class: "2º Ano A",
+          status: "active",
+          completedMissions: 8,
+          totalMissions: 15,
+          lastActivity: "1 dia atrás",
+          performance: "bom"
+        },
+        {
+          id: 3,
+          name: "Carla Oliveira",
+          avatar: "CO",
+          xp: 1450,
+          level: 9,
+          class: "2º Ano B",
+          status: "active",
+          completedMissions: 14,
+          totalMissions: 15,
+          lastActivity: "30 min atrás",
+          performance: "excelente"
+        },
+        {
+          id: 4,
+          name: "Diego Costa",
+          avatar: "DC",
+          xp: 750,
+          level: 5,
+          class: "2º Ano A",
+          status: "active",
+          completedMissions: 6,
+          totalMissions: 15,
+          lastActivity: "3 dias atrás",
+          performance: "regular"
+        },
+        {
+          id: 5,
+          name: "Elena Rodriguez",
+          avatar: "ER",
+          xp: 1680,
+          level: 11,
+          class: "2º Ano B",
+          status: "active",
+          completedMissions: 15,
+          totalMissions: 15,
+          lastActivity: "1 hora atrás",
+          performance: "excelente"
+        },
+        {
+          id: 6,
+          name: "Felipe Martins",
+          avatar: "FM",
+          xp: 420,
+          level: 3,
+          class: "2º Ano A",
+          status: "needs-attention",
+          completedMissions: 3,
+          totalMissions: 15,
+          lastActivity: "1 semana atrás",
+          performance: "baixo"
+        },
+        {
+          id: 7,
+          name: "Gabriela Lima",
+          avatar: "GL",
+          xp: 1120,
+          level: 7,
+          class: "2º Ano B",
+          status: "active",
+          completedMissions: 10,
+          totalMissions: 15,
+          lastActivity: "4 horas atrás",
+          performance: "bom"
+        },
+        {
+          id: 8,
+          name: "Hugo Almeida",
+          avatar: "HA",
+          xp: 890,
+          level: 6,
+          class: "2º Ano A",
+          status: "active",
+          completedMissions: 7,
+          totalMissions: 15,
+          lastActivity: "2 dias atrás",
+          performance: "bom"
+        },
+        {
+          id: 9,
+          name: "Isabella Ferreira",
+          avatar: "IF",
+          xp: 1320,
+          level: 8,
+          class: "2º Ano B",
+          status: "active",
+          completedMissions: 11,
+          totalMissions: 15,
+          lastActivity: "6 horas atrás",
+          performance: "excelente"
+        },
+        {
+          id: 10,
+          name: "João Pedro",
+          avatar: "JP",
+          xp: 320,
+          level: 2,
+          class: "2º Ano A",
+          status: "needs-attention",
+          completedMissions: 2,
+          totalMissions: 15,
+          lastActivity: "2 semanas atrás",
+          performance: "baixo"
+        },
+        {
+          id: 11,
+          name: "Larissa Souza",
+          avatar: "LS",
+          xp: 1580,
+          level: 10,
+          class: "2º Ano B",
+          status: "active",
+          completedMissions: 14,
+          totalMissions: 15,
+          lastActivity: "1 hora atrás",
+          performance: "excelente"
+        },
+        {
+          id: 12,
+          name: "Mateus Ribeiro",
+          avatar: "MR",
+          xp: 1050,
+          level: 7,
+          class: "2º Ano A",
+          status: "active",
+          completedMissions: 9,
+          totalMissions: 15,
+          lastActivity: "5 horas atrás",
+          performance: "bom"
+        }
+      ];
+
+      // Sistema de tabs
+      function showTab(tabName) {
+        // Esconder todas as tabs
+        document.querySelectorAll(".tab-content").forEach((tab) => {
+          tab.classList.add("hidden");
+        });
+
+        // Remover classe active de todos os botões
+        document.querySelectorAll(".tab-button").forEach((btn) => {
+          btn.classList.remove("active");
+          btn.classList.add("text-gray-400");
+        });
+
+        // Mostrar tab selecionada
+        document.getElementById(`tab-${tabName}`).classList.remove("hidden");
+
+        // Ativar botão correspondente
+        event.target.classList.add("active");
+        event.target.classList.remove("text-gray-400");
+
+        // Renderizar estudantes da tab correspondente
+        renderStudents(tabName);
+      }
+
+      // Renderizar estudantes
+      function renderStudents(filter = "all") {
+        const container = document.querySelector(`#tab-${filter} .grid`);
+        container.innerHTML = "";
+
+        let filteredStudents;
+
+        switch (filter) {
+          case "active":
+            filteredStudents = students.filter(
+              (student) => student.status === "active"
+            );
+            break;
+          case "top":
+            filteredStudents = [...students]
+              .sort((a, b) => b.xp - a.xp)
+              .slice(0, 5);
+            break;
+          case "needs-attention":
+            filteredStudents = students.filter(
+              (student) => student.status === "needs-attention"
+            );
+            break;
+          default:
+            filteredStudents = students;
+        }
+
+        filteredStudents.forEach((student) => {
+          const card = createStudentCard(student);
+          container.appendChild(card);
+        });
+      }
+
+      // Criar card de estudante
+      function createStudentCard(student) {
+        const card = document.createElement("div");
+        const progressPercent = (student.completedMissions / student.totalMissions) * 100;
+        const performanceConfig = getPerformanceConfig(student.performance);
+        
+        card.className =
+          "mission-card relative overflow-hidden rounded-2xl transform transition-all duration-500 hover:scale-105 cursor-pointer group bg-gradient-to-br from-slate-800/90 to-slate-900/80 border border-slate-700/50";
+
+        card.innerHTML = `
+          <!-- Efeitos de fundo -->
+          <div class="absolute inset-0 bg-gradient-to-br ${performanceConfig.gradient} opacity-30"></div>
+          <div class="absolute inset-0 bg-black/20"></div>
+          
+          <!-- Status indicator -->
+          <div class="absolute top-4 right-4 z-20">
+            <div class="w-3 h-3 rounded-full ${performanceConfig.statusColor} animate-pulse"></div>
+          </div>
+          
+          <!-- Conteúdo principal -->
+          <div class="relative z-10 p-6">
+            <!-- Header com avatar e info básica -->
+            <div class="flex items-center space-x-4 mb-4">
+              <div class="w-16 h-16 rounded-full bg-gradient-to-br ${performanceConfig.avatarGradient} flex items-center justify-center text-white font-bold text-lg shadow-lg border-2 border-white/20">
+                ${student.avatar}
+              </div>
+              <div class="flex-1">
+                <h3 class="text-lg font-bold text-white mb-1">${student.name}</h3>
+                <p class="text-sm text-gray-300">${student.class}</p>
+                <p class="text-xs text-gray-400">${student.lastActivity}</p>
+              </div>
+            </div>
+
+            <!-- Stats principais -->
+            <div class="grid grid-cols-2 gap-4 mb-4">
+              <!-- XP -->
+              <div class="bg-black/20 rounded-lg p-3 border border-white/10">
+                <div class="flex items-center space-x-2">
+                  <div class="w-8 h-8 rounded-full bg-gradient-to-r from-yellow-400 to-amber-500 flex items-center justify-center">
+                    <i class="fas fa-star text-white text-sm"></i>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-400 uppercase">XP</p>
+                    <p class="text-lg font-bold text-yellow-300">${student.xp}</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Nível -->
+              <div class="bg-black/20 rounded-lg p-3 border border-white/10">
+                <div class="flex items-center space-x-2">
+                  <div class="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 flex items-center justify-center">
+                    <i class="fas fa-level-up-alt text-white text-sm"></i>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-400 uppercase">Nível</p>
+                    <p class="text-lg font-bold text-cyan-300">${student.level}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Progresso das missões -->
+            <div class="mb-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm text-gray-300">Missões Concluídas</span>
+                <span class="text-sm font-bold text-white">${student.completedMissions}/${student.totalMissions}</span>
+              </div>
+              <div class="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+                <div 
+                  class="h-full bg-gradient-to-r ${performanceConfig.progressGradient} transition-all duration-1000 ease-out rounded-full"
+                  style="width: ${progressPercent}%"
+                ></div>
+              </div>
+              <div class="flex justify-between mt-1">
+                <span class="text-xs text-gray-500">0%</span>
+                <span class="text-xs font-bold ${performanceConfig.textColor}">${Math.round(progressPercent)}%</span>
+                <span class="text-xs text-gray-500">100%</span>
+              </div>
+            </div>
+
+            <!-- Status de performance -->
+            <div class="mb-4">
+              <div class="flex items-center justify-between p-3 rounded-lg ${performanceConfig.bg} border ${performanceConfig.border}">
+                <div class="flex items-center space-x-2">
+                  <i class="fas ${performanceConfig.icon} ${performanceConfig.textColor}"></i>
+                  <span class="text-sm font-medium ${performanceConfig.textColor}">
+                    ${performanceConfig.label}
+                  </span>
+                </div>
+                <div class="text-right">
+                  <div class="text-xs text-gray-400">Performance</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Botões de ação -->
+            <div class="flex space-x-2">
+              <button 
+                onclick="viewStudentDetails(${student.id})"
+                class="flex-1 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg"
+              >
+                <i class="fas fa-eye mr-2"></i>
+                Ver Detalhes
+              </button>
+              <button 
+                onclick="sendMessage(${student.id})"
+                class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg"
+              >
+                <i class="fas fa-comment"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Efeito hover -->
+          <div class="absolute inset-0 bg-gradient-to-t from-cyan-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+        `;
+
+        return card;
+      }
+
+      // Configurações de performance
+      function getPerformanceConfig(performance) {
+        switch (performance) {
+          case "excelente":
+            return {
+              label: "Excelente",
+              icon: "fa-trophy",
+              textColor: "text-green-300",
+              bg: "bg-green-900/30",
+              border: "border-green-400/50",
+              gradient: "from-green-600/50 to-emerald-600/30",
+              progressGradient: "from-green-400 to-emerald-500",
+              avatarGradient: "from-green-500 to-emerald-600",
+              statusColor: "bg-green-400"
+            };
+          case "bom":
+            return {
+              label: "Bom",
+              icon: "fa-thumbs-up",
+              textColor: "text-blue-300",
+              bg: "bg-blue-900/30",
+              border: "border-blue-400/50",
+              gradient: "from-blue-600/50 to-cyan-600/30",
+              progressGradient: "from-blue-400 to-cyan-500",
+              avatarGradient: "from-blue-500 to-cyan-600",
+              statusColor: "bg-blue-400"
+            };
+          case "regular":
+            return {
+              label: "Regular",
+              icon: "fa-chart-line",
+              textColor: "text-yellow-300",
+              bg: "bg-yellow-900/30",
+              border: "border-yellow-400/50",
+              gradient: "from-yellow-600/50 to-amber-600/30",
+              progressGradient: "from-yellow-400 to-amber-500",
+              avatarGradient: "from-yellow-500 to-amber-600",
+              statusColor: "bg-yellow-400"
+            };
+          case "baixo":
+            return {
+              label: "Precisa Atenção",
+              icon: "fa-exclamation-triangle",
+              textColor: "text-red-300",
+              bg: "bg-red-900/30",
+              border: "border-red-400/50",
+              gradient: "from-red-600/50 to-rose-600/30",
+              progressGradient: "from-red-400 to-rose-500",
+              avatarGradient: "from-red-500 to-rose-600",
+              statusColor: "bg-red-400"
+            };
+          default:
+            return {
+              label: "Avaliando",
+              icon: "fa-clock",
+              textColor: "text-gray-300",
+              bg: "bg-gray-900/30",
+              border: "border-gray-400/50",
+              gradient: "from-gray-600/50 to-slate-600/30",
+              progressGradient: "from-gray-400 to-slate-500",
+              avatarGradient: "from-gray-500 to-slate-600",
+              statusColor: "bg-gray-400"
+            };
+        }
+      }
+
+      // Funções de ação
+      function viewStudentDetails(studentId) {
+        const student = students.find(s => s.id === studentId);
+        console.log("Ver detalhes do estudante:", student.name);
+        // Aqui você implementaria a lógica para mostrar detalhes do estudante
+      }
+
+      function sendMessage(studentId) {
+        const student = students.find(s => s.id === studentId);
+        console.log("Enviar mensagem para:", student.name);
+        // Aqui você implementaria a lógica para enviar mensagem
+      }
+
+      // Inicializar painel
+      document.addEventListener("DOMContentLoaded", function () {
+        renderStudents("all");
+        console.log("Painel de estudantes carregado!");
+      });
+    </script>
+  </body>
+</html>

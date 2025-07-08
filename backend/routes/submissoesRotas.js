@@ -123,7 +123,11 @@ router.post('/:id/approve', autenticar, ehMestre, async (req, res) => {
     await fs.writeFile(caminhoSubmissions, JSON.stringify(submissions, null, 2));
     await fs.writeFile(caminhoUsers, JSON.stringify(users, null, 2));
     console.log('[DEBUG] Submissão aprovada e arquivos salvos');
-    res.json({ submission, user: { ...user, password: undefined } });
+    res.json({
+      message: 'Submissão aprovada com sucesso!',
+      submission,
+      user: { ...user, password: undefined }
+    });
   } catch (err) {
     console.error('Erro ao salvar arquivos:', err);
     res.status(500).json({ error: 'Erro interno do servidor' });
@@ -146,7 +150,7 @@ router.post('/:id/reject', autenticar, ehMestre, async (req, res) => {
   try {
     await fs.writeFile(caminhoSubmissions, JSON.stringify(submissions, null, 2));
     console.log('[DEBUG] Submissão rejeitada e arquivo salvo');
-    res.json({ message: 'Submissão rejeitada' });
+    res.json({ message: 'Submissão rejeitada com sucesso!' });
   } catch (err) {
     console.error('Erro ao salvar submissions.json:', err);
     res.status(500).json({ error: 'Erro interno do servidor' });

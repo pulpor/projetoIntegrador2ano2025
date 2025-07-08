@@ -1,6 +1,3 @@
-node_modules/
-web/Uploads/
-web/jsons/
-web/js/
-web/html/
-web/styles/
+
+.env
+node_modules

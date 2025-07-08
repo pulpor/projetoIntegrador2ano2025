@@ -4,132 +4,382 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sistema RPG de Aprendizado - Login</title>
-    <!-- Tailwind CSS - CDN para desenvolvimento, será substituído na build -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+
+    <style>
+      /* Gradiente animado de fundo */
+      .gradient-bg {
+        background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c);
+        background-size: 400% 400%;
+        animation: gradient 15s ease infinite;
+      }
+
+      @keyframes gradient {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      /* Glassmorphism para o card */
+      .glass-card {
+        background: rgba(255, 255, 255, 0.25);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      }
+
+      /* Inputs com efeitos modernos */
+      .modern-input {
+        background: rgba(255, 255, 255, 0.9);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        transition: all 0.3s ease;
+      }
+
+      .modern-input:focus {
+        background: rgba(255, 255, 255, 1);
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        transform: translateY(-2px);
+      }
+
+      /* Estilos específicos para selects */
+      .modern-input select {
+        cursor: pointer;
+      }
+
+      .modern-input option {
+        background: white;
+        color: #374151;
+        padding: 8px;
+      }
+
+      /* Botões com gradiente e hover */
+      .modern-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .modern-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+      }
+
+      .modern-btn:active {
+        transform: translateY(0);
+      }
+
+      /* Efeito de ondas no botão */
+      .modern-btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.2),
+          transparent
+        );
+        transition: left 0.5s;
+      }
+
+      .modern-btn:hover::before {
+        left: 100%;
+      }
+
+      /* Animação de entrada */
+      .fade-in {
+        animation: fadeInUp 0.8s ease-out;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Partículas flutuantes */
+      .floating-particles {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        pointer-events: none;
+      }
+
+      .particle {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        animation: float 6s ease-in-out infinite;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0px) rotate(0deg);
+        }
+        50% {
+          transform: translateY(-20px) rotate(180deg);
+        }
+      }
+
+      /* Logo animado */
+      .logo-icon {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        animation: pulse 2s ease-in-out infinite alternate;
+      }
+
+      @keyframes pulse {
+        from {
+          transform: scale(1);
+        }
+        to {
+          transform: scale(1.05);
+        }
+      }
+    </style>
   </head>
-  <body class="bg-gray-100 font-sans">
-    <div
-      class="container mx-auto p-4 flex items-center justify-center min-h-screen"
-    >
+  <body class="gradient-bg min-h-screen font-sans relative overflow-hidden">
+    <!-- Partículas flutuantes -->
+    <div class="floating-particles">
       <div
-        id="login-screen"
-        class="max-w-md w-full bg-white p-8 rounded-lg shadow-md"
-      >
-        <h1 class="text-2xl font-bold mb-6 text-center text-blue-600">
-          Sistema RPG de Aprendizado
-        </h1>
+        class="particle"
+        style="left: 10%; width: 20px; height: 20px; animation-delay: 0s"
+      ></div>
+      <div
+        class="particle"
+        style="left: 80%; width: 15px; height: 15px; animation-delay: 2s"
+      ></div>
+      <div
+        class="particle"
+        style="left: 60%; width: 25px; height: 25px; animation-delay: 4s"
+      ></div>
+      <div
+        class="particle"
+        style="left: 30%; width: 18px; height: 18px; animation-delay: 1s"
+      ></div>
+      <div
+        class="particle"
+        style="left: 90%; width: 12px; height: 12px; animation-delay: 3s"
+      ></div>
+    </div>
 
-        <div id="login-form">
-          <input
-            id="username"
-            type="text"
-            placeholder="Nome de usuário"
-            class="w-full p-3 mb-4 border rounded-lg focus:ring-2 focus:ring-blue-200"
-          />
-          <input
-            id="password"
-            type="password"
-            placeholder="Senha"
-            class="w-full p-3 mb-4 border rounded-lg focus:ring-2 focus:ring-blue-200"
-          />
-
-          <button
-            id="loginButton"
-            class="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition"
+    <div
+      class="container mx-auto p-4 flex items-center justify-center min-h-screen relative z-10"
+    >
+      <div class="glass-card max-w-md w-full p-8 rounded-2xl fade-in">
+        <!-- Logo e título -->
+        <div class="text-center mb-8">
+          <div
+            class="logo-icon w-20 h-20 mx-auto rounded-2xl flex items-center justify-center mb-4"
           >
-            Entrar
-          </button>
+            <i class="fas fa-dragon text-3xl text-white"></i>
+          </div>
+          <h1 class="text-3xl font-bold text-white mb-2">Sistema RPG</h1>
+          <p class="text-white/80 text-sm">Gamificação Educacional</p>
+        </div>
 
-          <p class="text-center my-4 text-gray-500">OU</p>
+        <!-- Formulário de Login -->
+        <div id="login-form">
+          <div class="space-y-4">
+            <div class="relative">
+              <i
+                class="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+              ></i>
+              <input
+                id="username"
+                type="text"
+                placeholder="Nome de usuário"
+                class="modern-input w-full pl-10 pr-4 py-3 rounded-xl border-0 outline-none text-gray-700 placeholder-gray-500"
+                autocomplete="username"
+              />
+            </div>
+
+            <div class="relative">
+              <i
+                class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+              ></i>
+              <input
+                id="password"
+                type="password"
+                placeholder="Senha"
+                class="modern-input w-full pl-10 pr-4 py-3 rounded-xl border-0 outline-none text-gray-700 placeholder-gray-500"
+                autocomplete="current-password"
+              />
+            </div>
+
+            <button
+              id="loginButton"
+              class="modern-btn w-full text-white py-3 rounded-xl font-semibold flex items-center justify-center space-x-2 relative"
+            >
+              <i class="fas fa-sign-in-alt"></i>
+              <span>Entrar</span>
+            </button>
+
+            <p class="text-center text-xs text-white/60 mt-2">
+              <i class="fas fa-keyboard mr-1"></i>
+              Pressione Enter para fazer login
+            </p>
+          </div>
+
+          <div class="relative my-6">
+            <div class="absolute inset-0 flex items-center">
+              <div class="w-full border-t border-white/20"></div>
+            </div>
+            <div class="relative flex justify-center text-sm">
+              <span class="px-3 bg-transparent text-white/80">ou</span>
+            </div>
+          </div>
 
           <button
             id="registerButton"
-            class="w-full bg-gray-200 text-gray-700 p-3 rounded-lg hover:bg-gray-300 transition"
+            class="w-full bg-white/20 backdrop-blur-sm text-white py-3 rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 flex items-center justify-center space-x-2 border border-white/30"
           >
-            Criar nova conta
+            <i class="fas fa-user-plus"></i>
+            <span>Criar nova conta</span>
           </button>
         </div>
 
+        <!-- Formulário de Registro -->
         <div id="register-form" class="hidden">
-          <input
-            id="reg-username"
-            type="text"
-            placeholder="Nome de usuário"
-            class="w-full p-3 mb-4 border rounded-lg focus:ring-2 focus:ring-blue-200"
-          />
-          <input
-            id="reg-fullname"
-            type="text"
-            placeholder="Nome completo"
-            class="w-full p-3 mb-4 border rounded-lg focus:ring-2 focus:ring-blue-200"
-          />
-          <input
-            id="reg-password"
-            type="password"
-            placeholder="Senha"
-            class="w-full p-3 mb-4 border rounded-lg focus:ring-2 focus:ring-blue-200"
-          />
-          <select
-            id="year-select"
-            class="w-full p-3 mb-4 border rounded-lg focus:ring-2 focus:ring-blue-200"
-          >
-            <option value="">Escolha seu ano</option>
-            <option value="1">1º ano - Front-end</option>
-            <option value="2">2º ano - Back-end</option>
-            <option value="3">3º ano - Mobile</option>
-          </select>
-          <select
-            id="class-select"
-            class="w-full p-3 mb-4 border rounded-lg focus:ring-2 focus:ring-blue-200"
-          >
-            <option value="">Escolha sua classe</option>
-            <option value="Arqueiro do JavaScript">
-              Arqueiro do JavaScript
-            </option>
-            <option value="Cafeicultor do Java">Cafeicultor do Java</option>
-            <option value="Mago do CSS">Mago do CSS</option>
-            <option value="Paladino do HTML">Paladino do HTML</option>
-            <option value="Bárbaro do Back-end">Bárbaro do Back-end</option>
-            <option value="Domador de Dados">Domador de Dados</option>
-            <option value="Elfo do Front-end">Elfo do Front-end</option>
-            <option value="Caçador de Bugs">Caçador de Bugs</option>
-          </select>
-          <div class="flex gap-3">
-            <button
-              id="backButton"
-              class="flex-1 bg-gray-200 text-gray-700 p-3 rounded-lg hover:bg-gray-300 transition"
-            >
-              Voltar
-            </button>
-            <button
-              id="registerSubmitButton"
-              class="flex-1 bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 transition"
-            >
-              Cadastrar
-            </button>
+          <div class="space-y-4">
+            <div class="relative">
+              <i
+                class="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+              ></i>
+              <input
+                id="reg-username"
+                type="text"
+                placeholder="Nome de usuário *"
+                class="modern-input w-full pl-10 pr-4 py-3 rounded-xl border-0 outline-none text-gray-700 placeholder-gray-500"
+                autocomplete="username"
+              />
+            </div>
+
+            <div class="relative">
+              <i
+                class="fas fa-id-card absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+              ></i>
+              <input
+                id="reg-fullname"
+                type="text"
+                placeholder="Nome completo *"
+                class="modern-input w-full pl-10 pr-4 py-3 rounded-xl border-0 outline-none text-gray-700 placeholder-gray-500"
+                autocomplete="name"
+              />
+            </div>
+
+            <div class="relative">
+              <i
+                class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+              ></i>
+              <input
+                id="reg-password"
+                type="password"
+                placeholder="Senha (mín. 6 caracteres) *"
+                class="modern-input w-full pl-10 pr-4 py-3 rounded-xl border-0 outline-none text-gray-700 placeholder-gray-500"
+                autocomplete="new-password"
+              />
+            </div>
+
+            <div class="relative">
+              <i
+                class="fas fa-graduation-cap absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 z-10"
+              ></i>
+              <select
+                id="year-select"
+                class="modern-input w-full pl-10 pr-4 py-3 rounded-xl border-0 outline-none text-gray-700 appearance-none bg-white cursor-pointer"
+              >
+                <option value="">Escolha seu ano *</option>
+                <option value="1">1º ano - Front-end</option>
+                <option value="2">2º ano - Back-end</option>
+                <option value="3">3º ano - Mobile</option>
+              </select>
+              <i
+                class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none"
+              ></i>
+            </div>
+
+            <div class="relative">
+              <i
+                class="fas fa-shield-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 z-10"
+              ></i>
+              <select
+                id="class-select"
+                class="modern-input w-full pl-10 pr-4 py-3 rounded-xl border-0 outline-none text-gray-700 appearance-none bg-white cursor-pointer"
+              >
+                <option value="">Escolha sua classe *</option>
+                <option value="Arqueiro do JavaScript">
+                  Arqueiro do JavaScript
+                </option>
+                <option value="Cafeicultor do Java">Cafeicultor do Java</option>
+                <option value="Mago do CSS">Mago do CSS</option>
+                <option value="Paladino do HTML">Paladino do HTML</option>
+                <option value="Bárbaro do Back-end">Bárbaro do Back-end</option>
+                <option value="Domador de Dados">Domador de Dados</option>
+                <option value="Elfo do Front-end">Elfo do Front-end</option>
+                <option value="Caçador de Bugs">Caçador de Bugs</option>
+              </select>
+              <i
+                class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none"
+              ></i>
+            </div>
+
+            <p class="text-center text-xs text-white/60 mt-2">
+              <i class="fas fa-keyboard mr-1"></i>
+              Pressione Enter nos campos de texto para cadastrar
+            </p>
+
+            <div class="flex gap-3 mt-6">
+              <button
+                id="backButton"
+                class="flex-1 bg-white/20 backdrop-blur-sm text-white py-3 rounded-xl font-semibold hover:bg-white/30 transition-all duration-300 flex items-center justify-center space-x-2 border border-white/30"
+              >
+                <i class="fas fa-arrow-left"></i>
+                <span>Voltar</span>
+              </button>
+              <button
+                id="registerSubmitButton"
+                class="modern-btn flex-1 text-white py-3 rounded-xl font-semibold flex items-center justify-center space-x-2 relative"
+              >
+                <i class="fas fa-user-check"></i>
+                <span>Cadastrar</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
     <script type="module">
-      import {
-        login,
-        logout,
-        showRegisterForm,
-        hideRegisterForm,
-        register,
-      } from "./src/auth.js";
+      import { setupEventListeners } from "./src/auth.js";
 
-      document.getElementById("loginButton").addEventListener("click", login);
-      document
-        .getElementById("registerButton")
-        .addEventListener("click", showRegisterForm);
-      document
-        .getElementById("backButton")
-        .addEventListener("click", hideRegisterForm);
-      document
-        .getElementById("registerSubmitButton")
-        .addEventListener("click", register);
+      // Configurar todos os event listeners quando DOM estiver pronto
+      document.addEventListener("DOMContentLoaded", () => {
+        setupEventListeners();
+        console.log("🚀 Sistema de login inicializado");
+      });
     </script>
   </body>
 </html>

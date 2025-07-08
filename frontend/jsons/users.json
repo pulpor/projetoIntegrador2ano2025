@@ -18,20 +18,60 @@
     "class": "Arqueiro do JavaScript",
     "year": 1,
     "isMaster": false,
-    "level": 2,
-    "xp": 200,
-    "pending": false
+    "level": 3,
+    "xp": 250,
+    "pending": false,
+    "actionHistory": [
+      {
+        "type": "reward",
+        "amount": 25,
+        "reason": "teste",
+        "oldXP": 200,
+        "newXP": 225,
+        "date": "2025-07-08T21:11:47.670Z",
+        "masterId": 1
+      },
+      {
+        "type": "penalty",
+        "amount": 25,
+        "reason": "teste",
+        "oldXP": 225,
+        "newXP": 200,
+        "date": "2025-07-08T21:29:39.275Z",
+        "masterId": 1
+      },
+      {
+        "type": "reward",
+        "amount": 50,
+        "reason": "testeeee",
+        "oldXP": 200,
+        "newXP": 250,
+        "date": "2025-07-08T21:54:13.440Z",
+        "masterId": 1
+      }
+    ]
   },
   {
     "id": 3,
     "username": "gg",
     "fullname": "gg",
-    "password": "$2b$10$IPbzHMSYQjSKWL02uX9tOedtTUJLS2DBJUH13OVd8AZW93cz0c0Hm",
+    "password": "$2b$10$gW0ZKmPrGGS9Vg4fm8tJK.hu/KRwroRMNxUMD9GTnsSReJlU845Fq",
     "class": "Arqueiro do JavaScript",
     "year": 1,
     "isMaster": false,
-    "level": 1,
-    "xp": 0,
-    "pending": false
+    "level": 2,
+    "xp": 150,
+    "pending": false,
+    "actionHistory": [
+      {
+        "type": "reward",
+        "amount": 50,
+        "reason": "teste",
+        "oldXP": 0,
+        "newXP": 50,
+        "date": "2025-07-08T21:55:53.662Z",
+        "masterId": 1
+      }
+    ]
   }
 ]

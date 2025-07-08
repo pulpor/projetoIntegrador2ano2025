@@ -24,9 +24,9 @@ function validateAuthentication() {
   const isMaster = localStorage.getItem('isMaster');
   const username = localStorage.getItem('username');
 
-  console.log('[DEBUG MASTER] Validando autenticação:', { 
-    hasToken: !!token, 
-    isMaster, 
+  console.log('[DEBUG MASTER] Validando autenticação:', {
+    hasToken: !!token,
+    isMaster,
     username,
     tokenLength: token ? token.length : 0
   });
@@ -125,7 +125,7 @@ function setActiveTab(activeId, activeContent) {
   // Ativa aba e conteúdo selecionados
   const activeTab = document.getElementById(activeId);
   const activeContentEl = document.getElementById(activeContent);
-  
+
   if (activeTab) {
     activeTab.classList.remove('text-gray-500');
     activeTab.classList.add('active', 'border-b-2', 'border-purple-500', 'text-purple-600');
@@ -136,24 +136,24 @@ function setActiveTab(activeId, activeContent) {
 // ====== FUNÇÕES DE API ======
 async function apiRequest(endpoint, options = {}) {
   console.log('[DEBUG MASTER] Fazendo requisição:', { endpoint, options });
-  
+
   const token = localStorage.getItem('token');
   const username = localStorage.getItem('username');
   const isMaster = localStorage.getItem('isMaster');
-  
-  console.log('[DEBUG MASTER] Estado de autenticação:', { 
-    hasToken: !!token, 
+
+  console.log('[DEBUG MASTER] Estado de autenticação:', {
+    hasToken: !!token,
     tokenLength: token ? token.length : 0,
     tokenPreview: token ? token.substring(0, 20) + '...' : 'N/A',
-    username, 
-    isMaster 
+    username,
+    isMaster
   });
-  
+
   if (!token) {
     console.error('[DEBUG MASTER] Token não encontrado no localStorage');
     throw new Error('Token de autenticação não encontrado. Faça login novamente.');
   }
-  
+
   const defaultOptions = {
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -167,11 +167,11 @@ async function apiRequest(endpoint, options = {}) {
     ...defaultOptions.headers,
     'Authorization': `Bearer ${token.substring(0, 20)}...`
   });
-  
+
   try {
     const response = await fetch(url, { ...defaultOptions, ...options });
     console.log('[DEBUG MASTER] Resposta recebida:', { status: response.status, ok: response.ok });
-    
+
     if (!response.ok) {
       let errorMessage = 'Erro desconhecido';
       try {
@@ -182,15 +182,15 @@ async function apiRequest(endpoint, options = {}) {
         errorMessage = response.statusText || errorMessage;
         console.log('[DEBUG MASTER] Erro ao ler resposta:', e);
       }
-      
+
       // Não redirecionar automaticamente, apenas lançar erro específico
       if (response.status === 401) {
         throw new Error(`Erro de autenticação: ${errorMessage}`);
       }
-      
+
       throw new Error(`HTTP ${response.status}: ${errorMessage}`);
     }
-    
+
     const result = await response.json();
     console.log('[DEBUG MASTER] Resultado da requisição:', result);
     return result;
@@ -217,7 +217,7 @@ async function loadApprovedStudents() {
   try {
     const data = await apiRequest('/usuarios/approved-students');
     originalStudents = data;
-    
+
     const hasActiveFilters = checkActiveFilters('student');
     if (hasActiveFilters) {
       applyStudentFilters();
@@ -248,10 +248,12 @@ function renderStudents(students) {
   if (!container) return;
 
   if (students.length === 0) {
-    container.innerHTML = '<p class="text-gray-500 py-4">Nenhum aluno encontrado.</p>';
+    container.innerHTML = '<p class="text-gray-500 py-4 col-span-full text-center">Nenhum aluno encontrado.</p>';
     return;
   }
 
+  // Alterar para grid layout
+  container.className = 'grid md:grid-cols-2 xl:grid-cols-3 gap-6';
   container.innerHTML = students.map(student => createStudentCard(student)).join('');
   setupStudentActionButtons();
 }
@@ -276,47 +278,152 @@ function createUserCard(user) {
 
 function createStudentCard(student) {
   const yearLabels = { 1: '1º ano - Front-end', 2: '2º ano - Back-end', 3: '3º ano - Mobile' };
-  const yearDisplay = (student.year !== null && student.year !== undefined) ? 
+  const yearDisplay = (student.year !== null && student.year !== undefined) ?
     (yearLabels[student.year] || `${student.year}º ano`) : 'Ano não definido';
 
-  let progressDisplay = '';
+  // Calcular progresso baseado em nível ou XP
+  let progressPercent = 0;
   if (student.levelInfo && !student.levelInfo.isMaxLevel) {
-    const info = student.levelInfo;
-    progressDisplay = `
-      <div class="text-xs text-gray-600">
-        Progresso: ${info.xpProgressInCurrentLevel}/${info.xpNeededForCurrentLevel} XP (${info.progressPercentage}%)
-      </div>
-      <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
-        <div class="bg-blue-500 h-2 rounded-full" style="width: ${info.progressPercentage}%"></div>
-      </div>
-    `;
+    progressPercent = student.levelInfo.progressPercentage || 0;
   } else if (student.levelInfo?.isMaxLevel) {
-    progressDisplay = '<div class="text-xs text-green-600 font-medium">NÍVEL MÁXIMO ATINGIDO!</div>';
+    progressPercent = 100;
+  } else {
+    // Fallback: calcular progresso baseado no XP total
+    const currentXP = student.xp || 0;
+    const level = student.level || 1;
+    progressPercent = Math.min((currentXP / (level * 100)) * 100, 100);
   }
 
+  // Definir cor do header baseada no nível/XP
+  let headerColor = 'bg-blue-500'; // Default
+  const xp = student.xp || 0;
+  const level = student.level || 1;
+
+  if (xp >= 1000 || level >= 8) {
+    headerColor = 'bg-green-500';
+  } else if (xp >= 500 || level >= 5) {
+    headerColor = 'bg-blue-500';
+  } else if (xp >= 200 || level >= 3) {
+    headerColor = 'bg-purple-500';
+  } else {
+    headerColor = 'bg-orange-500';
+  }
+
+  // Badge de nível no canto superior direito
+  const levelBadge = level >= 5 ?
+    `<div class="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center">
+      <i class="fas fa-check mr-1"></i>Nível ${level}
+    </div>` :
+    `<div class="absolute top-2 right-2 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center">
+      <i class="fas fa-star mr-1"></i>Nível ${level}
+    </div>`;
+
+  // Iniciais do estudante
+  const initials = student.username ?
+    student.username.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 1) :
+    'A';
+
   return `
-    <div class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition mb-4">
-      <div class="flex justify-between items-center">
-        <div class="flex-1">
-          <h3 class="font-bold text-lg">${student.username}</h3>
-          <p class="text-gray-600">Ano: ${yearDisplay}</p>
-          <p class="text-gray-600">Classe: ${student.class || 'Não definida'}</p>
-          <p class="text-gray-600">Nível: ${student.level || 1}</p>
-          <p class="text-gray-600">XP Total: ${student.xp || 0}</p>
-          ${progressDisplay}
-        </div>
-        <div class="flex flex-col space-y-2">
-          <div class="flex space-x-2">
-            <button data-student-id="${student.id}" class="penalty-btn bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded text-sm">
-              <i class="fas fa-minus-circle mr-1"></i> Penalidade
-            </button>
-            <button data-student-id="${student.id}" class="reward-btn bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm">
-              <i class="fas fa-plus-circle mr-1"></i> Recompensa
-            </button>
+    <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
+      <!-- Header colorido -->
+      <div class="relative ${headerColor} text-white p-4">
+        ${levelBadge}
+        <div class="flex items-center space-x-3">
+          <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-lg font-bold">
+            ${initials}
           </div>
-          <button data-student-id="${student.id}" class="expel-btn bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded text-sm">
-            <i class="fas fa-user-times mr-1"></i> Expulsar Aluno
+          <div class="flex-1">
+            <h3 class="font-bold text-lg truncate">${student.username}</h3>
+            <p class="text-sm opacity-90">${yearDisplay}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conteúdo principal -->
+      <div class="p-4">
+        <!-- Stats XP e Nível -->
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div class="text-center">
+            <div class="text-2xl font-bold text-gray-800">${student.xp || 0}</div>
+            <div class="text-sm text-gray-600">XP Total</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-gray-800">${level}</div>
+            <div class="text-sm text-gray-600">Nível Atual</div>
+          </div>
+        </div>
+
+        <!-- Classe/Badge -->
+        <div class="mb-4">
+          <div class="inline-flex items-center px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-sm">
+            <i class="fas fa-laptop-code mr-2"></i>
+            ${student.class || 'Classe não definida'}
+          </div>
+        </div>
+
+        <!-- Progresso do Nível -->
+        <div class="mb-4">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-sm text-gray-600">Progresso do Nível</span>
+            <span class="text-sm font-medium text-gray-800">${Math.round(progressPercent)}%</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-blue-500 h-2 rounded-full transition-all duration-500" style="width: ${progressPercent}%"></div>
+          </div>
+          <div class="text-xs text-gray-500 mt-1">
+            ${progressPercent < 100 ? `${Math.round(progressPercent)}% concluído` : 'Nível máximo atingido!'}
+          </div>
+        </div>
+
+        <!-- Botões de ação (estilo da imagem) -->
+        <div class="grid grid-cols-4 gap-1">
+          <!-- Botão laranja -->
+          <button 
+            data-student-id="${student.id}" 
+            class="penalty-btn bg-orange-500 hover:bg-orange-600 text-white p-2 rounded text-xs flex items-center justify-center transition-colors"
+            title="Penalidade"
+          >
+            <i class="fas fa-minus-circle"></i>
           </button>
+          
+          <!-- Botão verde -->
+          <button 
+            data-student-id="${student.id}" 
+            class="reward-btn bg-green-500 hover:bg-green-600 text-white p-2 rounded text-xs flex items-center justify-center transition-colors"
+            title="Recompensa"
+          >
+            <i class="fas fa-plus-circle"></i>
+          </button>
+          
+          <!-- Botão azul -->
+          <button 
+            data-student-id="${student.id}" 
+            class="info-btn bg-blue-500 hover:bg-blue-600 text-white p-2 rounded text-xs flex items-center justify-center transition-colors"
+            title="Informações"
+          >
+            <i class="fas fa-info-circle"></i>
+          </button>
+          
+          <!-- Botão vermelho -->
+          <button 
+            data-student-id="${student.id}" 
+            class="expel-btn bg-red-500 hover:bg-red-600 text-white p-2 rounded text-xs flex items-center justify-center transition-colors"
+            title="Expulsar"
+          >
+            <i class="fas fa-user-times"></i>
+          </button>
+        </div>
+
+        <!-- Data de membro -->
+        <div class="mt-3 pt-3 border-t border-gray-200 flex justify-between items-center text-xs text-gray-500">
+          <div class="flex items-center">
+            <i class="fas fa-calendar-alt mr-1"></i>
+            Membro desde 2025
+          </div>
+          <div class="flex items-center">
+            <div class="w-2 h-2 bg-green-400 rounded-full mr-1"></div>
+            Ativo
+          </div>
         </div>
       </div>
     </div>
@@ -327,7 +434,7 @@ function createStudentCard(student) {
 function setupUserActionButtons() {
   setupEventListeners('.approve-btn', async (e) => {
     const userId = e.target.closest('button').getAttribute('data-user-id');
-    await userAction('approve-user', { userId: parseInt(userId) }, 'Usuário aprovado com sucesso!');
+    await userAction('approve-user', { userId: parseInt(userId) });
     loadPendingUsers();
     loadApprovedStudents();
   });
@@ -335,45 +442,283 @@ function setupUserActionButtons() {
   setupEventListeners('.reject-btn', async (e) => {
     if (!confirm('Tem certeza que deseja rejeitar este usuário?')) return;
     const userId = e.target.closest('button').getAttribute('data-user-id');
-    await userAction('reject-user', { userId: parseInt(userId) }, 'Usuário rejeitado com sucesso!');
+    await userAction('reject-user', { userId: parseInt(userId) });
     loadPendingUsers();
   });
+}
+
+function createPenaltyRewardModal(title, studentName, type) {
+  const modal = document.createElement('div');
+  modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+
+  const bgColor = type === 'penalty' ? 'orange' : 'green';
+
+  modal.innerHTML = `
+    <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+      <h2 class="text-xl font-bold mb-4 text-${bgColor}-600">${title}</h2>
+      <p class="mb-4">Aluno: <strong>${studentName}</strong></p>
+      
+      <div class="mb-4">
+        <label for="xp-input" class="block text-sm font-medium text-gray-700 mb-1">
+          Quantidade de XP:
+        </label>
+        <input 
+          type="number" 
+          id="xp-input" 
+          min="1" 
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-${bgColor}-500"
+          placeholder="Digite a quantidade de XP"
+        >
+      </div>
+      
+      <div class="mb-6">
+        <label for="reason-input" class="block text-sm font-medium text-gray-700 mb-1">
+          Motivo:
+        </label>
+        <textarea 
+          id="reason-input" 
+          rows="3"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-${bgColor}-500"
+          placeholder="Digite o motivo da ${type === 'penalty' ? 'penalidade' : 'recompensa'}"
+        ></textarea>
+      </div>
+      
+      <div class="flex justify-end space-x-3">
+        <button class="cancel-btn px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded transition-colors">
+          Cancelar
+        </button>
+        <button class="confirm-btn px-4 py-2 bg-${bgColor}-500 hover:bg-${bgColor}-600 text-white rounded transition-colors">
+          ${type === 'penalty' ? 'Aplicar Penalidade' : 'Aplicar Recompensa'}
+        </button>
+      </div>
+    </div>
+  `;
+
+  return modal;
 }
 
 function setupStudentActionButtons() {
   setupEventListeners('.penalty-btn', async (e) => {
     const studentId = e.target.closest('button').getAttribute('data-student-id');
-    const penalty = prompt('Digite a quantidade de XP a ser removida:');
-    if (penalty && !isNaN(penalty) && parseInt(penalty) > 0) {
-      await userAction('penalty', { studentId: parseInt(studentId), penalty: parseInt(penalty) }, 
-        `Penalidade aplicada! ${penalty} XP removido.`);
-      loadApprovedStudents();
-    }
+    const studentName = e.target.closest('.bg-white').querySelector('h3').textContent;
+
+    // Criar modal para input de penalidade
+    const modal = createPenaltyRewardModal('Aplicar Penalidade', studentName, 'penalty');
+    document.body.appendChild(modal);
+
+    // Event listener para confirmar penalidade
+    modal.querySelector('.confirm-btn').addEventListener('click', async () => {
+      const xp = modal.querySelector('#xp-input').value;
+      const reason = modal.querySelector('#reason-input').value;
+
+      if (xp && !isNaN(xp) && parseInt(xp) > 0) {
+        document.body.removeChild(modal);
+        await userAction('penalty', {
+          studentId: parseInt(studentId),
+          penalty: parseInt(xp),
+          reason: reason.trim() || 'Sem motivo especificado'
+        });
+        loadApprovedStudents();
+      } else {
+        alert('Por favor, digite um valor de XP válido.');
+      }
+    });
+
+    // Event listener para cancelar
+    modal.querySelector('.cancel-btn').addEventListener('click', () => {
+      document.body.removeChild(modal);
+    });
   });
 
-  setupEventListeners('.reward-btn', () => {
-    alert('Funcionalidade de recompensa em desenvolvimento.');
+  setupEventListeners('.reward-btn', async (e) => {
+    const studentId = e.target.closest('button').getAttribute('data-student-id');
+    const studentName = e.target.closest('.bg-white').querySelector('h3').textContent;
+
+    // Criar modal para input de recompensa
+    const modal = createPenaltyRewardModal('Aplicar Recompensa', studentName, 'reward');
+    document.body.appendChild(modal);
+
+    // Event listener para confirmar recompensa
+    modal.querySelector('.confirm-btn').addEventListener('click', async () => {
+      const xp = modal.querySelector('#xp-input').value;
+      const reason = modal.querySelector('#reason-input').value;
+
+      if (xp && !isNaN(xp) && parseInt(xp) > 0) {
+        document.body.removeChild(modal);
+        await userAction('reward', {
+          studentId: parseInt(studentId),
+          reward: parseInt(xp),
+          reason: reason.trim() || 'Sem motivo especificado'
+        });
+        loadApprovedStudents();
+      } else {
+        alert('Por favor, digite um valor de XP válido.');
+      }
+    });
+
+    // Event listener para cancelar
+    modal.querySelector('.cancel-btn').addEventListener('click', () => {
+      document.body.removeChild(modal);
+    });
+  });
+
+  setupEventListeners('.info-btn', async (e) => {
+    const studentId = e.target.closest('button').getAttribute('data-student-id');
+    try {
+      const studentDetails = await apiRequest(`/usuarios/student-details/${studentId}`);
+
+      // Criar modal com informações detalhadas
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+      modal.innerHTML = `
+        <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-bold text-gray-800">Detalhes do Estudante</h2>
+            <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+          </div>
+          
+          <div class="grid md:grid-cols-2 gap-6">
+            <!-- Informações Básicas -->
+            <div>
+              <h3 class="text-lg font-semibold mb-3 text-blue-600">Informações Básicas</h3>
+              <div class="space-y-2">
+                <p><span class="font-medium">Nome:</span> ${studentDetails.student.username}</p>
+                <p><span class="font-medium">Nome Completo:</span> ${studentDetails.student.fullname || 'Não informado'}</p>
+                <p><span class="font-medium">Classe:</span> ${studentDetails.student.class || 'Não definida'}</p>
+                <p><span class="font-medium">Ano:</span> ${studentDetails.student.year || 'Não definido'}</p>
+                <p><span class="font-medium">XP Total:</span> ${studentDetails.student.xp || 0}</p>
+                <p><span class="font-medium">Nível:</span> ${studentDetails.student.level || 1}</p>
+              </div>
+            </div>
+            
+            <!-- Estatísticas -->
+            <div>
+              <h3 class="text-lg font-semibold mb-3 text-green-600">Estatísticas</h3>
+              <div class="space-y-2">
+                <p><span class="font-medium">Total de Submissões:</span> ${studentDetails.stats.totalSubmissions}</p>
+                <p><span class="font-medium text-green-600">Aprovadas:</span> ${studentDetails.stats.approvedSubmissions}</p>
+                <p><span class="font-medium text-yellow-600">Pendentes:</span> ${studentDetails.stats.pendingSubmissions}</p>
+                <p><span class="font-medium text-red-600">Rejeitadas:</span> ${studentDetails.stats.rejectedSubmissions}</p>
+                <div class="mt-3 p-3 bg-blue-50 rounded">
+                  <p class="text-sm"><span class="font-medium">Progresso do Nível:</span></p>
+                  <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                    <div class="bg-blue-500 h-2 rounded-full" style="width: ${studentDetails.levelInfo.progressPercentage || 0}%"></div>
+                  </div>
+                  <p class="text-xs text-gray-600 mt-1">${studentDetails.levelInfo.xpProgressInCurrentLevel || 0}/${studentDetails.levelInfo.xpNeededForCurrentLevel || 100} XP</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Histórico de Submissões -->
+          ${studentDetails.submissions.length > 0 ? `
+            <div class="mt-6">
+              <h3 class="text-lg font-semibold mb-3 text-purple-600">Histórico de Submissões</h3>
+              <div class="max-h-60 overflow-y-auto">
+                <table class="w-full text-sm">
+                  <thead class="bg-gray-50">
+                    <tr>
+                      <th class="text-left p-2">Missão ID</th>
+                      <th class="text-left p-2">Status</th>
+                      <th class="text-left p-2">Data</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${studentDetails.submissions.map(sub => `
+                      <tr class="border-t">
+                        <td class="p-2">${sub.missionId}</td>
+                        <td class="p-2">
+                          <span class="px-2 py-1 rounded text-xs ${sub.status === 'approved' ? 'bg-green-100 text-green-800' :
+          sub.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+            'bg-red-100 text-red-800'
+        }">
+                            ${sub.status === 'approved' ? 'Aprovada' : sub.status === 'pending' ? 'Pendente' : 'Rejeitada'}
+                          </span>
+                        </td>
+                        <td class="p-2">${new Date(sub.submittedAt).toLocaleDateString('pt-BR')}</td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ` : '<div class="mt-6"><p class="text-gray-500 text-center">Nenhuma submissão encontrada.</p></div>'}
+          
+          <!-- Histórico de Ações (Penalidades e Recompensas) -->
+          ${studentDetails.actionHistory && studentDetails.actionHistory.length > 0 ? `
+            <div class="mt-6">
+              <h3 class="text-lg font-semibold mb-3 text-orange-600">Histórico de Penalidades e Recompensas</h3>
+              <div class="max-h-60 overflow-y-auto">
+                <div class="space-y-3">
+                  ${studentDetails.actionHistory.map(action => `
+                    <div class="border p-3 rounded ${action.type === 'penalty' ? 'border-orange-200 bg-orange-50' : 'border-green-200 bg-green-50'}">
+                      <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                          <div class="flex items-center space-x-2">
+                            <span class="font-medium ${action.type === 'penalty' ? 'text-orange-700' : 'text-green-700'}">
+                              ${action.type === 'penalty' ? '🚫 Penalidade' : '🎉 Recompensa'}
+                            </span>
+                            <span class="px-2 py-1 rounded text-xs font-bold ${action.type === 'penalty' ? 'bg-orange-200 text-orange-800' : 'bg-green-200 text-green-800'}">
+                              ${action.type === 'penalty' ? '-' : '+'}${action.amount} XP
+                            </span>
+                          </div>
+                          <p class="text-sm text-gray-700 mt-1">${action.reason}</p>
+                          <p class="text-xs text-gray-500 mt-1">
+                            XP: ${action.oldXP} → ${action.newXP} | ${new Date(action.date).toLocaleDateString('pt-BR', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        })}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+          ` : '<div class="mt-6"><p class="text-gray-500 text-center">Nenhuma penalidade ou recompensa registrada.</p></div>'}
+          
+          <div class="mt-6 flex justify-end">
+            <button onclick="this.closest('.fixed').remove()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">
+              Fechar
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+    } catch (error) {
+      console.error('Erro ao carregar detalhes do estudante:', error);
+      alert(`Erro ao carregar informações: ${error.message}`);
+    }
   });
 
   setupEventListeners('.expel-btn', async (e) => {
     const studentId = e.target.closest('button').getAttribute('data-student-id');
     const studentName = e.target.closest('.bg-white').querySelector('h3').textContent;
-    
-    if (confirm(`Tem certeza que deseja expulsar "${studentName}"?`) && 
-        confirm('CONFIRMAÇÃO FINAL: Esta ação não pode ser desfeita!')) {
-      await userAction('expel-student', { studentId: parseInt(studentId) }, 'Aluno expulso com sucesso!');
+
+    if (confirm(`Tem certeza que deseja expulsar "${studentName}"?`) &&
+      confirm('CONFIRMAÇÃO FINAL: Esta ação não pode ser desfeita!')) {
+      await userAction('expel-student', { studentId: parseInt(studentId) });
       loadApprovedStudents();
     }
   });
 }
 
-async function userAction(endpoint, data, successMessage) {
+async function userAction(endpoint, data) {
   try {
-    await apiRequest(`/usuarios/${endpoint}`, {
+    const response = await apiRequest(`/usuarios/${endpoint}`, {
       method: 'POST',
       body: JSON.stringify(data)
     });
-    alert(successMessage);
+
+    // Mostrar mensagem do backend se disponível
+    if (response && response.message) {
+      alert(response.message);
+    }
   } catch (err) {
     console.error(`Erro na ação ${endpoint}:`, err);
     alert(`Erro: ${err.message}`);
@@ -384,7 +729,7 @@ async function userAction(endpoint, data, successMessage) {
 async function loadSubmissions() {
   try {
     const submissions = await apiRequest('/submissoes');
-    
+
     // Adicionar campo status baseado em pending e approved
     submissions.forEach(sub => {
       sub.status = sub.pending ? 'pending' : sub.approved ? 'approved' : 'rejected';
@@ -392,7 +737,7 @@ async function loadSubmissions() {
     });
 
     originalSubmissions = submissions;
-    
+
     const hasActiveFilters = checkActiveFilters('submission');
     if (hasActiveFilters) {
       applySubmissionFilters();
@@ -426,7 +771,7 @@ function createSubmissionCard(submission) {
   };
 
   const statusTexts = { pending: 'Pendente', approved: 'Aprovada', rejected: 'Rejeitada' };
-  
+
   return `
     <div class="bg-white p-6 rounded-lg shadow border-l-4 ${statusClasses[submission.status].split(' ')[0]}">
       <div class="flex justify-between items-start">
@@ -459,19 +804,23 @@ function createSubmissionCard(submission) {
 function setupSubmissionButtons() {
   setupEventListeners('.approve-submission-btn', async (e) => {
     const submissionId = parseInt(e.target.closest('button').getAttribute('data-submission-id'));
-    await submissionAction(submissionId, 'approve', 'Submissão aprovada com sucesso!');
+    await submissionAction(submissionId, 'approve');
   });
 
   setupEventListeners('.reject-submission-btn', async (e) => {
     const submissionId = parseInt(e.target.closest('button').getAttribute('data-submission-id'));
-    await submissionAction(submissionId, 'reject', 'Submissão rejeitada com sucesso!');
+    await submissionAction(submissionId, 'reject');
   });
 }
 
-async function submissionAction(submissionId, action, successMessage) {
+async function submissionAction(submissionId, action) {
   try {
-    await apiRequest(`/submissoes/${submissionId}/${action}`, { method: 'POST' });
-    alert(successMessage);
+    const response = await apiRequest(`/submissoes/${submissionId}/${action}`, { method: 'POST' });
+
+    // Mostrar mensagem do backend se disponível
+    if (response && response.message) {
+      alert(response.message);
+    }
     loadSubmissions();
   } catch (err) {
     console.error(`Erro ao ${action} submissão:`, err);
@@ -529,16 +878,16 @@ function renderMissions(missions) {
 
   container.innerHTML = html;
   setupMissionButtons();
-  
+
   // Configurar toggle para mostrar/ocultar todas as missões
   if (hasMore) {
     const toggleBtn = document.getElementById('toggle-all-missions');
     const hiddenMissions = document.getElementById('hidden-missions');
     let showingAll = false;
-    
+
     toggleBtn.addEventListener('click', () => {
       showingAll = !showingAll;
-      
+
       if (showingAll) {
         hiddenMissions.classList.remove('hidden');
         toggleBtn.innerHTML = '<i class="fas fa-chevron-up mr-1"></i>Mostrar menos';
@@ -546,7 +895,7 @@ function renderMissions(missions) {
         hiddenMissions.classList.add('hidden');
         toggleBtn.innerHTML = '<i class="fas fa-chevron-down mr-1"></i>Mostrar todas';
       }
-      
+
       // Reconfigurar botões após mostrar/ocultar
       setupMissionButtons();
     });
@@ -555,13 +904,13 @@ function renderMissions(missions) {
 
 function createMissionCard(mission) {
   const yearLabels = { 1: '1º ano', 2: '2º ano', 3: '3º ano' };
-  
+
   // Truncar descrição se for muito longa
   const maxDescLength = 100;
-  const description = mission.description.length > maxDescLength 
-    ? mission.description.substring(0, maxDescLength) + '...' 
+  const description = mission.description.length > maxDescLength
+    ? mission.description.substring(0, maxDescLength) + '...'
     : mission.description;
-  
+
   return `
     <div class="bg-white p-3 rounded-lg shadow-sm hover:shadow-md transition mb-3 border-l-4 border-purple-400">
       <div class="flex justify-between items-start">
@@ -572,14 +921,14 @@ function createMissionCard(mission) {
           </div>
           <p class="text-gray-600 text-sm mb-2 line-clamp-2">${description}</p>
           <div class="flex flex-wrap gap-1 mb-2">
-            ${mission.targetYear ? 
-              `<span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded">${yearLabels[mission.targetYear]}</span>` :
-              `<span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Todos</span>`
-            }
-            ${mission.targetClass === 'geral' ? 
-              `<span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded">Geral</span>` :
-              `<span class="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded max-w-20 truncate" title="${mission.targetClass}">${mission.targetClass}</span>`
-            }
+            ${mission.targetYear ?
+      `<span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded">${yearLabels[mission.targetYear]}</span>` :
+      `<span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Todos</span>`
+    }
+            ${mission.targetClass === 'geral' ?
+      `<span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded">Geral</span>` :
+      `<span class="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded max-w-20 truncate" title="${mission.targetClass}">${mission.targetClass}</span>`
+    }
           </div>
         </div>
         <div class="flex space-x-1 ml-3 flex-shrink-0">
@@ -604,7 +953,7 @@ function setupMissionButtons() {
   setupEventListeners('.delete-mission-btn', async (e) => {
     if (!confirm('Tem certeza que deseja excluir esta missão?')) return;
     const missionId = e.target.closest('button').getAttribute('data-mission-id');
-    await missionAction(missionId, 'DELETE', 'Missão excluída com sucesso!');
+    await missionAction(missionId, 'DELETE');
   });
 }
 
@@ -616,22 +965,22 @@ async function editMission(missionId) {
       alert('Missão não encontrada.');
       return;
     }
-    
+
     // Preencher formulário com dados da missão
     document.getElementById('mission-title').value = mission.title;
     document.getElementById('mission-description').value = mission.description;
     document.getElementById('mission-xp').value = mission.xp;
     document.getElementById('mission-year').value = mission.targetYear || '';
     document.getElementById('mission-class').value = mission.targetClass;
-    
+
     // Alterar botão para modo edição
     const createBtn = document.getElementById('create-mission-btn');
     const cancelBtn = document.getElementById('cancel-edit-btn');
-    
+
     createBtn.innerHTML = '<i class="fas fa-save mr-2"></i>Salvar Alterações';
     createBtn.setAttribute('data-edit-mission-id', missionId);
     cancelBtn.classList.remove('hidden');
-    
+
     console.log('[DEBUG MASTER] Editando missão:', mission);
   } catch (err) {
     console.error('[DEBUG MASTER] Erro ao carregar missão para edição:', err);
@@ -639,10 +988,14 @@ async function editMission(missionId) {
   }
 }
 
-async function missionAction(missionId, method, successMessage) {
+async function missionAction(missionId, method) {
   try {
-    await apiRequest(`/missoes/${missionId}`, { method });
-    alert(successMessage);
+    const response = await apiRequest(`/missoes/${missionId}`, { method });
+
+    // Mostrar mensagem do backend se disponível
+    if (response && response.message) {
+      alert(response.message);
+    }
     loadMissions();
   } catch (err) {
     console.error('Erro na ação de missão:', err);
@@ -654,11 +1007,11 @@ async function missionAction(missionId, method, successMessage) {
 function setupMissionCreation() {
   const createBtn = document.getElementById('create-mission-btn');
   const cancelBtn = document.getElementById('cancel-edit-btn');
-  
+
   if (createBtn) {
     createBtn.addEventListener('click', handleMissionSubmit);
   }
-  
+
   if (cancelBtn) {
     cancelBtn.addEventListener('click', cancelMissionEdit);
   }
@@ -670,28 +1023,28 @@ async function handleMissionSubmit() {
   const xp = document.getElementById('mission-xp').value;
   const year = document.getElementById('mission-year').value;
   let targetClass = document.getElementById('mission-class').value;
-  
+
   // Se não foi selecionada uma classe, usar "geral" como padrão
   if (!targetClass) {
     targetClass = 'geral';
   }
-  
+
   // Verificar se estamos editando uma missão existente
   const createBtn = document.getElementById('create-mission-btn');
   const editMissionId = createBtn.getAttribute('data-edit-mission-id');
   const isEditing = !!editMissionId;
-  
+
   // Validação
   if (!title || !description || !xp) {
     alert('Por favor, preencha todos os campos obrigatórios (título, descrição e XP).');
     return;
   }
-  
+
   if (parseInt(xp) <= 0) {
     alert('O XP deve ser maior que zero.');
     return;
   }
-  
+
   const missionData = {
     titulo: title,
     descricao: description,
@@ -699,15 +1052,15 @@ async function handleMissionSubmit() {
     targetYear: year ? parseInt(year) : null,
     targetClass: targetClass
   };
-  
+
   console.log('[DEBUG MASTER] ' + (isEditing ? 'Editando' : 'Criando') + ' missão:', missionData);
-  
+
   try {
     const url = isEditing ? `/missoes/${editMissionId}` : '/missoes';
     const method = isEditing ? 'PUT' : 'POST';
-    
+
     console.log('[DEBUG MASTER] Fazendo requisição:', { url, method, data: missionData });
-    
+
     const result = await apiRequest(url, {
       method: method,
       headers: {
@@ -715,19 +1068,19 @@ async function handleMissionSubmit() {
       },
       body: JSON.stringify(missionData)
     });
-    
+
     console.log('[DEBUG MASTER] Missão ' + (isEditing ? 'editada' : 'criada') + ' com sucesso:', result);
     alert('Missão ' + (isEditing ? 'editada' : 'criada') + ' com sucesso!');
-    
+
     // Limpar formulário e resetar estado
     clearMissionForm();
     resetMissionFormState();
-    
+
     // Recarregar lista de missões
     loadMissions();
   } catch (err) {
     console.error('[DEBUG MASTER] Erro na requisição:', err);
-    
+
     // Tratamento específico para erros de autenticação
     if (err.message.includes('401') || err.message.includes('autenticação') || err.message.includes('Token')) {
       const shouldRelogin = confirm('Problema de autenticação detectado. Deseja fazer login novamente?');
@@ -824,12 +1177,12 @@ function applyMissionFilters() {
 function getFilterValues(type) {
   const filters = {};
   const elements = document.querySelectorAll(`[id^="filter-${type}-"]`);
-  
+
   elements.forEach(el => {
     const key = el.id.replace(`filter-${type}-`, '');
     filters[key] = el.value;
   });
-  
+
   return filters;
 }
 

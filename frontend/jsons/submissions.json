@@ -48,5 +48,30 @@
     "pending": false,
     "xp": 20,
     "approved": false
+  },
+  {
+    "id": 5,
+    "userId": 3,
+    "missionId": 6,
+    "filePaths": [
+      "C:\\Users\\Leonardo\\Documents\\projetoIntegrador2ano2025\\backend\\Uploads\\gg_1gg_1752011737825.md"
+    ],
+    "submittedAt": "2025-07-08T21:55:37.830Z",
+    "pending": false,
+    "xp": 50,
+    "approved": true,
+    "feedback": ""
+  },
+  {
+    "id": 6,
+    "userId": 3,
+    "missionId": 8,
+    "filePaths": [
+      "C:\\Users\\Leonardo\\Documents\\projetoIntegrador2ano2025\\backend\\Uploads\\gg_1ga_1752012081508.json"
+    ],
+    "submittedAt": "2025-07-08T22:01:21.512Z",
+    "pending": false,
+    "xp": 20,
+    "approved": false
   }
 ]

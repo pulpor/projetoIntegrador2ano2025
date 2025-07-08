@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teste Direto - Student Panel</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+
+    <style>
+      body {
+        background: linear-gradient(
+          135deg,
+          #0f172a 0%,
+          #1e293b 50%,
+          #334155 100%
+        );
+        min-height: 100vh;
+      }
+
+      /* CSS dos mission cards copiado do student.html */
+      .mission-card {
+        min-height: 380px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .mission-available {
+        box-shadow: 0 10px 30px rgba(6, 182, 212, 0.3);
+      }
+
+      .mission-available::before {
+        content: "";
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        background: linear-gradient(
+          45deg,
+          #00f5ff,
+          #0080ff,
+          #8000ff,
+          #ff0080,
+          #ff8000,
+          #ffff00,
+          #80ff00,
+          #00ff80
+        );
+        border-radius: inherit;
+        z-index: -1;
+        animation: rainbowPulse 3s linear infinite;
+        opacity: 0.5;
+      }
+
+      @keyframes rainbowPulse {
+        0% {
+          background-position: 0% 50%;
+          opacity: 0.3;
+        }
+        50% {
+          background-position: 100% 50%;
+          opacity: 0.7;
+        }
+        100% {
+          background-position: 0% 50%;
+          opacity: 0.3;
+        }
+      }
+
+      .particles {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        z-index: 1;
+        opacity: 0.6;
+      }
+
+      .particle {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        animation: float 6s ease-in-out infinite;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+      }
+
+      .particle-1 {
+        width: 4px;
+        height: 4px;
+        top: 20%;
+        left: 10%;
+        animation-delay: 0s;
+      }
+      .particle-2 {
+        width: 6px;
+        height: 6px;
+        top: 40%;
+        left: 80%;
+        animation-delay: 1s;
+      }
+      .particle-3 {
+        width: 3px;
+        height: 3px;
+        top: 60%;
+        left: 30%;
+        animation-delay: 2s;
+      }
+      .particle-4 {
+        width: 5px;
+        height: 5px;
+        top: 80%;
+        left: 70%;
+        animation-delay: 3s;
+      }
+      .particle-5 {
+        width: 4px;
+        height: 4px;
+        top: 30%;
+        left: 60%;
+        animation-delay: 4s;
+      }
+      .particle-6 {
+        width: 7px;
+        height: 7px;
+        top: 70%;
+        left: 20%;
+        animation-delay: 5s;
+      }
+      .particle-7 {
+        width: 3px;
+        height: 3px;
+        top: 10%;
+        left: 50%;
+        animation-delay: 1.5s;
+      }
+      .particle-8 {
+        width: 5px;
+        height: 5px;
+        top: 90%;
+        left: 40%;
+        animation-delay: 2.5s;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0px) translateX(0px) rotate(0deg);
+          opacity: 0.3;
+        }
+        50% {
+          transform: translateY(-20px) translateX(10px) rotate(180deg);
+          opacity: 0.8;
+        }
+      }
+
+      .mission-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(6, 182, 212, 0.4);
+      }
+
+      .mission-action-btn {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 700;
+      }
+
+      .mission-action-btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.3),
+          transparent
+        );
+        transition: left 0.6s;
+      }
+
+      .mission-action-btn:hover::before {
+        left: 100%;
+      }
+
+      .mission-action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container mx-auto p-6">
+      <h1 class="text-3xl font-bold text-white mb-6">
+        Teste Direto - Cards Futurísticos
+      </h1>
+
+      <div class="bg-white/10 rounded-lg p-6 mb-6">
+        <button
+          id="create-card"
+          class="bg-blue-600 text-white px-4 py-2 rounded"
+        >
+          Criar Card Futurístico
+        </button>
+        <div id="status" class="text-green-400 mt-2"></div>
+      </div>
+
+      <div
+        id="missions"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+      >
+        <!-- Cards aparecerão aqui -->
+      </div>
+    </div>
+
+    <script>
+      document.getElementById("create-card").addEventListener("click", () => {
+        const mission = {
+          id: 1,
+          title: "Fundamentos JavaScript",
+          description:
+            "Domine os conceitos básicos de JavaScript: variáveis, funções, arrays e objetos. Crie um sistema de inventário para um jogo RPG.",
+          xp: 150,
+          targetClass: "Arqueiro do JavaScript",
+          targetYear: 1,
+          status: "ativa",
+        };
+
+        const card = createFuturisticCard(mission);
+        document.getElementById("missions").appendChild(card);
+        document.getElementById("status").textContent =
+          "Card criado com sucesso!";
+      });
+
+      function createFuturisticCard(mission) {
+        const card = document.createElement("div");
+        card.className =
+          "mission-card mission-available relative overflow-hidden rounded-2xl transform transition-all duration-500 hover:scale-105 cursor-pointer group";
+
+        const difficulty = getDifficulty(mission.xp);
+        const classIcon = "fab fa-js-square";
+
+        const particles = Array.from(
+          { length: 8 },
+          (_, i) => `<div class="particle particle-${i + 1}"></div>`
+        ).join("");
+
+        card.innerHTML = `
+                <!-- Fundo futurístico -->
+                <div class="absolute inset-0 bg-gradient-to-br ${
+                  difficulty.gradient
+                } opacity-90"></div>
+                <div class="absolute inset-0 bg-black/50"></div>
+                
+                <!-- Partículas animadas -->
+                <div class="particles">${particles}</div>
+                
+                <!-- Efeitos de borda -->
+                <div class="absolute inset-0 rounded-2xl border-2 ${
+                  difficulty.border
+                } opacity-60"></div>
+                <div class="absolute inset-0 rounded-2xl border ${
+                  difficulty.glowBorder
+                } opacity-30 group-hover:opacity-60 transition-opacity duration-300"></div>
+                
+                <!-- Conteúdo principal -->
+                <div class="relative z-10 p-6 h-full flex flex-col">
+                    <!-- Header com classe e dificuldade -->
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br ${
+                              difficulty.iconGradient
+                            } flex items-center justify-center shadow-lg">
+                                <i class="${classIcon} text-white text-lg"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-300 uppercase tracking-wider">${
+                                  mission.targetClass || "Classe Geral"
+                                }</p>
+                                <div class="flex items-center space-x-1">
+                                    <span class="text-xs font-bold ${
+                                      difficulty.textColor
+                                    } px-2 py-1 rounded-full ${
+          difficulty.bg
+        }">${difficulty.text}</span>
+                                    ${
+                                      mission.targetYear
+                                        ? `<span class="text-xs text-cyan-300">• Ano ${mission.targetYear}</span>`
+                                        : '<span class="text-xs text-cyan-300">• Todos os Anos</span>'
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Título da missão -->
+                    <h3 class="text-xl font-bold text-white mb-3 leading-tight">${
+                      mission.title
+                    }</h3>
+                    
+                    <!-- Descrição -->
+                    <p class="text-gray-300 text-sm leading-relaxed mb-6 flex-grow">${
+                      mission.description
+                    }</p>
+                    
+                    <!-- XP e recompensa -->
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center space-x-4">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-8 h-8 rounded-full bg-gradient-to-r from-yellow-400 to-amber-500 flex items-center justify-center shadow-lg">
+                                    <i class="fas fa-star text-white text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-400 uppercase">Recompensa</p>
+                                    <p class="text-lg font-bold text-yellow-300">${
+                                      mission.xp
+                                    } XP</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Indicador de progresso -->
+                        <div class="text-right">
+                            <div class="w-16 h-16 relative">
+                                <svg class="w-16 h-16 transform -rotate-90" viewBox="0 0 64 64">
+                                    <circle cx="32" cy="32" r="28" stroke="currentColor" stroke-width="4" fill="none" class="text-gray-600"/>
+                                    <circle cx="32" cy="32" r="28" stroke="currentColor" stroke-width="4" fill="none" 
+                                            class="${
+                                              difficulty.circleColor
+                                            }" stroke-linecap="round"
+                                            stroke-dasharray="175.92" stroke-dashoffset="175.92"/>
+                                </svg>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <i class="fas fa-play text-white text-lg"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Botão de ação -->
+                    <button class="mission-action-btn w-full bg-gradient-to-r ${
+                      difficulty.gradientAction
+                    } text-white px-6 py-3 rounded-lg font-bold text-sm transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/25 transform hover:-translate-y-1">
+                        <i class="fas fa-rocket mr-2"></i>
+                        INICIAR MISSÃO
+                    </button>
+                </div>
+                
+                <!-- Efeito hover -->
+                <div class="absolute inset-0 bg-gradient-to-t from-cyan-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+            `;
+
+        return card;
+      }
+
+      function getDifficulty(xp) {
+        if (xp <= 100) {
+          return {
+            text: "INTERMEDIÁRIO",
+            color: "text-yellow-400",
+            bg: "bg-yellow-900/30",
+            textColor: "text-yellow-300",
+            gradient: "from-yellow-900/80 via-amber-800/60 to-orange-700/40",
+            gradientAction:
+              "from-yellow-600 to-orange-700 hover:from-yellow-500 hover:to-orange-600",
+            border: "border-yellow-400/50",
+            glowBorder: "border-yellow-400",
+            iconGradient: "from-yellow-500 to-amber-600",
+            circleColor: "text-yellow-400",
+          };
+        } else {
+          return {
+            text: "AVANÇADO",
+            color: "text-orange-400",
+            bg: "bg-orange-900/30",
+            textColor: "text-orange-300",
+            gradient: "from-orange-900/80 via-red-800/60 to-pink-700/40",
+            gradientAction:
+              "from-orange-600 to-red-700 hover:from-orange-500 hover:to-red-600",
+            border: "border-orange-400/50",
+            glowBorder: "border-orange-400",
+            iconGradient: "from-orange-500 to-red-600",
+            circleColor: "text-orange-400",
+          };
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -58,7 +58,8 @@ router.get('/me', autenticar, (req, res) => {
     level: user.level,
     xp: user.xp,
     isMaster: user.isMaster,
-    levelInfo: levelInfo
+    levelInfo: levelInfo,
+    actionHistory: user.actionHistory || []
   });
 });
 
@@ -78,7 +79,10 @@ router.post('/approve-user', autenticar, ehMestre, async (req, res) => {
   user.pending = false;
   try {
     await fs.writeFile(caminhoUsers, JSON.stringify(users, null, 2));
-    res.json({ user: { ...user, password: undefined } });
+    res.json({
+      message: 'Usuário aprovado com sucesso!',
+      user: { ...user, password: undefined }
+    });
   } catch (err) {
     console.error('Erro ao salvar users.json:', err);
     res.status(500).json({ error: 'Erro interno do servidor' });
@@ -94,7 +98,7 @@ router.post('/reject-user', autenticar, ehMestre, async (req, res) => {
   users.splice(index, 1);
   try {
     await fs.writeFile(caminhoUsers, JSON.stringify(users, null, 2));
-    res.json({ message: 'Usuário rejeitado' });
+    res.json({ message: 'Usuário rejeitado com sucesso!' });
   } catch (err) {
     console.error('Erro ao salvar users.json:', err);
     res.status(500).json({ error: 'Erro interno do servidor' });
@@ -102,18 +106,82 @@ router.post('/reject-user', autenticar, ehMestre, async (req, res) => {
 });
 
 router.post('/penalty', autenticar, ehMestre, async (req, res) => {
-  const { studentId, penalty } = req.body;
+  const { studentId, penalty, reason } = req.body;
   const user = users.find(u => u.id === parseInt(studentId));
   if (!user) {
     return res.status(404).json({ error: 'Usuário não encontrado' });
   }
-  user.xp = Math.max(0, user.xp - parseInt(penalty));
+
+  const oldXP = user.xp || 0;
+  user.xp = Math.max(0, oldXP - parseInt(penalty));
+
+  // Inicializar histórico se não existir
+  if (!user.actionHistory) {
+    user.actionHistory = [];
+  }
+
+  // Adicionar entrada no histórico
+  user.actionHistory.push({
+    type: 'penalty',
+    amount: parseInt(penalty),
+    reason: reason || 'Sem motivo especificado',
+    oldXP: oldXP,
+    newXP: user.xp,
+    date: new Date().toISOString(),
+    masterId: req.user.userId
+  });
 
   // Usar o novo sistema de níveis
   updateUserLevel(user);
+
   try {
     await fs.writeFile(caminhoUsers, JSON.stringify(users, null, 2));
-    res.json({ user: { ...user, password: undefined } });
+    res.json({
+      message: `Penalidade de ${penalty} XP aplicada com sucesso`,
+      user: { ...user, password: undefined }
+    });
+  } catch (err) {
+    console.error('Erro ao salvar users.json:', err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
+// Rota para dar recompensa (adicionar XP)
+router.post('/reward', autenticar, ehMestre, async (req, res) => {
+  const { studentId, reward, reason } = req.body;
+  const user = users.find(u => u.id === parseInt(studentId));
+  if (!user) {
+    return res.status(404).json({ error: 'Usuário não encontrado' });
+  }
+
+  const oldXP = user.xp || 0;
+  user.xp = oldXP + parseInt(reward);
+
+  // Inicializar histórico se não existir
+  if (!user.actionHistory) {
+    user.actionHistory = [];
+  }
+
+  // Adicionar entrada no histórico
+  user.actionHistory.push({
+    type: 'reward',
+    amount: parseInt(reward),
+    reason: reason || 'Sem motivo especificado',
+    oldXP: oldXP,
+    newXP: user.xp,
+    date: new Date().toISOString(),
+    masterId: req.user.userId
+  });
+
+  // Usar o novo sistema de níveis
+  updateUserLevel(user);
+
+  try {
+    await fs.writeFile(caminhoUsers, JSON.stringify(users, null, 2));
+    res.json({
+      message: `Recompensa de ${reward} XP adicionada com sucesso`,
+      user: { ...user, password: undefined }
+    });
   } catch (err) {
     console.error('Erro ao salvar users.json:', err);
     res.status(500).json({ error: 'Erro interno do servidor' });
@@ -155,7 +223,7 @@ router.post('/expel-student', autenticar, ehMestre, async (req, res) => {
 
     console.log(`[DEBUG] Aluno expulso com sucesso: ${expelledUser.username}. ${userSubmissionsIndices.length} submissões removidas.`);
     res.json({
-      message: 'Aluno expulso com sucesso',
+      message: 'Aluno expulso com sucesso!',
       user: { ...expelledUser, password: undefined },
       submissionsRemoved: userSubmissionsIndices.length
     });
@@ -163,6 +231,44 @@ router.post('/expel-student', autenticar, ehMestre, async (req, res) => {
     console.error('Erro ao salvar arquivos:', err);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
+});
+
+// Rota para obter histórico/detalhes do estudante
+router.get('/student-details/:studentId', autenticar, ehMestre, (req, res) => {
+  const { studentId } = req.params;
+  const student = users.find(u => u.id === parseInt(studentId) && !u.isMaster);
+
+  if (!student) {
+    return res.status(404).json({ error: 'Estudante não encontrado' });
+  }
+
+  // Obter submissões do estudante
+  const studentSubmissions = submissions.filter(s => parseInt(s.userId) === parseInt(studentId));
+
+  // Calcular estatísticas
+  const stats = {
+    totalSubmissions: studentSubmissions.length,
+    approvedSubmissions: studentSubmissions.filter(s => s.status === 'approved').length,
+    pendingSubmissions: studentSubmissions.filter(s => s.status === 'pending').length,
+    rejectedSubmissions: studentSubmissions.filter(s => s.status === 'rejected').length
+  };
+
+  // Obter informações de nível
+  const levelInfo = getLevelInfo(student.xp || 0);
+
+  res.json({
+    student: { ...student, password: undefined },
+    submissions: studentSubmissions.map(s => ({
+      id: s.id,
+      missionId: s.missionId,
+      status: s.status,
+      submittedAt: s.submittedAt,
+      feedback: s.feedback
+    })),
+    actionHistory: student.actionHistory || [],
+    stats,
+    levelInfo
+  });
 });
 
 module.exports = router;

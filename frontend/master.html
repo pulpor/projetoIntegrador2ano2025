@@ -61,14 +61,21 @@
 
       <div id="students-content" class="tab-content hidden">
         <h2 class="text-xl font-bold mb-4">Gerenciar Alunos</h2>
-        
+
         <!-- Filtros para Alunos -->
         <div class="filter-section bg-white p-4 rounded-lg shadow mb-6">
-          <h3 class="text-lg font-semibold mb-4"><i class="fas fa-filter mr-2"></i>Filtros de Alunos</h3>
+          <h3 class="text-lg font-semibold mb-4">
+            <i class="fas fa-filter mr-2"></i>Filtros de Alunos
+          </h3>
           <div class="filter-grid grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Ano</label>
-              <select id="filter-student-year" class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200">
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Ano</label
+              >
+              <select
+                id="filter-student-year"
+                class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
+              >
                 <option value="">Todos os anos</option>
                 <option value="1">1º ano - Front-end</option>
                 <option value="2">2º ano - Back-end</option>
@@ -76,18 +83,31 @@
               </select>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Classe</label>
-              <select id="filter-student-class" class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200">
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Classe</label
+              >
+              <select
+                id="filter-student-class"
+                class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
+              >
                 <option value="">Todas as classes</option>
-                <option value="Arqueiro do JavaScript">Arqueiro do JavaScript</option>
+                <option value="Arqueiro do JavaScript">
+                  Arqueiro do JavaScript
+                </option>
                 <option value="Cafeicultor do Java">Cafeicultor do Java</option>
                 <option value="Mago do CSS">Mago do CSS</option>
                 <option value="Guerreiro do HTML">Guerreiro do HTML</option>
                 <option value="Xamã do React">Xamã do React</option>
-                <option value="Necromante do Node.js">Necromante do Node.js</option>
+                <option value="Necromante do Node.js">
+                  Necromante do Node.js
+                </option>
                 <option value="Paladino do Python">Paladino do Python</option>
-                <option value="Druida do Banco de Dados">Druida do Banco de Dados</option>
-                <option value="Assassino do Android">Assassino do Android</option>
+                <option value="Druida do Banco de Dados">
+                  Druida do Banco de Dados
+                </option>
+                <option value="Assassino do Android">
+                  Assassino do Android
+                </option>
                 <option value="Bardo do iOS">Bardo do iOS</option>
                 <option value="Bárbaro do Back-end">Bárbaro do Back-end</option>
                 <option value="Domador de Dados">Domador de Dados</option>
@@ -96,8 +116,13 @@
               </select>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">XP</label>
-              <select id="filter-student-xp" class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200">
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >XP</label
+              >
+              <select
+                id="filter-student-xp"
+                class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
+              >
                 <option value="">Qualquer XP</option>
                 <option value="0-100">0 - 100 XP</option>
                 <option value="101-300">101 - 300 XP</option>
@@ -107,33 +132,51 @@
               </select>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Nome</label>
-              <input type="text" id="filter-student-name" placeholder="Digite o nome do aluno" class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200">
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Nome</label
+              >
+              <input
+                type="text"
+                id="filter-student-name"
+                placeholder="Digite o nome do aluno"
+                class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
+              />
             </div>
           </div>
           <div class="filter-buttons mt-4 flex space-x-2">
-            <button id="apply-student-filters" class="filter-button bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition">
+            <button
+              id="apply-student-filters"
+              class="filter-button bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition"
+            >
               <i class="fas fa-filter mr-2"></i>Aplicar Filtros
             </button>
-            <button id="clear-student-filters" class="filter-button bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition">
+            <button
+              id="clear-student-filters"
+              class="filter-button bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition"
+            >
               <i class="fas fa-times mr-2"></i>Limpar Filtros
             </button>
           </div>
         </div>
-        
-        <div id="students-list" class="grid gap-4"></div>
+
+        <div id="students-list"></div>
       </div>
 
       <div id="submissions-content" class="tab-content hidden">
         <h2 class="text-xl font-bold mb-4">Submissões</h2>
-        
+
         <!-- Filtros para Submissões -->
         <div class="filter-section p-4 rounded-lg shadow mb-6">
           <h3 class="text-lg font-semibold mb-4">Filtros</h3>
           <div class="filter-grid grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-              <select id="filter-submission-status" class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200">
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Status</label
+              >
+              <select
+                id="filter-submission-status"
+                class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
+              >
                 <option value="">Todos os status</option>
                 <option value="pending">Pendente</option>
                 <option value="approved">Aprovado</option>
@@ -141,43 +184,72 @@
               </select>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Aluno</label>
-              <input type="text" id="filter-submission-student" placeholder="Nome do aluno" class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200">
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Aluno</label
+              >
+              <input
+                type="text"
+                id="filter-submission-student"
+                placeholder="Nome do aluno"
+                class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
+              />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Missão</label>
-              <select id="filter-submission-mission" class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200">
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Missão</label
+              >
+              <select
+                id="filter-submission-mission"
+                class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
+              >
                 <option value="">Todas as missões</option>
               </select>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Data</label>
-              <input type="date" id="filter-submission-date" class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200">
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Data</label
+              >
+              <input
+                type="date"
+                id="filter-submission-date"
+                class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
+              />
             </div>
           </div>
           <div class="filter-buttons mt-4 flex space-x-2">
-            <button id="apply-submission-filters" class="filter-button bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition">
+            <button
+              id="apply-submission-filters"
+              class="filter-button bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition"
+            >
               <i class="fas fa-filter mr-2"></i>Aplicar Filtros
             </button>
-            <button id="clear-submission-filters" class="filter-button bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition">
+            <button
+              id="clear-submission-filters"
+              class="filter-button bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition"
+            >
               <i class="fas fa-times mr-2"></i>Limpar
             </button>
           </div>
         </div>
-        
+
         <div id="submissions-list" class="grid gap-4"></div>
       </div>
 
       <div id="missions-content" class="tab-content hidden">
         <h2 class="text-xl font-bold mb-4">Criar Nova Missão</h2>
-        
+
         <!-- Filtros para Missões -->
         <div class="filter-section p-4 rounded-lg shadow mb-6">
           <h3 class="text-lg font-semibold mb-4">Filtrar Missões Existentes</h3>
           <div class="filter-grid grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Ano</label>
-              <select id="filter-mission-year" class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200">
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Ano</label
+              >
+              <select
+                id="filter-mission-year"
+                class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
+              >
                 <option value="">Todos os anos</option>
                 <option value="1">1º ano - Front-end</option>
                 <option value="2">2º ano - Back-end</option>
@@ -185,25 +257,43 @@
               </select>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Classe</label>
-              <select id="filter-mission-class" class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200">
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >Classe</label
+              >
+              <select
+                id="filter-mission-class"
+                class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
+              >
                 <option value="">Todas as classes</option>
                 <option value="geral">Geral</option>
-                <option value="Arqueiro do JavaScript">Arqueiro do JavaScript</option>
+                <option value="Arqueiro do JavaScript">
+                  Arqueiro do JavaScript
+                </option>
                 <option value="Cafeicultor do Java">Cafeicultor do Java</option>
                 <option value="Mago do CSS">Mago do CSS</option>
                 <option value="Guerreiro do HTML">Guerreiro do HTML</option>
                 <option value="Xamã do React">Xamã do React</option>
-                <option value="Necromante do Node.js">Necromante do Node.js</option>
+                <option value="Necromante do Node.js">
+                  Necromante do Node.js
+                </option>
                 <option value="Paladino do Python">Paladino do Python</option>
-                <option value="Druida do Banco de Dados">Druida do Banco de Dados</option>
-                <option value="Assassino do Android">Assassino do Android</option>
+                <option value="Druida do Banco de Dados">
+                  Druida do Banco de Dados
+                </option>
+                <option value="Assassino do Android">
+                  Assassino do Android
+                </option>
                 <option value="Bardo do iOS">Bardo do iOS</option>
               </select>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">XP</label>
-              <select id="filter-mission-xp" class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200">
+              <label class="block text-sm font-medium text-gray-700 mb-2"
+                >XP</label
+              >
+              <select
+                id="filter-mission-xp"
+                class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
+              >
                 <option value="">Qualquer XP</option>
                 <option value="0-50">0 - 50 XP</option>
                 <option value="51-100">51 - 100 XP</option>
@@ -213,10 +303,16 @@
             </div>
           </div>
           <div class="filter-buttons mt-4 flex space-x-2">
-            <button id="apply-mission-filters" class="filter-button bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition">
+            <button
+              id="apply-mission-filters"
+              class="filter-button bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition"
+            >
               <i class="fas fa-filter mr-2"></i>Aplicar Filtros
             </button>
-            <button id="clear-mission-filters" class="filter-button bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition">
+            <button
+              id="clear-mission-filters"
+              class="filter-button bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition"
+            >
               <i class="fas fa-times mr-2"></i>Limpar
             </button>
           </div>
@@ -227,7 +323,7 @@
           <h3 class="text-lg font-semibold mb-4">Missões Existentes</h3>
           <div id="existing-missions-list" class="grid gap-4"></div>
         </div>
-        
+
         <div class="bg-white p-6 rounded-lg shadow">
           <input
             id="mission-title"

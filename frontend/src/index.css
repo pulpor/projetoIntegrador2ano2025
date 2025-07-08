@@ -4,6 +4,14 @@
 
 /* Estilos existentes */
 
+/* Utilitário para truncar texto em múltiplas linhas */
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 /* Estilos para filtros */
 .filter-section {
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
@@ -79,9 +87,20 @@
 
 /* Animações para filtros */
 @keyframes filterApplied {
-  0% { opacity: 0.5; transform: scale(0.98); }
-  50% { opacity: 0.8; transform: scale(1.02); }
-  100% { opacity: 1; transform: scale(1); }
+  0% {
+    opacity: 0.5;
+    transform: scale(0.98);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: scale(1.02);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .filter-applied {
@@ -94,12 +113,12 @@
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-  
+
   .filter-buttons {
     flex-direction: column;
     gap: 0.5rem;
   }
-  
+
   .filter-button {
     width: 100%;
   }
