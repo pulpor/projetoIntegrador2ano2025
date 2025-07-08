@@ -3,7 +3,7 @@ const fetch = require('node-fetch');
 async function testMeEndpoint() {
     // Token válido do usuário 'g'
     const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlzTWFzdGVyIjpmYWxzZSwiaWF0IjoxNzUyMDExODk4LCJleHAiOjE3NTIwOTgyOTh9.uSfKXknoQ9S5NdEt4ciUeXT2NFFR2IENSSdYzFGWrHU';
-    
+
     try {
         const response = await fetch('http://localhost:3000/usuarios/me', {
             method: 'GET',
@@ -18,7 +18,7 @@ async function testMeEndpoint() {
             console.log('✅ Rota /usuarios/me funcionando!');
             console.log('📊 Dados do usuário:', data);
             console.log('📋 ActionHistory encontrado:', data.actionHistory?.length || 0, 'itens');
-            
+
             if (data.actionHistory && data.actionHistory.length > 0) {
                 console.log('🎉 SUCESSO! ActionHistory está sendo retornado pelo backend');
                 data.actionHistory.forEach((action, index) => {
