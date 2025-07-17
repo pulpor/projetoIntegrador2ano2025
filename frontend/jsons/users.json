@@ -2,7 +2,7 @@
   {
     "id": 1,
     "username": "mestre",
-    "password": "$2b$10$86xIuDQYU5I/GC9ExZVZIODZ79fxBAeHFV.GC1WfSody7zpAGYNUi",
+    "password": "$2b$10$G5ZmenhOEc01VsI5vYYbiuF7dntsOwLLCkkNGc1SRPwIg7ZnKCv4q",
     "class": "Mestre Fullstack",
     "year": null,
     "isMaster": true,
@@ -59,8 +59,8 @@
     "class": "Arqueiro do JavaScript",
     "year": 1,
     "isMaster": false,
-    "level": 2,
-    "xp": 150,
+    "level": 1,
+    "xp": 76,
     "pending": false,
     "actionHistory": [
       {
@@ -70,6 +70,110 @@
         "oldXP": 0,
         "newXP": 50,
         "date": "2025-07-08T21:55:53.662Z",
+        "masterId": 1
+      },
+      {
+        "type": "penalty",
+        "amount": 24,
+        "reason": "teste",
+        "oldXP": 150,
+        "newXP": 126,
+        "date": "2025-07-17T00:14:33.892Z",
+        "masterId": 1
+      },
+      {
+        "type": "penalty",
+        "amount": 50,
+        "reason": "estou testando feedback",
+        "oldXP": 126,
+        "newXP": 76,
+        "date": "2025-07-17T00:28:00.468Z",
+        "masterId": 1
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "username": "leo",
+    "fullname": "leo",
+    "password": "$2b$10$KlKMh7U/UB/49h0rp4TbnuoECq5iqJXiN1RfWQCD9ECWM0W7ugEha",
+    "class": "Bárbaro do Back-end",
+    "year": 3,
+    "isMaster": false,
+    "level": 2,
+    "xp": 152,
+    "pending": false,
+    "actionHistory": [
+      {
+        "type": "reward",
+        "amount": 50,
+        "reason": "oi oi",
+        "oldXP": 100,
+        "newXP": 150,
+        "date": "2025-07-17T12:05:40.851Z",
+        "masterId": 1
+      },
+      {
+        "type": "penalty",
+        "amount": 25,
+        "reason": "tchaaau",
+        "oldXP": 150,
+        "newXP": 125,
+        "date": "2025-07-17T12:06:18.766Z",
+        "masterId": 1
+      },
+      {
+        "type": "penalty",
+        "amount": 20,
+        "reason": "rerwerwer",
+        "oldXP": 125,
+        "newXP": 105,
+        "date": "2025-07-17T12:07:05.304Z",
+        "masterId": 1
+      },
+      {
+        "type": "reward",
+        "amount": 10,
+        "reason": "werwer",
+        "oldXP": 105,
+        "newXP": 115,
+        "date": "2025-07-17T12:07:12.064Z",
+        "masterId": 1
+      },
+      {
+        "type": "reward",
+        "amount": 11,
+        "reason": "asfdfsdfsdfsdfdsf",
+        "oldXP": 115,
+        "newXP": 126,
+        "date": "2025-07-17T12:07:25.422Z",
+        "masterId": 1
+      },
+      {
+        "type": "reward",
+        "amount": 33,
+        "reason": "fsdfsdfsdfs",
+        "oldXP": 126,
+        "newXP": 159,
+        "date": "2025-07-17T12:08:44.138Z",
+        "masterId": 1
+      },
+      {
+        "type": "penalty",
+        "amount": 5,
+        "reason": "sdfsdfsdfsdf",
+        "oldXP": 159,
+        "newXP": 154,
+        "date": "2025-07-17T12:08:51.739Z",
+        "masterId": 1
+      },
+      {
+        "type": "penalty",
+        "amount": 2,
+        "reason": "adasdasd",
+        "oldXP": 154,
+        "newXP": 152,
+        "date": "2025-07-17T12:08:57.947Z",
         "masterId": 1
       }
     ]

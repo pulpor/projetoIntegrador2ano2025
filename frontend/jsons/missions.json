@@ -78,5 +78,37 @@
     "xp": 100,
     "targetYear": 1,
     "targetClass": "A"
+  },
+  {
+    "id": 16,
+    "title": "Teste Automatizado - 19:54:18",
+    "description": "Esta missão foi criada pelo teste automatizado para verificar se o sistema está funcionando.",
+    "xp": 100,
+    "targetYear": null,
+    "targetClass": "geral"
+  },
+  {
+    "id": 17,
+    "title": "Missão 2º Ano - 19:59:12",
+    "description": "Esta é uma missão específica para alunos do segundo ano. Teste de criação para verificar se funciona corretamente.",
+    "xp": 150,
+    "targetYear": 2,
+    "targetClass": "geral"
+  },
+  {
+    "id": 18,
+    "title": "Missão Guerreiro Frontend 2º Ano - 19:59:12",
+    "description": "Missão específica para Guerreiros do Frontend do segundo ano.",
+    "xp": 120,
+    "targetYear": 2,
+    "targetClass": "Guerreiro do Frontend"
+  },
+  {
+    "id": 19,
+    "title": "teste de ano",
+    "description": "asdasd",
+    "xp": 23,
+    "targetYear": 2,
+    "targetClass": "geral"
   }
 ]

@@ -73,6 +73,7 @@ function loadInitialData() {
   loadMissions();
   loadSubmissions();
   setupMissionCreation(); // Adicionar setup para criação de missões
+  setupGlobalEventListeners(); // Configurar event listeners uma única vez
 }
 
 // ====== CONFIGURAÇÃO DE INTERFACE ======
@@ -240,7 +241,7 @@ function renderPendingUsers(users) {
   }
 
   container.innerHTML = users.map(user => createUserCard(user)).join('');
-  setupUserActionButtons();
+  // Removido setupUserActionButtons() - agora configurado globalmente
 }
 
 function renderStudents(students) {
@@ -255,7 +256,7 @@ function renderStudents(students) {
   // Alterar para grid layout
   container.className = 'grid md:grid-cols-2 xl:grid-cols-3 gap-6';
   container.innerHTML = students.map(student => createStudentCard(student)).join('');
-  setupStudentActionButtons();
+  // Removido setupStudentActionButtons() - agora configurado globalmente
 }
 
 function createUserCard(user) {
@@ -294,22 +295,47 @@ function createStudentCard(student) {
     progressPercent = Math.min((currentXP / (level * 100)) * 100, 100);
   }
 
-  // Definir cor do header baseada no nível/XP
-  let headerColor = 'bg-blue-500'; // Default
-  const xp = student.xp || 0;
-  const level = student.level || 1;
+  // Definir cor do header baseada na classe do aluno
+  let headerColor = ''; // Será definido baseado na classe ou XP
+  let headerStyle = ''; // Para cores customizadas
 
-  if (xp >= 1000 || level >= 8) {
-    headerColor = 'bg-green-500';
-  } else if (xp >= 500 || level >= 5) {
-    headerColor = 'bg-blue-500';
-  } else if (xp >= 200 || level >= 3) {
-    headerColor = 'bg-purple-500';
+  // Mapeamento de classes para cores específicas
+  const classColors = {
+    'Arqueiro do JavaScript': { color: '#F7DF1E', textColor: 'text-black' },
+    'Cafeicultor do Java': { color: '#007396', textColor: 'text-white' },
+    'Mago do CSS': { color: '#264DE4', textColor: 'text-white' },
+    'Guerreiro do HTML': { color: '#E44D26', textColor: 'text-white' },
+    'Xamã do React': { color: '#61DAFB', textColor: 'text-black' },
+    'Necromante do Node.js': { color: '#6DA55F', textColor: 'text-white' },
+    'Paladino do Python': { color: '#3776AB', textColor: 'text-white' },
+    'Druida do Banco de Dados': { color: '#4479A1', textColor: 'text-white' },
+    'Assassino do Android': { color: '#3DDC84', textColor: 'text-black' },
+    'Bardo do iOS': { color: '#BFBFBF', textColor: 'text-black' }
+  };
+
+  const studentClass = student.class || '';
+  if (classColors[studentClass]) {
+    headerStyle = `style="background-color: ${classColors[studentClass].color}"`;
+    headerColor = classColors[studentClass].textColor;
   } else {
-    headerColor = 'bg-orange-500';
+    // Fallback: usar cor baseada no XP/nível se classe não for reconhecida
+    const xp = student.xp || 0;
+    const level = student.level || 1;
+
+    if (xp >= 1000 || level >= 8) {
+      headerColor = 'bg-green-500';
+    } else if (xp >= 500 || level >= 5) {
+      headerColor = 'bg-blue-500';
+    } else if (xp >= 200 || level >= 3) {
+      headerColor = 'bg-purple-500';
+    } else {
+      headerColor = 'bg-orange-500';
+    }
+    headerColor += ' text-white';
   }
 
   // Badge de nível no canto superior direito
+  const level = student.level || 1;
   const levelBadge = level >= 5 ?
     `<div class="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center">
       <i class="fas fa-check mr-1"></i>Nível ${level}
@@ -326,7 +352,7 @@ function createStudentCard(student) {
   return `
     <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
       <!-- Header colorido -->
-      <div class="relative ${headerColor} text-white p-4">
+      <div class="relative ${headerColor} p-4" ${headerStyle}>
         ${levelBadge}
         <div class="flex items-center space-x-3">
           <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-lg font-bold">
@@ -414,6 +440,26 @@ function createStudentCard(student) {
           </button>
         </div>
 
+        <!-- Histórico Recente de Ações -->
+        ${student.actionHistory && student.actionHistory.length > 0 ? `
+          <div class="mb-3">
+            <div class="text-xs text-gray-600 mb-2 font-medium">Histórico Recente:</div>
+            <div class="space-y-1 max-h-16 overflow-y-auto">
+              ${student.actionHistory.slice(-2).reverse().map(action => `
+                <div class="text-xs p-2 rounded ${action.type === 'penalty' ? 'bg-orange-50 border border-orange-200' : 'bg-green-50 border border-green-200'}">
+                  <div class="flex justify-between items-center">
+                    <span class="${action.type === 'penalty' ? 'text-orange-700' : 'text-green-700'} font-medium">
+                      ${action.type === 'penalty' ? '🚫' : '🎉'} ${action.type === 'penalty' ? '-' : '+'}${action.amount} XP
+                    </span>
+                    <span class="text-gray-500">${new Date(action.date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}</span>
+                  </div>
+                  <div class="text-gray-600 truncate mt-1">${action.reason}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+
         <!-- Data de membro -->
         <div class="mt-3 pt-3 border-t border-gray-200 flex justify-between items-center text-xs text-gray-500">
           <div class="flex items-center">
@@ -431,21 +477,7 @@ function createStudentCard(student) {
 }
 
 // ====== AÇÕES DE USUÁRIOS ======
-function setupUserActionButtons() {
-  setupEventListeners('.approve-btn', async (e) => {
-    const userId = e.target.closest('button').getAttribute('data-user-id');
-    await userAction('approve-user', { userId: parseInt(userId) });
-    loadPendingUsers();
-    loadApprovedStudents();
-  });
 
-  setupEventListeners('.reject-btn', async (e) => {
-    if (!confirm('Tem certeza que deseja rejeitar este usuário?')) return;
-    const userId = e.target.closest('button').getAttribute('data-user-id');
-    await userAction('reject-user', { userId: parseInt(userId) });
-    loadPendingUsers();
-  });
-}
 
 function createPenaltyRewardModal(title, studentName, type) {
   const modal = document.createElement('div');
@@ -495,217 +527,6 @@ function createPenaltyRewardModal(title, studentName, type) {
   `;
 
   return modal;
-}
-
-function setupStudentActionButtons() {
-  setupEventListeners('.penalty-btn', async (e) => {
-    const studentId = e.target.closest('button').getAttribute('data-student-id');
-    const studentName = e.target.closest('.bg-white').querySelector('h3').textContent;
-
-    // Criar modal para input de penalidade
-    const modal = createPenaltyRewardModal('Aplicar Penalidade', studentName, 'penalty');
-    document.body.appendChild(modal);
-
-    // Event listener para confirmar penalidade
-    modal.querySelector('.confirm-btn').addEventListener('click', async () => {
-      const xp = modal.querySelector('#xp-input').value;
-      const reason = modal.querySelector('#reason-input').value;
-
-      if (xp && !isNaN(xp) && parseInt(xp) > 0) {
-        document.body.removeChild(modal);
-        await userAction('penalty', {
-          studentId: parseInt(studentId),
-          penalty: parseInt(xp),
-          reason: reason.trim() || 'Sem motivo especificado'
-        });
-        loadApprovedStudents();
-      } else {
-        alert('Por favor, digite um valor de XP válido.');
-      }
-    });
-
-    // Event listener para cancelar
-    modal.querySelector('.cancel-btn').addEventListener('click', () => {
-      document.body.removeChild(modal);
-    });
-  });
-
-  setupEventListeners('.reward-btn', async (e) => {
-    const studentId = e.target.closest('button').getAttribute('data-student-id');
-    const studentName = e.target.closest('.bg-white').querySelector('h3').textContent;
-
-    // Criar modal para input de recompensa
-    const modal = createPenaltyRewardModal('Aplicar Recompensa', studentName, 'reward');
-    document.body.appendChild(modal);
-
-    // Event listener para confirmar recompensa
-    modal.querySelector('.confirm-btn').addEventListener('click', async () => {
-      const xp = modal.querySelector('#xp-input').value;
-      const reason = modal.querySelector('#reason-input').value;
-
-      if (xp && !isNaN(xp) && parseInt(xp) > 0) {
-        document.body.removeChild(modal);
-        await userAction('reward', {
-          studentId: parseInt(studentId),
-          reward: parseInt(xp),
-          reason: reason.trim() || 'Sem motivo especificado'
-        });
-        loadApprovedStudents();
-      } else {
-        alert('Por favor, digite um valor de XP válido.');
-      }
-    });
-
-    // Event listener para cancelar
-    modal.querySelector('.cancel-btn').addEventListener('click', () => {
-      document.body.removeChild(modal);
-    });
-  });
-
-  setupEventListeners('.info-btn', async (e) => {
-    const studentId = e.target.closest('button').getAttribute('data-student-id');
-    try {
-      const studentDetails = await apiRequest(`/usuarios/student-details/${studentId}`);
-
-      // Criar modal com informações detalhadas
-      const modal = document.createElement('div');
-      modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-      modal.innerHTML = `
-        <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-bold text-gray-800">Detalhes do Estudante</h2>
-            <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
-          </div>
-          
-          <div class="grid md:grid-cols-2 gap-6">
-            <!-- Informações Básicas -->
-            <div>
-              <h3 class="text-lg font-semibold mb-3 text-blue-600">Informações Básicas</h3>
-              <div class="space-y-2">
-                <p><span class="font-medium">Nome:</span> ${studentDetails.student.username}</p>
-                <p><span class="font-medium">Nome Completo:</span> ${studentDetails.student.fullname || 'Não informado'}</p>
-                <p><span class="font-medium">Classe:</span> ${studentDetails.student.class || 'Não definida'}</p>
-                <p><span class="font-medium">Ano:</span> ${studentDetails.student.year || 'Não definido'}</p>
-                <p><span class="font-medium">XP Total:</span> ${studentDetails.student.xp || 0}</p>
-                <p><span class="font-medium">Nível:</span> ${studentDetails.student.level || 1}</p>
-              </div>
-            </div>
-            
-            <!-- Estatísticas -->
-            <div>
-              <h3 class="text-lg font-semibold mb-3 text-green-600">Estatísticas</h3>
-              <div class="space-y-2">
-                <p><span class="font-medium">Total de Submissões:</span> ${studentDetails.stats.totalSubmissions}</p>
-                <p><span class="font-medium text-green-600">Aprovadas:</span> ${studentDetails.stats.approvedSubmissions}</p>
-                <p><span class="font-medium text-yellow-600">Pendentes:</span> ${studentDetails.stats.pendingSubmissions}</p>
-                <p><span class="font-medium text-red-600">Rejeitadas:</span> ${studentDetails.stats.rejectedSubmissions}</p>
-                <div class="mt-3 p-3 bg-blue-50 rounded">
-                  <p class="text-sm"><span class="font-medium">Progresso do Nível:</span></p>
-                  <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
-                    <div class="bg-blue-500 h-2 rounded-full" style="width: ${studentDetails.levelInfo.progressPercentage || 0}%"></div>
-                  </div>
-                  <p class="text-xs text-gray-600 mt-1">${studentDetails.levelInfo.xpProgressInCurrentLevel || 0}/${studentDetails.levelInfo.xpNeededForCurrentLevel || 100} XP</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Histórico de Submissões -->
-          ${studentDetails.submissions.length > 0 ? `
-            <div class="mt-6">
-              <h3 class="text-lg font-semibold mb-3 text-purple-600">Histórico de Submissões</h3>
-              <div class="max-h-60 overflow-y-auto">
-                <table class="w-full text-sm">
-                  <thead class="bg-gray-50">
-                    <tr>
-                      <th class="text-left p-2">Missão ID</th>
-                      <th class="text-left p-2">Status</th>
-                      <th class="text-left p-2">Data</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${studentDetails.submissions.map(sub => `
-                      <tr class="border-t">
-                        <td class="p-2">${sub.missionId}</td>
-                        <td class="p-2">
-                          <span class="px-2 py-1 rounded text-xs ${sub.status === 'approved' ? 'bg-green-100 text-green-800' :
-          sub.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-            'bg-red-100 text-red-800'
-        }">
-                            ${sub.status === 'approved' ? 'Aprovada' : sub.status === 'pending' ? 'Pendente' : 'Rejeitada'}
-                          </span>
-                        </td>
-                        <td class="p-2">${new Date(sub.submittedAt).toLocaleDateString('pt-BR')}</td>
-                      </tr>
-                    `).join('')}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          ` : '<div class="mt-6"><p class="text-gray-500 text-center">Nenhuma submissão encontrada.</p></div>'}
-          
-          <!-- Histórico de Ações (Penalidades e Recompensas) -->
-          ${studentDetails.actionHistory && studentDetails.actionHistory.length > 0 ? `
-            <div class="mt-6">
-              <h3 class="text-lg font-semibold mb-3 text-orange-600">Histórico de Penalidades e Recompensas</h3>
-              <div class="max-h-60 overflow-y-auto">
-                <div class="space-y-3">
-                  ${studentDetails.actionHistory.map(action => `
-                    <div class="border p-3 rounded ${action.type === 'penalty' ? 'border-orange-200 bg-orange-50' : 'border-green-200 bg-green-50'}">
-                      <div class="flex justify-between items-start">
-                        <div class="flex-1">
-                          <div class="flex items-center space-x-2">
-                            <span class="font-medium ${action.type === 'penalty' ? 'text-orange-700' : 'text-green-700'}">
-                              ${action.type === 'penalty' ? '🚫 Penalidade' : '🎉 Recompensa'}
-                            </span>
-                            <span class="px-2 py-1 rounded text-xs font-bold ${action.type === 'penalty' ? 'bg-orange-200 text-orange-800' : 'bg-green-200 text-green-800'}">
-                              ${action.type === 'penalty' ? '-' : '+'}${action.amount} XP
-                            </span>
-                          </div>
-                          <p class="text-sm text-gray-700 mt-1">${action.reason}</p>
-                          <p class="text-xs text-gray-500 mt-1">
-                            XP: ${action.oldXP} → ${action.newXP} | ${new Date(action.date).toLocaleDateString('pt-BR', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit'
-        })}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  `).join('')}
-                </div>
-              </div>
-            </div>
-          ` : '<div class="mt-6"><p class="text-gray-500 text-center">Nenhuma penalidade ou recompensa registrada.</p></div>'}
-          
-          <div class="mt-6 flex justify-end">
-            <button onclick="this.closest('.fixed').remove()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">
-              Fechar
-            </button>
-          </div>
-        </div>
-      `;
-
-      document.body.appendChild(modal);
-    } catch (error) {
-      console.error('Erro ao carregar detalhes do estudante:', error);
-      alert(`Erro ao carregar informações: ${error.message}`);
-    }
-  });
-
-  setupEventListeners('.expel-btn', async (e) => {
-    const studentId = e.target.closest('button').getAttribute('data-student-id');
-    const studentName = e.target.closest('.bg-white').querySelector('h3').textContent;
-
-    if (confirm(`Tem certeza que deseja expulsar "${studentName}"?`) &&
-      confirm('CONFIRMAÇÃO FINAL: Esta ação não pode ser desfeita!')) {
-      await userAction('expel-student', { studentId: parseInt(studentId) });
-      loadApprovedStudents();
-    }
-  });
 }
 
 async function userAction(endpoint, data) {
@@ -760,7 +581,7 @@ function renderSubmissions(submissions) {
   }
 
   container.innerHTML = submissions.map(submission => createSubmissionCard(submission)).join('');
-  setupSubmissionButtons();
+  // Removido setupSubmissionButtons() - agora configurado globalmente
 }
 
 function createSubmissionCard(submission) {
@@ -772,6 +593,46 @@ function createSubmissionCard(submission) {
 
   const statusTexts = { pending: 'Pendente', approved: 'Aprovada', rejected: 'Rejeitada' };
 
+  // Processar arquivos enviados
+  const filesSection = submission.filePaths && submission.filePaths.length > 0 ? `
+    <div class="mt-3">
+      <p class="text-sm font-medium text-gray-700 mb-2">
+        <i class="fas fa-file-code mr-1"></i>
+        Arquivos Enviados (${submission.filePaths.length}):
+      </p>
+      <div class="bg-gray-50 rounded-lg p-3 space-y-2">
+        ${submission.filePaths.map(filePath => {
+    const fileName = filePath.split('\\').pop() || filePath.split('/').pop();
+    const fileExtension = fileName.split('.').pop().toLowerCase();
+    const fileIcon = getFileIcon(fileExtension);
+
+    return `
+            <div class="flex items-center justify-between bg-white rounded p-2 border">
+              <div class="flex items-center space-x-2">
+                <i class="fas ${fileIcon} text-blue-600"></i>
+                <span class="text-sm text-gray-700 truncate" title="${fileName}">${fileName}</span>
+              </div>
+              <button 
+                class="download-file-btn text-blue-600 hover:text-blue-800 text-sm"
+                data-file-path="${filePath}"
+                title="Download arquivo"
+              >
+                <i class="fas fa-download"></i>
+              </button>
+            </div>
+          `;
+  }).join('')}
+      </div>
+    </div>
+  ` : `
+    <div class="mt-3">
+      <p class="text-sm text-gray-500">
+        <i class="fas fa-exclamation-triangle mr-1"></i>
+        Nenhum arquivo enviado
+      </p>
+    </div>
+  `;
+
   return `
     <div class="bg-white p-6 rounded-lg shadow border-l-4 ${statusClasses[submission.status].split(' ')[0]}">
       <div class="flex justify-between items-start">
@@ -780,7 +641,10 @@ function createSubmissionCard(submission) {
           <p class="text-sm text-gray-600 mb-2">Aluno: <span class="font-medium">${submission.username || 'Desconhecido'}</span></p>
           <p class="text-sm text-gray-600 mb-2">Enviado em: ${new Date(submission.submittedAt).toLocaleString('pt-BR')}</p>
           <p class="text-sm text-gray-600 mb-2">XP: <span class="font-medium text-purple-600">${submission.xp}</span></p>
-          <div class="mt-3">
+          
+          ${filesSection}
+          
+          <div class="mt-4">
             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClasses[submission.status]}">
               ${statusTexts[submission.status]}
             </span>
@@ -801,16 +665,37 @@ function createSubmissionCard(submission) {
   `;
 }
 
-function setupSubmissionButtons() {
-  setupEventListeners('.approve-submission-btn', async (e) => {
-    const submissionId = parseInt(e.target.closest('button').getAttribute('data-submission-id'));
-    await submissionAction(submissionId, 'approve');
-  });
+// Função para obter ícone do arquivo baseado na extensão
+function getFileIcon(extension) {
+  const iconMap = {
+    'js': 'fa-file-code',
+    'html': 'fa-file-code',
+    'css': 'fa-file-code',
+    'ts': 'fa-file-code',
+    'jsx': 'fa-file-code',
+    'vue': 'fa-file-code',
+    'py': 'fa-file-code',
+    'java': 'fa-file-code',
+    'cpp': 'fa-file-code',
+    'c': 'fa-file-code',
+    'php': 'fa-file-code',
+    'rb': 'fa-file-code',
+    'go': 'fa-file-code',
+    'json': 'fa-file-code',
+    'txt': 'fa-file-text',
+    'md': 'fa-file-text',
+    'pdf': 'fa-file-pdf',
+    'doc': 'fa-file-word',
+    'docx': 'fa-file-word',
+    'png': 'fa-file-image',
+    'jpg': 'fa-file-image',
+    'jpeg': 'fa-file-image',
+    'gif': 'fa-file-image',
+    'zip': 'fa-file-archive',
+    'rar': 'fa-file-archive'
+  };
 
-  setupEventListeners('.reject-submission-btn', async (e) => {
-    const submissionId = parseInt(e.target.closest('button').getAttribute('data-submission-id'));
-    await submissionAction(submissionId, 'reject');
-  });
+  return iconMap[extension] || 'fa-file';
 }
 
 async function submissionAction(submissionId, action) {
@@ -849,35 +734,35 @@ function renderMissions(missions) {
     return;
   }
 
-  // Limitar a 5 missões por padrão
-  const maxDisplayed = 5;
+  // Limitar a 6 missões por padrão (para grid 2x3)
+  const maxDisplayed = 6;
   const missionsToShow = missions.slice(0, maxDisplayed);
   const hasMore = missions.length > maxDisplayed;
 
   let html = `
     <div class="flex justify-between items-center mb-4">
-      <h4 class="text-lg font-semibold text-gray-800">Missões Existentes (${missions.length})</h4>
+      <span class="text-sm text-gray-600">${missions.length} missão${missions.length !== 1 ? 'ões' : ''} disponível${missions.length !== 1 ? 'eis' : ''}</span>
       ${hasMore ? `
         <button id="toggle-all-missions" class="text-blue-600 hover:text-blue-800 text-sm">
           <i class="fas fa-chevron-down mr-1"></i>Mostrar todas
         </button>
       ` : ''}
     </div>
-    <div id="missions-display">
+    <div id="missions-display" class="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
       ${missionsToShow.map(mission => createMissionCard(mission)).join('')}
     </div>
   `;
 
   if (hasMore) {
     html += `
-      <div id="hidden-missions" class="hidden">
+      <div id="hidden-missions" class="hidden grid md:grid-cols-2 xl:grid-cols-3 gap-4">
         ${missions.slice(maxDisplayed).map(mission => createMissionCard(mission)).join('')}
       </div>
     `;
   }
 
   container.innerHTML = html;
-  setupMissionButtons();
+  // Removido setupMissionButtons() - agora configurado globalmente
 
   // Configurar toggle para mostrar/ocultar todas as missões
   if (hasMore) {
@@ -890,14 +775,15 @@ function renderMissions(missions) {
 
       if (showingAll) {
         hiddenMissions.classList.remove('hidden');
+        hiddenMissions.classList.add('grid', 'md:grid-cols-2', 'xl:grid-cols-3', 'gap-4');
         toggleBtn.innerHTML = '<i class="fas fa-chevron-up mr-1"></i>Mostrar menos';
       } else {
         hiddenMissions.classList.add('hidden');
+        hiddenMissions.classList.remove('grid', 'md:grid-cols-2', 'xl:grid-cols-3', 'gap-4');
         toggleBtn.innerHTML = '<i class="fas fa-chevron-down mr-1"></i>Mostrar todas';
       }
 
-      // Reconfigurar botões após mostrar/ocultar
-      setupMissionButtons();
+      // Não é mais necessário reconfigurar botões - event listeners são globais
     });
   }
 }
@@ -906,55 +792,100 @@ function createMissionCard(mission) {
   const yearLabels = { 1: '1º ano', 2: '2º ano', 3: '3º ano' };
 
   // Truncar descrição se for muito longa
-  const maxDescLength = 100;
+  const maxDescLength = 120;
   const description = mission.description.length > maxDescLength
     ? mission.description.substring(0, maxDescLength) + '...'
     : mission.description;
 
+  // Definir cor do header baseada no XP
+  let headerColor = 'bg-blue-500'; // Default
+  const xp = mission.xp || 0;
+
+  if (xp >= 200) {
+    headerColor = 'bg-green-500';
+  } else if (xp >= 100) {
+    headerColor = 'bg-blue-500';
+  } else if (xp >= 50) {
+    headerColor = 'bg-purple-500';
+  } else {
+    headerColor = 'bg-orange-500';
+  }
+
+  // Iniciais da missão
+  const initials = mission.title ? mission.title.substring(0, 2).toUpperCase() : 'MI';
+
   return `
-    <div class="bg-white p-3 rounded-lg shadow-sm hover:shadow-md transition mb-3 border-l-4 border-purple-400">
-      <div class="flex justify-between items-start">
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center justify-between mb-1">
-            <h3 class="font-semibold text-md text-gray-800 truncate">${mission.title}</h3>
-            <span class="text-green-600 font-medium text-sm ml-2 flex-shrink-0">${mission.xp} XP</span>
+    <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
+      <!-- Header colorido -->
+      <div class="relative ${headerColor} text-white p-4">
+        <div class="absolute top-2 right-2 bg-white/20 rounded-full px-2 py-1 text-xs font-bold">
+          ${xp} XP
+        </div>
+        <div class="flex items-center space-x-3">
+          <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-lg font-bold">
+            ${initials}
           </div>
-          <p class="text-gray-600 text-sm mb-2 line-clamp-2">${description}</p>
-          <div class="flex flex-wrap gap-1 mb-2">
-            ${mission.targetYear ?
-      `<span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded">${yearLabels[mission.targetYear]}</span>` :
-      `<span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Todos</span>`
-    }
-            ${mission.targetClass === 'geral' ?
-      `<span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded">Geral</span>` :
-      `<span class="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded max-w-20 truncate" title="${mission.targetClass}">${mission.targetClass}</span>`
-    }
+          <div class="flex-1">
+            <h3 class="font-bold text-lg truncate">${mission.title}</h3>
+            <p class="text-sm opacity-90">
+              ${mission.targetYear ? yearLabels[mission.targetYear] : 'Todos os anos'}
+            </p>
           </div>
         </div>
-        <div class="flex space-x-1 ml-3 flex-shrink-0">
-          <button data-mission-id="${mission.id}" class="edit-mission-btn bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs" title="Editar">
-            <i class="fas fa-edit"></i>
+      </div>
+
+      <!-- Conteúdo principal -->
+      <div class="p-4">
+        <!-- Descrição -->
+        <div class="mb-4">
+          <p class="text-gray-600 text-sm leading-relaxed">${description}</p>
+        </div>
+
+        <!-- Tags -->
+        <div class="mb-4 flex flex-wrap gap-2">
+          ${mission.targetYear ?
+      `<span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">${yearLabels[mission.targetYear]}</span>` :
+      `<span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">Todos</span>`
+    }
+          ${mission.targetClass === 'geral' ?
+      `<span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">Geral</span>` :
+      `<span class="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full">${mission.targetClass}</span>`
+    }
+        </div>
+
+        <!-- Botões de ação -->
+        <div class="grid grid-cols-2 gap-2">
+          <button 
+            data-mission-id="${mission.id}" 
+            class="edit-mission-btn bg-blue-500 hover:bg-blue-600 text-white p-2 rounded text-xs flex items-center justify-center transition-colors"
+            title="Editar Missão"
+          >
+            <i class="fas fa-edit mr-1"></i>Editar
           </button>
-          <button data-mission-id="${mission.id}" class="delete-mission-btn bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs" title="Excluir">
-            <i class="fas fa-trash"></i>
+          
+          <button 
+            data-mission-id="${mission.id}" 
+            class="delete-mission-btn bg-red-500 hover:bg-red-600 text-white p-2 rounded text-xs flex items-center justify-center transition-colors"
+            title="Excluir Missão"
+          >
+            <i class="fas fa-trash mr-1"></i>Excluir
           </button>
+        </div>
+
+        <!-- Info adicional -->
+        <div class="mt-3 pt-3 border-t border-gray-200 flex justify-between items-center text-xs text-gray-500">
+          <div class="flex items-center">
+            <i class="fas fa-calendar-alt mr-1"></i>
+            Criada em 2025
+          </div>
+          <div class="flex items-center">
+            <div class="w-2 h-2 bg-green-400 rounded-full mr-1"></div>
+            Ativa
+          </div>
         </div>
       </div>
     </div>
   `;
-}
-
-function setupMissionButtons() {
-  setupEventListeners('.edit-mission-btn', async (e) => {
-    const missionId = e.target.closest('button').getAttribute('data-mission-id');
-    await editMission(missionId);
-  });
-
-  setupEventListeners('.delete-mission-btn', async (e) => {
-    if (!confirm('Tem certeza que deseja excluir esta missão?')) return;
-    const missionId = e.target.closest('button').getAttribute('data-mission-id');
-    await missionAction(missionId, 'DELETE');
-  });
 }
 
 async function editMission(missionId) {
@@ -1063,9 +994,6 @@ async function handleMissionSubmit() {
 
     const result = await apiRequest(url, {
       method: method,
-      headers: {
-        'Content-Type': 'application/json'
-      },
       body: JSON.stringify(missionData)
     });
 
@@ -1074,7 +1002,7 @@ async function handleMissionSubmit() {
 
     // Limpar formulário e resetar estado
     clearMissionForm();
-    resetMissionFormState();
+    cancelMissionEdit();
 
     // Recarregar lista de missões
     loadMissions();
@@ -1258,4 +1186,245 @@ function showError(containerId, message) {
   }
 }
 
-console.log('[DEBUG] Master.js otimizado carregado');
+// Função para download de arquivos de submissões
+async function downloadFile(filePath) {
+  try {
+    console.log('[MASTER] Iniciando download do arquivo:', filePath);
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Token de autenticação não encontrado. Faça login novamente.');
+      return;
+    }
+
+    // Extrair nome do arquivo
+    const fileName = filePath.split('\\').pop() || filePath.split('/').pop();
+
+    // Fazer requisição para o endpoint de download
+    const response = await fetch(`${API_URL}/submissoes/download-file`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ filePath })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Erro ao baixar arquivo');
+    }
+
+    // Obter o blob do arquivo
+    const blob = await response.blob();
+
+    // Criar URL temporária e fazer download
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+
+    // Limpeza
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+
+    console.log('[MASTER] Download concluído:', fileName);
+
+  } catch (error) {
+    console.error('[MASTER] Erro no download:', error);
+    alert(`Erro ao baixar arquivo: ${error.message}`);
+  }
+}
+
+// ====== CONFIGURAÇÃO GLOBAL DE EVENT LISTENERS ======
+function setupGlobalEventListeners() {
+  // Event listeners para submissões
+  setupEventListeners('.approve-submission-btn', async (e) => {
+    const submissionId = parseInt(e.target.closest('button').getAttribute('data-submission-id'));
+    await submissionAction(submissionId, 'approve');
+  });
+
+  setupEventListeners('.reject-submission-btn', async (e) => {
+    const submissionId = parseInt(e.target.closest('button').getAttribute('data-submission-id'));
+    await submissionAction(submissionId, 'reject');
+  });
+
+  // Event listener para download de arquivos - configurado apenas uma vez
+  setupEventListeners('.download-file-btn', async (e) => {
+    e.preventDefault();
+    const filePath = e.target.closest('button').getAttribute('data-file-path');
+    await downloadFile(filePath);
+  });
+
+  // Event listeners para usuários pendentes
+  setupEventListeners('.approve-btn', async (e) => {
+    const userId = parseInt(e.target.closest('button').getAttribute('data-user-id'));
+
+    if (confirm('Tem certeza que deseja aprovar este usuário?')) {
+      await userAction('approve-user', { userId });
+      loadPendingUsers();
+      loadApprovedStudents();
+    }
+  });
+
+  setupEventListeners('.reject-btn', async (e) => {
+    const userId = parseInt(e.target.closest('button').getAttribute('data-user-id'));
+
+    if (!confirm('Tem certeza que deseja rejeitar este usuário?')) return;
+    await userAction('reject-user', { userId });
+    loadPendingUsers();
+  });
+
+  // Event listeners para alunos
+  setupEventListeners('.penalty-btn', async (e) => {
+    const studentId = e.target.closest('button').getAttribute('data-student-id');
+    const studentName = e.target.closest('.bg-white').querySelector('h3').textContent;
+
+    // Criar modal para input de penalidade
+    const modal = createPenaltyRewardModal('Aplicar Penalidade', studentName, 'penalty');
+    document.body.appendChild(modal);
+
+    // Event listener para confirmar penalidade
+    modal.querySelector('.confirm-btn').addEventListener('click', async () => {
+      const xp = modal.querySelector('#xp-input').value;
+      const reason = modal.querySelector('#reason-input').value;
+
+      if (xp && !isNaN(xp) && parseInt(xp) > 0) {
+        document.body.removeChild(modal);
+        await userAction('penalty', {
+          studentId: parseInt(studentId),
+          penalty: parseInt(xp),
+          reason: reason.trim() || 'Sem motivo especificado'
+        });
+        loadApprovedStudents();
+      } else {
+        alert('Por favor, digite um valor de XP válido.');
+      }
+    });
+
+    // Event listener para cancelar
+    modal.querySelector('.cancel-btn').addEventListener('click', () => {
+      document.body.removeChild(modal);
+    });
+  });
+
+  setupEventListeners('.reward-btn', async (e) => {
+    const studentId = e.target.closest('button').getAttribute('data-student-id');
+    const studentName = e.target.closest('.bg-white').querySelector('h3').textContent;
+
+    // Criar modal para input de recompensa
+    const modal = createPenaltyRewardModal('Aplicar Recompensa', studentName, 'reward');
+    document.body.appendChild(modal);
+
+    // Event listener para confirmar recompensa
+    modal.querySelector('.confirm-btn').addEventListener('click', async () => {
+      const xp = modal.querySelector('#xp-input').value;
+      const reason = modal.querySelector('#reason-input').value;
+
+      if (xp && !isNaN(xp) && parseInt(xp) > 0) {
+        document.body.removeChild(modal);
+        await userAction('reward', {
+          studentId: parseInt(studentId),
+          reward: parseInt(xp),
+          reason: reason.trim() || 'Sem motivo especificado'
+        });
+        loadApprovedStudents();
+      } else {
+        alert('Por favor, digite um valor de XP válido.');
+      }
+    });
+
+    // Event listener para cancelar
+    modal.querySelector('.cancel-btn').addEventListener('click', () => {
+      document.body.removeChild(modal);
+    });
+  });
+
+  setupEventListeners('.info-btn', async (e) => {
+    const studentId = e.target.closest('button').getAttribute('data-student-id');
+    try {
+      const studentDetails = await apiRequest(`/usuarios/student-details/${studentId}`);
+
+      // Criar modal com informações detalhadas
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+      modal.innerHTML = `
+        <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-bold text-gray-800">Detalhes do Estudante</h2>
+            <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+          </div>
+          
+          <div class="grid md:grid-cols-2 gap-6">
+            <!-- Informações Básicas -->
+            <div>
+              <h3 class="text-lg font-semibold mb-3 text-blue-600">Informações Básicas</h3>
+              <div class="space-y-2">
+                <p><span class="font-medium">Nome:</span> ${studentDetails.student.username}</p>
+                <p><span class="font-medium">Nome Completo:</span> ${studentDetails.student.fullname || 'Não informado'}</p>
+                <p><span class="font-medium">Classe:</span> ${studentDetails.student.class || 'Não definida'}</p>
+                <p><span class="font-medium">Ano:</span> ${studentDetails.student.year || 'Não definido'}</p>
+                <p><span class="font-medium">XP Total:</span> ${studentDetails.student.xp || 0}</p>
+                <p><span class="font-medium">Nível:</span> ${studentDetails.student.level || 1}</p>
+              </div>
+            </div>
+            
+            <!-- Estatísticas -->
+            <div>
+              <h3 class="text-lg font-semibold mb-3 text-green-600">Estatísticas</h3>
+              <div class="space-y-2">
+                <p><span class="font-medium">Total de Submissões:</span> ${studentDetails.stats.totalSubmissions}</p>
+                <p><span class="font-medium text-green-600">Aprovadas:</span> ${studentDetails.stats.approvedSubmissions}</p>
+                <p><span class="font-medium text-yellow-600">Pendentes:</span> ${studentDetails.stats.pendingSubmissions}</p>
+                <p><span class="font-medium text-red-600">Rejeitadas:</span> ${studentDetails.stats.rejectedSubmissions}</p>
+                <div class="mt-3 p-3 bg-blue-50 rounded">
+                  <p class="text-sm"><span class="font-medium">Progresso do Nível:</span></p>
+                  <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                    <div class="bg-blue-500 h-2 rounded-full" style="width: ${studentDetails.levelInfo.progressPercentage || 0}%"></div>
+                  </div>
+                  <p class="text-xs text-gray-600 mt-1">${studentDetails.levelInfo.xpProgressInCurrentLevel || 0}/${studentDetails.levelInfo.xpNeededForCurrentLevel || 100} XP</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mt-6 flex justify-end">
+            <button onclick="this.closest('.fixed').remove()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded">
+              Fechar
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+    } catch (error) {
+      console.error('Erro ao carregar detalhes do estudante:', error);
+      alert(`Erro ao carregar informações: ${error.message}`);
+    }
+  });
+
+  setupEventListeners('.expel-btn', async (e) => {
+    const studentId = e.target.closest('button').getAttribute('data-student-id');
+    const studentName = e.target.closest('.bg-white').querySelector('h3').textContent;
+
+    if (confirm(`Tem certeza que deseja expulsar "${studentName}"?`) &&
+      confirm('CONFIRMAÇÃO FINAL: Esta ação não pode ser desfeita!')) {
+      await userAction('expel-student', { studentId: parseInt(studentId) });
+      loadApprovedStudents();
+    }
+  });
+
+  // Event listeners para missões
+  setupEventListeners('.edit-mission-btn', async (e) => {
+    const missionId = e.target.closest('button').getAttribute('data-mission-id');
+    await editMission(missionId);
+  });
+
+  setupEventListeners('.delete-mission-btn', async (e) => {
+    if (!confirm('Tem certeza que deseja excluir esta missão?')) return;
+    const missionId = e.target.closest('button').getAttribute('data-mission-id');
+    await missionAction(missionId, 'DELETE');
+  });
+}

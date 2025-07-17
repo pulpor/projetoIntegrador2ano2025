@@ -271,4 +271,39 @@ router.get('/student-details/:studentId', autenticar, ehMestre, (req, res) => {
   });
 });
 
+// Rota para obter rankings dos usuários
+router.get('/rankings', autenticar, (req, res) => {
+  console.log('[DEBUG BACKEND] Chamada para rankings');
+  
+  try {
+    // Filtrar apenas usuários que não são mestres e não estão pendentes
+    const students = users.filter(u => !u.isMaster && !u.pending);
+    
+    // Criar ranking com informações essenciais
+    const rankings = students.map(student => {
+      const levelInfo = getLevelInfo(student.xp || 0);
+      return {
+        id: student.id,
+        username: student.username,
+        fullname: student.fullname,
+        class: student.class,
+        xp: student.xp || 0,
+        level: levelInfo.level,
+        levelInfo: levelInfo
+      };
+    });
+    
+    // Ordenar por XP em ordem decrescente
+    rankings.sort((a, b) => (b.xp || 0) - (a.xp || 0));
+    
+    console.log('[DEBUG BACKEND] Rankings gerados:', rankings.length);
+    console.log('[DEBUG BACKEND] Exemplo de ranking:', rankings[0]);
+    
+    res.json(rankings);
+  } catch (error) {
+    console.error('[DEBUG BACKEND] Erro ao gerar rankings:', error);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
 module.exports = router;

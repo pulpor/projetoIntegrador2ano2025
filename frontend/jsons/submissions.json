@@ -73,5 +73,43 @@
     "pending": false,
     "xp": 20,
     "approved": false
+  },
+  {
+    "id": 7,
+    "userId": 3,
+    "missionId": 8,
+    "filePaths": [
+      "C:\\Users\\Leonardo\\Documents\\projetoIntegrador2ano2025\\backend\\Uploads\\gg_1ga_1752713429950.json",
+      "C:\\Users\\Leonardo\\Documents\\projetoIntegrador2ano2025\\backend\\Uploads\\gg_1ga_1752713429951.json"
+    ],
+    "submittedAt": "2025-07-17T00:50:29.957Z",
+    "pending": false,
+    "xp": 20,
+    "approved": false
+  },
+  {
+    "id": 8,
+    "userId": 4,
+    "missionId": 16,
+    "filePaths": [
+      "C:\\Users\\Leonardo\\Documents\\projetoIntegrador2ano2025\\backend\\Uploads\\leo_Teste_Automatizado___19_54_18_1752752423546.js"
+    ],
+    "submittedAt": "2025-07-17T11:40:23.551Z",
+    "pending": false,
+    "xp": 100,
+    "approved": false
+  },
+  {
+    "id": 9,
+    "userId": 4,
+    "missionId": 16,
+    "filePaths": [
+      "C:\\Users\\Leonardo\\Documents\\projetoIntegrador2ano2025\\backend\\Uploads\\leo_Teste_Automatizado___19_54_18_1752752513818.json"
+    ],
+    "submittedAt": "2025-07-17T11:41:53.825Z",
+    "pending": false,
+    "xp": 100,
+    "approved": true,
+    "feedback": ""
   }
 ]

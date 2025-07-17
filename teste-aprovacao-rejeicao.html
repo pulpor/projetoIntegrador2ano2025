@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teste Aprovação/Rejeição</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+      <h1 class="text-2xl font-bold mb-6">
+        Teste de Aprovação/Rejeição de Usuários
+      </h1>
+
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-semibold mb-4">Usuários Pendentes</h2>
+        <div
+          id="pending-users"
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+        ></div>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6 mt-6">
+        <h2 class="text-xl font-semibold mb-4">Log de Ações</h2>
+        <div
+          id="action-log"
+          class="bg-gray-50 rounded p-4 min-h-32 max-h-64 overflow-y-auto"
+        ></div>
+      </div>
+    </div>
+
+    <script>
+      // Simular dados de usuários pendentes
+      const pendingUsers = [
+        {
+          id: 1,
+          name: "João Silva",
+          email: "joao@email.com",
+          turma: "Turma A",
+        },
+        {
+          id: 2,
+          name: "Maria Santos",
+          email: "maria@email.com",
+          turma: "Turma B",
+        },
+        {
+          id: 3,
+          name: "Pedro Oliveira",
+          email: "pedro@email.com",
+          turma: "Turma C",
+        },
+      ];
+
+      // Função para log de ações
+      function logAction(message, type = "info") {
+        const logDiv = document.getElementById("action-log");
+        const timestamp = new Date().toLocaleTimeString();
+        const colorClass =
+          type === "error"
+            ? "text-red-600"
+            : type === "success"
+            ? "text-green-600"
+            : "text-blue-600";
+
+        logDiv.innerHTML += `
+        <div class="mb-2">
+          <span class="text-gray-500">[${timestamp}]</span>
+          <span class="${colorClass}">${message}</span>
+        </div>
+      `;
+        logDiv.scrollTop = logDiv.scrollHeight;
+      }
+
+      // Função para criar card de usuário pendente
+      function createPendingUserCard(user) {
+        return `
+        <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center">
+              <div class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                <i class="fas fa-user text-gray-600"></i>
+              </div>
+              <div class="ml-3">
+                <h3 class="font-medium text-gray-900">${user.name}</h3>
+                <p class="text-sm text-gray-500">${user.email}</p>
+              </div>
+            </div>
+            <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">
+              Pendente
+            </span>
+          </div>
+          
+          <div class="mb-3">
+            <span class="text-sm text-gray-600">Turma: ${user.turma}</span>
+          </div>
+          
+          <div class="flex gap-2">
+            <button class="approve-btn bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded" 
+                    data-user-id="${user.id}">
+              <i class="fas fa-check mr-1"></i>
+              Aprovar
+            </button>
+            <button class="reject-btn bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded" 
+                    data-user-id="${user.id}">
+              <i class="fas fa-times mr-1"></i>
+              Rejeitar
+            </button>
+          </div>
+        </div>
+      `;
+      }
+
+      // Função para carregar usuários pendentes
+      function loadPendingUsers() {
+        const container = document.getElementById("pending-users");
+        container.innerHTML = pendingUsers
+          .map((user) => createPendingUserCard(user))
+          .join("");
+        logAction("Usuários pendentes carregados");
+      }
+
+      // Simulação da função userAction
+      async function userAction(endpoint, data) {
+        try {
+          logAction(
+            `Executando ação: ${endpoint} para usuário ${data.userId}`,
+            "info"
+          );
+
+          // Simular delay de API
+          await new Promise((resolve) => setTimeout(resolve, 500));
+
+          // Simular sucesso ou erro
+          if (Math.random() < 0.9) {
+            // 90% de sucesso
+            logAction(
+              `Ação ${endpoint} executada com sucesso para usuário ${data.userId}`,
+              "success"
+            );
+
+            // Remover usuário da lista
+            const index = pendingUsers.findIndex((u) => u.id === data.userId);
+            if (index > -1) {
+              const removedUser = pendingUsers.splice(index, 1)[0];
+              logAction(
+                `Usuário ${removedUser.name} removido da lista pendente`,
+                "info"
+              );
+              loadPendingUsers();
+            }
+          } else {
+            throw new Error("Erro simulado de API");
+          }
+        } catch (err) {
+          logAction(`Erro na ação ${endpoint}: ${err.message}`, "error");
+          alert(`Erro: ${err.message}`);
+        }
+      }
+
+      // Função para configurar event listeners
+      function setupEventListeners(selector, handler) {
+        document.addEventListener("click", function (e) {
+          if (e.target.matches(selector) || e.target.closest(selector)) {
+            const element = e.target.matches(selector)
+              ? e.target
+              : e.target.closest(selector);
+            handler.call(element, e);
+          }
+        });
+      }
+
+      // Configurar event listeners globais
+      function setupGlobalEventListeners() {
+        logAction("Configurando event listeners globais...", "info");
+
+        // Botões de aprovação
+        setupEventListeners(".approve-btn", async function (e) {
+          const userId = this.getAttribute("data-user-id");
+          logAction(
+            `Botão de aprovação clicado para usuário ${userId}`,
+            "info"
+          );
+
+          if (confirm("Tem certeza que deseja aprovar este usuário?")) {
+            await userAction("approve-user", { userId: parseInt(userId) });
+          }
+        });
+
+        // Botões de rejeição
+        setupEventListeners(".reject-btn", async function (e) {
+          const userId = this.getAttribute("data-user-id");
+          logAction(`Botão de rejeição clicado para usuário ${userId}`, "info");
+
+          if (confirm("Tem certeza que deseja rejeitar este usuário?")) {
+            await userAction("reject-user", { userId: parseInt(userId) });
+          }
+        });
+
+        logAction("Event listeners configurados com sucesso!", "success");
+      }
+
+      // Inicializar página
+      document.addEventListener("DOMContentLoaded", function () {
+        logAction("Página carregada, inicializando...", "info");
+        setupGlobalEventListeners();
+        loadPendingUsers();
+        logAction("Inicialização completa!", "success");
+      });
+    </script>
+  </body>
+</html>

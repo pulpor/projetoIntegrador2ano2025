@@ -157,4 +157,41 @@ router.post('/:id/reject', autenticar, ehMestre, async (req, res) => {
   }
 });
 
+router.post('/download-file', autenticar, ehMestre, async (req, res) => {
+  const { filePath } = req.body;
+
+  console.log('[DEBUG] Solicitação de download de arquivo:', filePath);
+
+  if (!filePath) {
+    return res.status(400).json({ error: 'Caminho do arquivo não fornecido' });
+  }
+
+  try {
+    // Verificar se o arquivo existe
+    const fullPath = path.resolve(filePath);
+    await fs.access(fullPath);
+
+    // Obter nome do arquivo
+    const fileName = path.basename(fullPath);
+
+    // Definir cabeçalhos para download
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.setHeader('Content-Type', 'application/octet-stream');
+
+    // Ler e enviar o arquivo
+    const fileBuffer = await fs.readFile(fullPath);
+    res.send(fileBuffer);
+
+    console.log('[DEBUG] Arquivo enviado com sucesso:', fileName);
+
+  } catch (error) {
+    console.error('[DEBUG] Erro ao fazer download do arquivo:', error);
+    if (error.code === 'ENOENT') {
+      res.status(404).json({ error: 'Arquivo não encontrado' });
+    } else {
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  }
+});
+
 module.exports = router;
