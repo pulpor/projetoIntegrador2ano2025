@@ -1,6 +1,8 @@
 // Sistema de Painel do Estudante
 // Arquivo: student.js
 
+import { API } from './utils/api.js';
+
 // Estado global da aplicação
 const AppState = {
     data: {},
@@ -167,6 +169,7 @@ async function initializeApp() {
         updateMissionsInterface(missionsData);
         updateSubmissionsInterface(submissionsData);
         setupMissionSubmission();
+        setupTabs();
 
         hideLoadingStates();
         console.log('Aplicação inicializada com sucesso');
@@ -174,6 +177,62 @@ async function initializeApp() {
         console.error('Erro ao inicializar a aplicação:', error);
         Toast.show('Erro ao carregar os dados. Por favor, recarregue a página.', 'error');
         hideLoadingStates();
+    }
+}
+
+// Configurar sistema de abas
+function setupTabs() {
+    console.log('Configurando sistema de abas...');
+
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            const targetId = button.id.replace('tab-', '') + '-tab';
+            console.log('Clique na aba:', button.id, 'Target:', targetId);
+
+            // Remove active de todos os botões
+            tabButtons.forEach(btn => {
+                btn.classList.remove('active', 'text-blue-600', 'border-blue-600');
+                btn.classList.add('text-gray-500', 'border-transparent');
+            });
+
+            // Adiciona active ao botão clicado
+            button.classList.add('active', 'text-blue-600', 'border-blue-600');
+            button.classList.remove('text-gray-500', 'border-transparent');
+
+            // Esconde todos os conteúdos
+            tabContents.forEach(content => {
+                content.classList.add('hidden');
+            });
+
+            // Mostra o conteúdo da aba clicada
+            const targetContent = document.getElementById(targetId);
+            if (targetContent) {
+                targetContent.classList.remove('hidden');
+
+                // Se for a aba de histórico, recarregar as submissões
+                if (targetId === 'history-tab') {
+                    console.log('Carregando histórico de submissões...');
+                    loadAndUpdateSubmissions();
+                }
+            }
+        });
+    });
+}
+
+// Função para carregar e atualizar submissões
+async function loadAndUpdateSubmissions() {
+    try {
+        const submissions = await loadSubmissions();
+        updateSubmissionsInterface(submissions);
+        console.log('Histórico de submissões atualizado:', submissions);
+    } catch (error) {
+        console.error('Erro ao carregar histórico:', error);
+        Toast.show('Erro ao carregar histórico de submissões', 'error');
     }
 }
 
@@ -239,7 +298,30 @@ async function loadMissions() {
 async function loadSubmissions() {
     console.log('Carregando submissões...');
     try {
-        return await apiRequest('/submissoes/my-submissions');
+        const [submissions, penaltiesRewards] = await Promise.all([
+            apiRequest('/submissoes/my-submissions'),
+            apiRequest('/usuarios/my-penalties-rewards').catch(() => []) // Fallback se rota não existir
+        ]);
+
+        // Combinar submissões com penalidades/recompensas
+        const allItems = [...submissions];
+
+        // Adicionar penalidades e recompensas como itens do histórico
+        if (penaltiesRewards && penaltiesRewards.length > 0) {
+            penaltiesRewards.forEach(item => {
+                allItems.push({
+                    ...item,
+                    isPenaltyReward: true,
+                    submittedAt: item.createdAt || item.date,
+                    missionTitle: item.type === 'penalty' ? 'Penalidade Aplicada' : 'Recompensa Concedida'
+                });
+            });
+        }
+
+        // Ordenar por data (mais recentes primeiro)
+        allItems.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+
+        return allItems;
     } catch (error) {
         console.error('Erro ao carregar submissões:', error);
         Toast.show('Erro ao carregar submissões: ' + error.message, 'error');
@@ -323,9 +405,6 @@ function updateMissionsInterface(missions) {
                 <span class="text-sm text-gray-500">
                     <i class="fas fa-users mr-1"></i> ${mission.targetClass}
                 </span>
-                <span class="text-sm text-gray-500">
-                    <i class="fas fa-info-circle mr-1"></i> Use o formulário abaixo para enviar esta missão
-                </span>
             </div>
         `;
         missionsList.appendChild(card);
@@ -371,14 +450,14 @@ function setupMissionSubmission() {
         const formData = new FormData();
         formData.append('missionId', missionSelect.value);
         Array.from(codeUpload.files).forEach(file => {
-            formData.append('files', file);
+            formData.append('code', file);
         });
 
         submitButton.disabled = true;
         submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Enviando...';
 
         try {
-            await API.request('/submissoes', {
+            await API.request('/submissoes/submit', {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -390,8 +469,17 @@ function setupMissionSubmission() {
             missionSelect.value = '';
             codeUpload.value = '';
 
+            // Recarregar submissões e missões
             const submissions = await loadSubmissions();
             updateSubmissionsInterface(submissions);
+
+            // Recarregar missões para atualizar a lista
+            const missions = await API.request('/missoes', {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            updateMissionsInterface(missions);
         } catch (error) {
             console.error('Erro ao enviar missão:', error);
             Toast.show('Erro ao enviar missão. Tente novamente.', 'error');
@@ -432,35 +520,120 @@ function updateSubmissionsInterface(submissions) {
     }
 
     submissions.forEach(submission => {
-        const statusColors = {
-            pending: 'bg-yellow-100 text-yellow-800',
-            approved: 'bg-green-100 text-green-800',
-            rejected: 'bg-red-100 text-red-800'
-        };
-
-        const card = document.createElement('div');
-        card.className = 'bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-300';
-        card.innerHTML = `
-            <div class="flex justify-between items-start mb-4">
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-800">${submission.missionTitle}</h3>
-                    <p class="text-sm text-gray-500">
-                        Enviado em ${new Date(submission.submittedAt).toLocaleString()}
-                    </p>
-                </div>
-                <span class="${statusColors[submission.status]} px-3 py-1 rounded-full text-sm font-medium">
-                    ${submission.status.charAt(0).toUpperCase() + submission.status.slice(1)}
-                </span>
-            </div>
-            ${submission.feedback ? `
-                <div class="mt-4 p-4 bg-gray-50 rounded-lg">
-                    <h4 class="text-sm font-semibold text-gray-700 mb-2">Feedback do Mestre:</h4>
-                    <p class="text-gray-600">${submission.feedback}</p>
-                </div>
-            ` : ''}
-        `;
-        submissionsList.appendChild(card);
+        // Se for penalidade/recompensa, usar cores e ícones específicos
+        if (submission.isPenaltyReward) {
+            renderPenaltyRewardCard(submission, submissionsList);
+        } else {
+            renderSubmissionCard(submission, submissionsList);
+        }
     });
+}
+
+function renderPenaltyRewardCard(item, container) {
+    const isPenalty = item.type === 'penalty';
+    const card = document.createElement('div');
+    card.className = `bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-300 border-l-4 ${isPenalty ? 'border-red-500' : 'border-green-500'}`;
+
+    card.innerHTML = `
+        <div class="flex justify-between items-start mb-4">
+            <div>
+                <h3 class="text-lg font-semibold ${isPenalty ? 'text-red-800' : 'text-green-800'} flex items-center">
+                    <i class="fas ${isPenalty ? 'fa-exclamation-triangle' : 'fa-gift'} mr-2"></i>
+                    ${item.missionTitle}
+                </h3>
+                <p class="text-sm text-gray-500">
+                    <i class="fas fa-calendar-alt mr-1"></i>
+                    ${new Date(item.submittedAt).toLocaleString()}
+                </p>
+                <p class="text-sm ${isPenalty ? 'text-red-600' : 'text-green-600'} mt-1 font-semibold">
+                    <i class="fas fa-star mr-1"></i>
+                    ${isPenalty ? '-' : '+'}${Math.abs(item.xp || 0)} XP
+                </p>
+            </div>
+            <span class="${isPenalty ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'} px-3 py-1 rounded-full text-sm font-medium flex items-center">
+                <i class="fas ${isPenalty ? 'fa-minus-circle' : 'fa-plus-circle'} mr-1"></i>
+                ${isPenalty ? 'Penalidade' : 'Recompensa'}
+            </span>
+        </div>
+        ${item.reason ? `
+            <div class="mt-4 p-4 ${isPenalty ? 'bg-red-50' : 'bg-green-50'} rounded-lg">
+                <h4 class="text-sm font-semibold ${isPenalty ? 'text-red-700' : 'text-green-700'} mb-2 flex items-center">
+                    <i class="fas fa-comment-alt mr-2"></i>
+                    Motivo:
+                </h4>
+                <p class="${isPenalty ? 'text-red-600' : 'text-green-600'}">${item.reason}</p>
+            </div>
+        ` : ''}
+    `;
+    container.appendChild(card);
+}
+
+function renderSubmissionCard(submission, container) {
+    const statusColors = {
+        pending: 'bg-yellow-100 text-yellow-800',
+        approved: 'bg-green-100 text-green-800',
+        rejected: 'bg-red-100 text-red-800'
+    };
+
+    const statusText = {
+        pending: 'Pendente',
+        approved: 'Aprovada',
+        rejected: 'Rejeitada'
+    };
+
+    const statusIcon = {
+        pending: 'fas fa-clock',
+        approved: 'fas fa-check-circle',
+        rejected: 'fas fa-times-circle'
+    };
+
+    const card = document.createElement('div');
+    card.className = 'bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-300';
+    card.innerHTML = `
+        <div class="flex justify-between items-start mb-4">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-800">${submission.missionTitle}</h3>
+                <p class="text-sm text-gray-500">
+                    <i class="fas fa-calendar-alt mr-1"></i>
+                    Enviado em ${new Date(submission.submittedAt).toLocaleString()}
+                </p>
+                ${submission.xp ? `
+                    <p class="text-sm text-blue-600 mt-1">
+                        <i class="fas fa-star mr-1"></i>
+                        ${submission.xp} XP
+                    </p>
+                ` : ''}
+            </div>
+            <span class="${statusColors[submission.status || 'pending']} px-3 py-1 rounded-full text-sm font-medium flex items-center">
+                <i class="${statusIcon[submission.status || 'pending']} mr-1"></i>
+                ${statusText[submission.status || 'pending']}
+            </span>
+        </div>
+        ${submission.feedback ? `
+            <div class="mt-4 p-4 ${submission.status === 'rejected' ? 'bg-red-50 border-l-4 border-red-400' : 'bg-blue-50 border-l-4 border-blue-400'} rounded-r-lg">
+                <h4 class="text-sm font-semibold ${submission.status === 'rejected' ? 'text-red-700' : 'text-blue-700'} mb-2 flex items-center">
+                    <i class="fas fa-comment-alt mr-2"></i>
+                    Feedback do Mestre:
+                </h4>
+                <p class="${submission.status === 'rejected' ? 'text-red-600' : 'text-blue-600'}">${submission.feedback}</p>
+            </div>
+        ` : ''}
+        ${submission.filePaths && submission.filePaths.length > 0 ? `
+            <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                <h4 class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                    <i class="fas fa-paperclip mr-2"></i>
+                    Arquivos enviados:
+                </h4>
+                <div class="space-y-1">
+                    ${submission.filePaths.map(filePath => {
+        const fileName = filePath.split('/').pop() || filePath.split('\\').pop();
+        return `<span class="inline-block bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs">${fileName}</span>`;
+    }).join(' ')}
+                </div>
+            </div>
+        ` : ''}
+    `;
+    container.appendChild(card);
 }
 
 document.addEventListener('DOMContentLoaded', initializeApp);

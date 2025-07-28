@@ -62,6 +62,32 @@ router.get('/me', autenticar, (req, res) => {
   });
 });
 
+// Rota para obter histórico de penalidades e recompensas do usuário logado
+router.get('/my-penalties-rewards', autenticar, (req, res) => {
+  console.log('[DEBUG BACKEND] Chamada para /my-penalties-rewards:', req.user);
+  const user = users.find(u => u.id === req.user.userId);
+  if (!user) {
+    return res.status(404).json({ error: 'Usuário não encontrado' });
+  }
+
+  // Retornar histórico se existir, senão array vazio
+  const history = user.history || [];
+
+  // Filtrar apenas penalidades e recompensas (excluir outros tipos de histórico se houver)
+  const penaltiesRewards = history.filter(item =>
+    item.type === 'penalty' || item.type === 'reward'
+  ).map(item => ({
+    type: item.type,
+    xp: item.amount,
+    reason: item.reason,
+    createdAt: item.appliedAt,
+    appliedBy: item.appliedBy
+  }));
+
+  console.log('[DEBUG BACKEND] Histórico de penalidades/recompensas:', penaltiesRewards.length);
+  res.json(penaltiesRewards);
+});
+
 router.get('/pending-users', autenticar, ehMestre, (req, res) => {
   console.log('[DEBUG BACKEND] Chamada para pending-users (com autenticação)');
   const pendingUsers = users.filter(u => u.pending && !u.isMaster);

@@ -23,9 +23,7 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage }).fields([
-  { name: 'code', maxCount: 10 },
-  { name: 'missionId', maxCount: 1 },
-  { name: 'userId', maxCount: 1 }
+  { name: 'code', maxCount: 10 }
 ]);
 
 module.exports = { upload };

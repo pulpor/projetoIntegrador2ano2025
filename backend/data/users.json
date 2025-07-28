@@ -19,7 +19,27 @@
     "year": 1,
     "isMaster": false,
     "level": 1,
-    "xp": 0,
-    "pending": false
+    "xp": 77,
+    "pending": false,
+    "history": [
+      {
+        "type": "penalty",
+        "amount": 25,
+        "reason": "pq quero",
+        "oldXp": 100,
+        "newXp": 75,
+        "appliedBy": 1,
+        "appliedAt": "2025-07-28T19:12:59.372Z"
+      },
+      {
+        "type": "reward",
+        "amount": 2,
+        "reason": "ggg",
+        "oldXp": 75,
+        "newXp": 77,
+        "appliedBy": 1,
+        "appliedAt": "2025-07-28T19:20:16.563Z"
+      }
+    ]
   }
 ]

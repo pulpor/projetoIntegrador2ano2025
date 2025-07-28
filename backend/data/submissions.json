@@ -1,1 +1,119 @@
-[]
+[
+  {
+    "id": 1,
+    "userId": 2,
+    "missionId": 1,
+    "filePaths": [
+      "C:\\Users\\LEONARDOFELIPEDEGOES\\Documents\\pi2\\projetoIntegrador2ano2025\\uploads\\g_teste_1753714835590.txt"
+    ],
+    "submittedAt": "2025-07-28T15:00:35.599Z",
+    "pending": false,
+    "xp": 50,
+    "approved": true,
+    "feedback": ""
+  },
+  {
+    "id": 2,
+    "userId": 2,
+    "missionId": 1,
+    "filePaths": [
+      "C:\\Users\\LEONARDOFELIPEDEGOES\\Documents\\pi2\\projetoIntegrador2ano2025\\uploads\\g_teste_1753714950364.txt"
+    ],
+    "submittedAt": "2025-07-28T15:02:30.386Z",
+    "pending": false,
+    "status": "pending",
+    "missionTitle": "teste",
+    "xp": 50,
+    "approved": false
+  },
+  {
+    "id": 3,
+    "userId": 2,
+    "missionId": 1,
+    "filePaths": [
+      "C:\\Users\\LEONARDOFELIPEDEGOES\\Documents\\pi2\\projetoIntegrador2ano2025\\uploads\\g_teste_1753715251922.js"
+    ],
+    "submittedAt": "2025-07-28T15:07:31.947Z",
+    "pending": false,
+    "status": "approved",
+    "missionTitle": "teste",
+    "xp": 50,
+    "completed": true,
+    "feedback": ""
+  },
+  {
+    "id": 4,
+    "userId": 2,
+    "missionId": 1,
+    "filePaths": [
+      "C:\\Users\\LEONARDOFELIPEDEGOES\\Documents\\pi2\\projetoIntegrador2ano2025\\uploads\\g_teste_1753715411293.html"
+    ],
+    "submittedAt": "2025-07-28T15:10:11.344Z",
+    "pending": false,
+    "status": "rejected",
+    "missionTitle": "teste",
+    "xp": 50,
+    "completed": false,
+    "feedback": ""
+  },
+  {
+    "id": 5,
+    "userId": 2,
+    "missionId": 1,
+    "filePaths": [
+      "C:\\Users\\LEONARDOFELIPEDEGOES\\Documents\\pi2\\projetoIntegrador2ano2025\\uploads\\g_teste_1753720917409.txt"
+    ],
+    "submittedAt": "2025-07-28T16:41:57.479Z",
+    "pending": false,
+    "status": "rejected",
+    "missionTitle": "teste",
+    "xp": 50,
+    "completed": false,
+    "feedback": ""
+  },
+  {
+    "id": 6,
+    "userId": 2,
+    "missionId": 1,
+    "filePaths": [
+      "C:\\Users\\LEONARDOFELIPEDEGOES\\Documents\\pi2\\projetoIntegrador2ano2025\\uploads\\g_teste_1753726795098.txt"
+    ],
+    "submittedAt": "2025-07-28T18:19:55.103Z",
+    "pending": false,
+    "status": "approved",
+    "missionTitle": "teste",
+    "xp": 50,
+    "completed": true,
+    "feedback": ""
+  },
+  {
+    "id": 7,
+    "userId": 2,
+    "missionId": 2,
+    "filePaths": [
+      "C:\\Users\\LEONARDOFELIPEDEGOES\\Documents\\pi2\\projetoIntegrador2ano2025\\uploads\\g_oi_28_1753727696739.txt"
+    ],
+    "submittedAt": "2025-07-28T18:34:56.750Z",
+    "pending": false,
+    "status": "rejected",
+    "missionTitle": "oi 28",
+    "xp": 50,
+    "completed": false,
+    "feedback": "feedback bonitaaaaaaaao"
+  },
+  {
+    "id": 8,
+    "userId": 2,
+    "missionId": 2,
+    "filePaths": [
+      "C:\\Users\\LEONARDOFELIPEDEGOES\\Documents\\pi2\\projetoIntegrador2ano2025\\uploads\\g_oi_28_1753727833169.txt"
+    ],
+    "submittedAt": "2025-07-28T18:37:13.173Z",
+    "pending": false,
+    "status": "approved",
+    "missionTitle": "oi 28",
+    "xp": 50,
+    "completed": true,
+    "feedback": "boa"
+  }
+]

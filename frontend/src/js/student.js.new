@@ -327,7 +327,7 @@ function setupMissionSubmission() {
         const formData = new FormData();
         formData.append('missionId', missionSelect.value);
         Array.from(codeUpload.files).forEach(file => {
-            formData.append('files', file);
+            formData.append('code', file);
         });
 
         submitButton.disabled = true;

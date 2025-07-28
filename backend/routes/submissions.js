@@ -5,13 +5,23 @@ const router = express.Router();
 
 // Caminho correto para o arquivo submissions.json
 const caminhoSubmissions = path.join(__dirname, '../data/submissions.json');
-const caminhoUsers = path.join(__dirname, '..', '..', 'frontend', 'jsons', 'users.json');
+const caminhoUsers = path.join(__dirname, '../data/users.json');
 
 const { autenticar, ehMestre } = require('../middleware/auth');
 
 const { users, missions, submissions, submissionIdCounter } = require('../inicializacao');
 const { upload } = require('../utils/armazenamentoArquivos');
-const { updateUserLevel } = require('../utils/levelSystem');
+const { updateUserLevel, calculateLevel } = require('../utils/levelSystem');
+
+// Função auxiliar para atualizar o XP do usuário
+async function updateUserXP(userId, xpToAdd) {
+  const user = users.find(u => u.id === parseInt(userId));
+  if (user) {
+    user.xp = (user.xp || 0) + xpToAdd;
+    user.level = calculateLevel(user.xp).currentLevel;
+    await fs.writeFile(caminhoUsers, JSON.stringify(users, null, 2));
+  }
+}
 
 router.post('/submit', autenticar, upload, async (req, res) => {
   const { missionId } = req.body;
@@ -28,7 +38,10 @@ router.post('/submit', autenticar, upload, async (req, res) => {
     filePaths: req.files.code ? req.files.code.map(file => file.path) : [],
     submittedAt: new Date(),
     pending: true,
-    xp: mission.xp
+    status: 'pending',
+    missionTitle: mission.title,
+    xp: mission.xp,
+    completed: false
   };
   submissions.push(submission);
   try {
@@ -111,17 +124,21 @@ router.post('/:id/approve', autenticar, ehMestre, async (req, res) => {
     return res.status(404).json({ error: 'Usuário não encontrado' });
   }
 
-  submission.approved = true;
-  submission.pending = false;
-  submission.feedback = feedback || '';
-  user.xp += submission.xp;
+  // Atualizar XP apenas se a submissão não foi completada antes
+  const wasAlreadyCompleted = submission.completed;
 
-  // Usar o novo sistema de níveis
-  updateUserLevel(user);
+  submission.status = 'approved';
+  submission.pending = false;
+  submission.completed = true;
+  submission.feedback = feedback || '';
+
+  // Atualizar XP apenas se a missão não foi completada antes
+  if (!wasAlreadyCompleted) {
+    await updateUserXP(submission.userId, submission.xp);
+  }
 
   try {
     await fs.writeFile(caminhoSubmissions, JSON.stringify(submissions, null, 2));
-    await fs.writeFile(caminhoUsers, JSON.stringify(users, null, 2));
     console.log('[DEBUG] Submissão aprovada e arquivos salvos');
     res.json({ submission, user: { ...user, password: undefined } });
   } catch (err) {
@@ -140,8 +157,10 @@ router.post('/:id/reject', autenticar, ehMestre, async (req, res) => {
     return res.status(404).json({ error: 'Submissão não encontrada' });
   }
 
-  submissions[index].approved = false;
+  submissions[index].status = 'rejected';
   submissions[index].pending = false;
+  submissions[index].completed = false;
+  submissions[index].feedback = req.body.feedback || '';
 
   try {
     await fs.writeFile(caminhoSubmissions, JSON.stringify(submissions, null, 2));

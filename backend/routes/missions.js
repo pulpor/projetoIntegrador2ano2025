@@ -9,7 +9,7 @@ const caminhoMissions = path.join(__dirname, '../data/missions.json');
 
 const { autenticar, ehMestre } = require('../middleware/auth');
 
-const { missions, missionIdCounter, users } = require('../inicializacao');
+const { missions, missionIdCounter, users, submissions } = require('../inicializacao');
 
 // Middleware de log específico para missões
 router.use((req, res, next) => {
@@ -30,13 +30,26 @@ router.get('/', autenticar, (req, res) => {
     return;
   }
 
-  // Para alunos, filtrar por ano e classe
+  // Para alunos, filtrar por ano e classe, e remover missões já submetidas
   const user = users.find(u => u.id === req.user.userId);
   if (!user) {
     return res.status(404).json({ error: 'Usuário não encontrado' });
   }
 
+  // Buscar submissões do usuário que estão pendentes ou aprovadas
+  const userSubmissions = submissions.filter(sub =>
+    parseInt(sub.userId) === req.user.userId &&
+    (sub.status === 'pending' || sub.status === 'approved')
+  );
+
+  const submittedMissionIds = new Set(userSubmissions.map(sub => parseInt(sub.missionId)));
+
   const filteredMissions = missions.filter(mission => {
+    // Excluir missões já submetidas (pendentes ou aprovadas)
+    if (submittedMissionIds.has(mission.id)) {
+      return false;
+    }
+
     // Missões gerais (sem ano específico) são visíveis para todos
     if (!mission.targetYear) {
       return mission.targetClass === 'geral' || mission.targetClass === user.class;

@@ -111,16 +111,32 @@ function setupStudentActionButtons() {
 function setupSubmissionButtons() {
     setupEventListeners('.approve-submission-btn', async (e) => {
         const submissionId = parseInt(e.target.closest('button').getAttribute('data-submission-id'));
-        await submissionAction(submissionId, 'approve', 'Submissão aprovada!');
+
+        // Solicitar feedback opcional para aprovação
+        const feedback = prompt('Feedback opcional para o aluno (deixe em branco se não quiser dar feedback):');
+
+        await submissionAction(submissionId, 'approve', 'Submissão aprovada!', feedback);
     });
 
     setupEventListeners('.reject-submission-btn', async (e) => {
         const submissionId = parseInt(e.target.closest('button').getAttribute('data-submission-id'));
 
+        // Solicitar feedback obrigatório para rejeição
+        const feedback = prompt('Por favor, forneça um feedback para o aluno sobre por que a submissão foi rejeitada:');
+
+        if (feedback === null) {
+            return; // Usuário cancelou
+        }
+
+        if (feedback.trim() === '') {
+            showError('Feedback é obrigatório ao rejeitar uma submissão');
+            return;
+        }
+
         confirmAction(
             'Rejeitar esta submissão?',
             async () => {
-                await submissionAction(submissionId, 'reject', 'Submissão rejeitada!');
+                await submissionAction(submissionId, 'reject', 'Submissão rejeitada!', feedback);
             }
         );
     });
@@ -163,10 +179,21 @@ async function userAction(endpoint, data, successMessage) {
     }
 }
 
-async function submissionAction(submissionId, action, successMessage) {
+async function submissionAction(submissionId, action, successMessage, feedback = '') {
     try {
         console.log(`[SUBMISSION ACTION] Iniciando ${action} para submissão ${submissionId}`);
-        const result = await apiRequest(`/submissoes/${submissionId}/${action}`, { method: 'POST' });
+
+        const requestOptions = {
+            method: 'POST'
+        };
+
+        // Se há feedback, adicionar ao body
+        if (feedback) {
+            requestOptions.body = JSON.stringify({ feedback });
+        }
+
+        const result = await apiRequest(`/submissoes/${submissionId}/${action}`, requestOptions);
+
         console.log(`[SUBMISSION ACTION] Resultado:`, result);
         showSuccess(successMessage);
 

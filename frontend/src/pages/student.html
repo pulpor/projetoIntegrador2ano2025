@@ -15,11 +15,30 @@
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome - versão 5 estável -->
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+
+    <!-- Font Awesome - versão mais completa -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <!-- Fallback para Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://use.fontawesome.com/releases/v6.5.1/css/all.css"
     />
     <link rel="stylesheet" href="../css/helper.css" />
+    <link rel="stylesheet" href="../css/correction.css" />
     <style>
       /* Reset e transições */
       * {
@@ -193,9 +212,43 @@
         color: #cbd5e0 !important;
       }
 
-      /* ===== COMPONENTES ESPECIAIS ===== */
+      /* ===== ELEMENTOS ESPECÍFICOS NO MODO ESCURO ===== */
 
-      /* ===== BOTÃO DE TEMA ===== */
+      /* Avatar do usuário e outros elementos bg-gray-200 */
+      html:not([data-theme]) .bg-gray-200,
+      html[data-theme="light"] .bg-gray-200 {
+        background-color: #e5e7eb !important;
+      }
+
+      html[data-theme="dark"] .bg-gray-200 {
+        background-color: #4b5563 !important;
+      }
+
+      /* Progress bar background no modo escuro */
+      html[data-theme="dark"] .w-full.bg-gray-200 {
+        background-color: #374151 !important;
+      }
+
+      /* Ícones que precisam de cor específica no dark mode */
+      html[data-theme="dark"] .fas.fa-user {
+        color: #e5e7eb !important;
+      }
+
+      /* ===== FALLBACK PARA ÍCONES ===== */
+      /* Garantir que Font Awesome seja carregado corretamente */
+      .fa,
+      .fas {
+        font-family: "Font Awesome 5 Free", "FontAwesome" !important;
+        font-weight: 900 !important;
+        font-style: normal !important;
+        font-variant: normal !important;
+        text-rendering: auto !important;
+        line-height: 1 !important;
+        -webkit-font-smoothing: antialiased !important;
+        -moz-osx-font-smoothing: grayscale !important;
+      }
+
+      /* ===== COMPONENTES ESPECIAIS ===== */ /* ===== BOTÃO DE TEMA ===== */
       #theme-toggle {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
@@ -306,18 +359,6 @@
     </style>
   </head>
   <body class="bg-white min-h-screen transition-all duration-300">
-    <!-- Theme Toggle Button -->
-    <button
-      id="theme-toggle"
-      class="fixed top-6 right-6 z-[1001] w-14 h-14 text-white shadow-lg hover:shadow-xl rounded-full transition-all duration-300 hover:scale-110 active:scale-95"
-      title="Alternar tema"
-    >
-      <i
-        id="theme-icon"
-        class="fas fa-moon text-xl transition-transform duration-300"
-      ></i>
-    </button>
-
     <!-- Header -->
     <header class="bg-white shadow-lg fixed w-full top-0 z-50 page-header">
       <div class="container mx-auto px-4 py-4">
@@ -350,6 +391,17 @@
                 >
               </span>
             </div>
+            <!-- Theme Toggle Button -->
+            <button
+              id="theme-toggle"
+              class="w-10 h-10 text-white shadow-lg hover:shadow-xl rounded-full transition-all duration-300 hover:scale-110 active:scale-95"
+              title="Alternar tema"
+            >
+              <i
+                id="theme-icon"
+                class="fas fa-moon text-lg transition-transform duration-300"
+              ></i>
+            </button>
             <button
               id="logout-btn"
               class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
@@ -364,14 +416,15 @@
     <!-- Main Content -->
     <main class="container mx-auto px-4 py-8 page-container">
       <!-- Progress Section -->
-      <div class="bg-white rounded-lg shadow-lg p-6 mb-6 fade-in progresso">
+      <div
+        class="prog bg-white rounded-lg shadow-lg p-6 mb-6 fade-in progresso"
+      >
         <div class="flex items-center justify-between mb-6">
           <h2 class="text-2xl font-bold text-gray-800">
             <i class="fas fa-chart-line mr-2 text-purple-600"></i>
             Progresso do Estudante
           </h2>
           <div class="flex items-center space-x-2">
-            <span class="text-sm text-gray-500">Nível</span>
             <span
               id="student-level"
               class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full font-bold"
@@ -383,7 +436,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           <div class="text-center">
             <div class="gradient-card text-white p-4 rounded-lg progress-card">
-              <i class="fas fa-star text-2xl mb-2"></i>
+              <i class="fa fa-star text-2xl mb-2"></i>
               <div class="text-sm opacity-90">XP Total</div>
               <div id="total-xp" class="text-2xl font-bold">295</div>
             </div>
@@ -392,7 +445,7 @@
             <div
               class="gradient-card-green text-white p-4 rounded-lg progress-card"
             >
-              <i class="fas fa-trophy text-2xl mb-2"></i>
+              <i class="fa fa-trophy text-2xl mb-2"></i>
               <div class="text-sm opacity-90">XP Atual</div>
               <div id="current-xp" class="text-2xl font-bold">95</div>
             </div>
@@ -401,14 +454,14 @@
             <div
               class="gradient-card-orange text-white p-4 rounded-lg progress-card"
             >
-              <i class="fas fa-target text-2xl mb-2"></i>
+              <i class="fa fa-arrow-up text-2xl mb-2"></i>
               <div class="text-sm opacity-90">Próximo Nível</div>
               <div id="next-level-xp" class="text-2xl font-bold">100</div>
             </div>
           </div>
           <div class="text-center">
             <div class="bg-gray-700 text-white p-4 rounded-lg progress-card">
-              <i class="fas fa-graduation-cap text-2xl mb-2"></i>
+              <i class="fa fa-graduation-cap text-2xl mb-2"></i>
               <div class="text-sm opacity-90">Classe</div>
               <div id="student-class" class="text-lg font-bold">
                 Carregando...
