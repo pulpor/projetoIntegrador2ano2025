@@ -63,55 +63,50 @@ const Toast = {
     }
 };
 
-// Configuração da API
-const API_URL = 'http://localhost:3000'; // Altere isso para a URL correta do seu backend
+// API - Sistema de requisições
+const API = {
+    baseUrl: 'http://localhost:3000', // URL base da API
 
-// Função auxiliar para fazer requisições à API
-async function apiRequest(endpoint, options = {}) {
-    const token = localStorage.getItem('token');
-    if (!token) {
-        console.error('Token não encontrado');
-        window.location.href = '/';
-        throw new Error('Token não encontrado');
-    }
+    async request(endpoint, options = {}) {
+        const url = this.baseUrl + endpoint;
+        console.log(`API Request: ${url}`);
 
-    const url = API_URL + endpoint;
-    console.log(`Fazendo requisição para: ${url}`);
-
-    const defaultOptions = {
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('Token não encontrado');
         }
-    };
 
-    try {
-        const response = await fetch(url, { ...defaultOptions, ...options });
-        console.log(`Resposta da API (${endpoint}):`, response.status);
-
-        if (!response.ok) {
-            if (response.status === 401) {
-                console.error('Token inválido ou expirado');
-                localStorage.removeItem('token');
-                window.location.href = '/';
-                throw new Error('Sessão expirada. Por favor, faça login novamente.');
+        const defaultOptions = {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             }
-            throw new Error(`Erro na requisição: ${response.status}`);
-        }
+        };
 
-        const data = await response.json();
-        console.log(`Dados recebidos (${endpoint}):`, data);
-        return data;
-    } catch (error) {
-        console.error(`Erro na requisição para ${endpoint}:`, error);
-        throw error;
+        try {
+            const response = await fetch(url, { ...defaultOptions, ...options });
+
+            if (!response.ok) {
+                if (response.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = '/login.html';
+                    throw new Error('Sessão expirada. Por favor, faça login novamente.');
+                }
+                throw new Error(`Erro na requisição: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error(`Erro na API ${endpoint}:`, error);
+            throw error;
+        }
     }
-}
+};
 
 // Sistema de XP e Níveis
 const LevelSystem = {
-    baseXP: 100,
-    multiplier: 1.5,
+    baseXP: 100, // XP base para o primeiro nível
+    multiplier: 1.5, // Multiplicador de dificuldade por nível
 
     calculateNextLevelXP(level) {
         return Math.round(this.baseXP * Math.pow(this.multiplier, level - 1));
@@ -140,17 +135,7 @@ const LevelSystem = {
 // Funções de inicialização e carregamento
 async function initializeApp() {
     console.log('Inicializando aplicação do estudante...');
-
-    // Configurar logout
-    setupLogout();
-
-    // Verificar autenticação
-    if (!validateAuthentication()) {
-        console.log('Falha na autenticação, redirecionando...');
-        return;
-    }
-
-    console.log('Token atual:', localStorage.getItem('token')); showLoadingStates();
+    showLoadingStates();
 
     try {
         const [userData, missionsData, submissionsData] = await Promise.all([
@@ -177,30 +162,6 @@ async function initializeApp() {
     }
 }
 
-function validateAuthentication() {
-    const token = localStorage.getItem('token');
-    if (!token) {
-        window.location.href = '/';
-        return false;
-    }
-    return true;
-}
-
-function setupLogout() {
-    const logoutBtn = document.getElementById('logout-btn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
-            console.log('Realizando logout...');
-            localStorage.removeItem('token');
-            localStorage.removeItem('username');
-            Toast.show('Logout realizado com sucesso!', 'success');
-            setTimeout(() => {
-                window.location.href = '/';
-            }, 1000);
-        });
-    }
-}
-
 function showLoadingStates() {
     const elements = ['student-name', 'student-level', 'student-class', 'total-xp', 'current-xp', 'next-level-xp'];
     elements.forEach(id => {
@@ -217,10 +178,10 @@ function hideLoadingStates() {
 async function loadUserProfile() {
     console.log('Carregando perfil do usuário...');
     try {
-        return await apiRequest('/usuarios/me');
+        return await API.request('/usuarios/me');
     } catch (error) {
         console.error('Erro ao carregar perfil:', error);
-        Toast.show('Erro ao carregar seu perfil: ' + error.message, 'error');
+        Toast.show('Erro ao carregar seu perfil', 'error');
         throw error;
     }
 }
@@ -228,10 +189,10 @@ async function loadUserProfile() {
 async function loadMissions() {
     console.log('Carregando missões...');
     try {
-        return await apiRequest('/missoes');
+        return await API.request('/missoes');
     } catch (error) {
         console.error('Erro ao carregar missões:', error);
-        Toast.show('Erro ao carregar missões: ' + error.message, 'error');
+        Toast.show('Erro ao carregar missões', 'error');
         throw error;
     }
 }
@@ -239,29 +200,24 @@ async function loadMissions() {
 async function loadSubmissions() {
     console.log('Carregando submissões...');
     try {
-        return await apiRequest('/submissoes/my-submissions');
+        return await API.request('/submissoes/my-submissions');
     } catch (error) {
         console.error('Erro ao carregar submissões:', error);
-        Toast.show('Erro ao carregar submissões: ' + error.message, 'error');
+        Toast.show('Erro ao carregar submissões', 'error');
         throw error;
     }
 }
 
 function updateUserInterface(userData) {
     console.log('Atualizando interface do usuário:', userData);
-
+    
     // Calcular nível e XP
     const xpInfo = LevelSystem.calculateCurrentLevelXP(userData.xp || 0);
     console.log('Informações de XP calculadas:', xpInfo);
 
-    // Atualizar nome do estudante na header
-    const studentNameHeader = document.getElementById('student-name');
-    if (studentNameHeader) {
-        studentNameHeader.textContent = userData.username || 'Aluno';
-    }
-
     // Atualizar elementos da interface
     const elements = {
+        'student-name': userData.username || 'Aluno',
         'student-level': `Nível ${xpInfo.level}`,
         'student-class': userData.class || 'Não definida',
         'total-xp': xpInfo.totalXP,

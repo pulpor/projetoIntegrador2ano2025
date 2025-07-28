@@ -64,13 +64,13 @@
         backdrop-filter: blur(10px) !important;
         border: 1px solid rgba(255, 255, 255, 0.3) !important;
         box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15),
-                    0 2px 8px 0 rgba(31, 38, 135, 0.1) !important;
+          0 2px 8px 0 rgba(31, 38, 135, 0.1) !important;
       }
 
       html:not([data-theme]) .bg-white:hover,
       html[data-theme="light"] .bg-white:hover {
         box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.2),
-                    0 4px 12px 0 rgba(31, 38, 135, 0.15) !important;
+          0 4px 12px 0 rgba(31, 38, 135, 0.15) !important;
         transform: translateY(-2px) !important;
       }
 
@@ -103,8 +103,8 @@
       html[data-theme="light"] select:focus,
       html[data-theme="light"] textarea:focus {
         border-color: #6366f1 !important;
-        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1), 
-                    0 4px 20px rgba(99, 102, 241, 0.2) !important;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1),
+          0 4px 20px rgba(99, 102, 241, 0.2) !important;
         background: #ffffff !important;
         transform: translateY(-1px) !important;
       }
@@ -118,7 +118,12 @@
 
       /* ===== TEMA DARK ===== */
       html[data-theme="dark"] body {
-        background: linear-gradient(135deg, #0c0c0c 0%, #1a1a1a 50%, #2d3748 100%);
+        background: linear-gradient(
+          135deg,
+          #0c0c0c 0%,
+          #1a1a1a 50%,
+          #2d3748 100%
+        );
         color: #f7fafc;
       }
 
@@ -545,7 +550,7 @@
 
               <!-- Submit Mission -->
               <div
-                class="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-700 border border-blue-200 dark:border-gray-600 rounded-lg p-6"
+                class="bg-white dark:from-gray-800 dark:to-gray-700 border border-blue-200 dark:border-gray-600 rounded-lg p-6"
               >
                 <h3 class="font-bold text-gray-800 dark:text-white mb-4">
                   <i
@@ -616,50 +621,56 @@
     </main>
 
     <!-- JavaScript -->
-    <script src="../js/student.js"></script>
-    
+    <script src="../js/student.js" type="module"></script>
+
     <!-- Script de backup para o botão de tema -->
     <script>
-        // Script de backup para garantir que o botão de tema funcione
-        document.addEventListener("DOMContentLoaded", function() {
-            console.log("🚀 Script de backup carregado");
-            
-            // Aguardar um momento para garantir que tudo foi carregado
-            setTimeout(function() {
-                const themeToggleBackup = document.getElementById("theme-toggle");
-                console.log("🔍 Botão de tema (backup):", themeToggleBackup);
-                
-                if (themeToggleBackup && !themeToggleBackup.hasAttribute('data-backup-configured')) {
-                    themeToggleBackup.setAttribute('data-backup-configured', 'true');
-                    
-                    themeToggleBackup.addEventListener("click", function(e) {
-                        e.preventDefault();
-                        console.log("🖱️ Botão de tema clicado (backup)!");
-                        
-                        // Função de toggle simplificada
-                        const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
-                        const newTheme = currentTheme === "light" ? "dark" : "light";
-                        
-                        document.documentElement.setAttribute("data-theme", newTheme);
-                        localStorage.setItem("theme", newTheme);
-                        
-                        // Atualizar ícone
-                        const icon = document.getElementById("theme-icon");
-                        if (icon) {
-                            if (newTheme === "dark") {
-                                icon.className = "fas fa-sun text-xl transition-transform duration-300";
-                            } else {
-                                icon.className = "fas fa-moon text-xl transition-transform duration-300";
-                            }
-                        }
-                        
-                        console.log("🎨 Tema alterado para:", newTheme);
-                    });
-                    
-                    console.log("✅ Event listener de backup configurado");
+      // Script de backup para garantir que o botão de tema funcione
+      document.addEventListener("DOMContentLoaded", function () {
+        console.log("🚀 Script de backup carregado");
+
+        // Aguardar um momento para garantir que tudo foi carregado
+        setTimeout(function () {
+          const themeToggleBackup = document.getElementById("theme-toggle");
+          console.log("🔍 Botão de tema (backup):", themeToggleBackup);
+
+          if (
+            themeToggleBackup &&
+            !themeToggleBackup.hasAttribute("data-backup-configured")
+          ) {
+            themeToggleBackup.setAttribute("data-backup-configured", "true");
+
+            themeToggleBackup.addEventListener("click", function (e) {
+              e.preventDefault();
+              console.log("🖱️ Botão de tema clicado (backup)!");
+
+              // Função de toggle simplificada
+              const currentTheme =
+                document.documentElement.getAttribute("data-theme") || "light";
+              const newTheme = currentTheme === "light" ? "dark" : "light";
+
+              document.documentElement.setAttribute("data-theme", newTheme);
+              localStorage.setItem("theme", newTheme);
+
+              // Atualizar ícone
+              const icon = document.getElementById("theme-icon");
+              if (icon) {
+                if (newTheme === "dark") {
+                  icon.className =
+                    "fas fa-sun text-xl transition-transform duration-300";
+                } else {
+                  icon.className =
+                    "fas fa-moon text-xl transition-transform duration-300";
                 }
-            }, 100);
-        });
+              }
+
+              console.log("🎨 Tema alterado para:", newTheme);
+            });
+
+            console.log("✅ Event listener de backup configurado");
+          }
+        }, 100);
+      });
     </script>
   </body>
 </html>
