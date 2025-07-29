@@ -1,119 +1,47 @@
 [
   {
     "id": 1,
-    "userId": 2,
+    "userId": 4,
     "missionId": 1,
     "filePaths": [
-      "C:\\Users\\LEONARDOFELIPEDEGOES\\Documents\\pi2\\projetoIntegrador2ano2025\\uploads\\g_teste_1753714835590.txt"
+      "C:\\Users\\LEONARDOFELIPEDEGOES\\Documents\\pi2\\projetoIntegrador2ano2025\\uploads\\leonardo_teste_1753788883516.txt"
     ],
-    "submittedAt": "2025-07-28T15:00:35.599Z",
-    "pending": false,
-    "xp": 50,
-    "approved": true,
-    "feedback": ""
-  },
-  {
-    "id": 2,
-    "userId": 2,
-    "missionId": 1,
-    "filePaths": [
-      "C:\\Users\\LEONARDOFELIPEDEGOES\\Documents\\pi2\\projetoIntegrador2ano2025\\uploads\\g_teste_1753714950364.txt"
-    ],
-    "submittedAt": "2025-07-28T15:02:30.386Z",
-    "pending": false,
-    "status": "pending",
-    "missionTitle": "teste",
-    "xp": 50,
-    "approved": false
-  },
-  {
-    "id": 3,
-    "userId": 2,
-    "missionId": 1,
-    "filePaths": [
-      "C:\\Users\\LEONARDOFELIPEDEGOES\\Documents\\pi2\\projetoIntegrador2ano2025\\uploads\\g_teste_1753715251922.js"
-    ],
-    "submittedAt": "2025-07-28T15:07:31.947Z",
+    "submittedAt": "2025-07-29T11:34:43.591Z",
     "pending": false,
     "status": "approved",
     "missionTitle": "teste",
-    "xp": 50,
-    "completed": true,
-    "feedback": ""
-  },
-  {
-    "id": 4,
-    "userId": 2,
-    "missionId": 1,
-    "filePaths": [
-      "C:\\Users\\LEONARDOFELIPEDEGOES\\Documents\\pi2\\projetoIntegrador2ano2025\\uploads\\g_teste_1753715411293.html"
-    ],
-    "submittedAt": "2025-07-28T15:10:11.344Z",
-    "pending": false,
-    "status": "rejected",
-    "missionTitle": "teste",
-    "xp": 50,
-    "completed": false,
-    "feedback": ""
-  },
-  {
-    "id": 5,
-    "userId": 2,
-    "missionId": 1,
-    "filePaths": [
-      "C:\\Users\\LEONARDOFELIPEDEGOES\\Documents\\pi2\\projetoIntegrador2ano2025\\uploads\\g_teste_1753720917409.txt"
-    ],
-    "submittedAt": "2025-07-28T16:41:57.479Z",
-    "pending": false,
-    "status": "rejected",
-    "missionTitle": "teste",
-    "xp": 50,
-    "completed": false,
-    "feedback": ""
-  },
-  {
-    "id": 6,
-    "userId": 2,
-    "missionId": 1,
-    "filePaths": [
-      "C:\\Users\\LEONARDOFELIPEDEGOES\\Documents\\pi2\\projetoIntegrador2ano2025\\uploads\\g_teste_1753726795098.txt"
-    ],
-    "submittedAt": "2025-07-28T18:19:55.103Z",
-    "pending": false,
-    "status": "approved",
-    "missionTitle": "teste",
-    "xp": 50,
-    "completed": true,
-    "feedback": ""
-  },
-  {
-    "id": 7,
-    "userId": 2,
-    "missionId": 2,
-    "filePaths": [
-      "C:\\Users\\LEONARDOFELIPEDEGOES\\Documents\\pi2\\projetoIntegrador2ano2025\\uploads\\g_oi_28_1753727696739.txt"
-    ],
-    "submittedAt": "2025-07-28T18:34:56.750Z",
-    "pending": false,
-    "status": "rejected",
-    "missionTitle": "oi 28",
-    "xp": 50,
-    "completed": false,
-    "feedback": "feedback bonitaaaaaaaao"
-  },
-  {
-    "id": 8,
-    "userId": 2,
-    "missionId": 2,
-    "filePaths": [
-      "C:\\Users\\LEONARDOFELIPEDEGOES\\Documents\\pi2\\projetoIntegrador2ano2025\\uploads\\g_oi_28_1753727833169.txt"
-    ],
-    "submittedAt": "2025-07-28T18:37:13.173Z",
-    "pending": false,
-    "status": "approved",
-    "missionTitle": "oi 28",
     "xp": 50,
     "completed": true,
     "feedback": "boa"
+  },
+  {
+    "id": 2,
+    "userId": 4,
+    "missionId": 2,
+    "filePaths": [
+      "C:\\Users\\LEONARDOFELIPEDEGOES\\Documents\\pi2\\projetoIntegrador2ano2025\\uploads\\leonardo_oi_28_1753790046822.CSS"
+    ],
+    "submittedAt": "2025-07-29T11:54:06.830Z",
+    "pending": false,
+    "status": "rejected",
+    "missionTitle": "oi 28",
+    "xp": 50,
+    "completed": false,
+    "feedback": "melhoraaaa"
+  },
+  {
+    "id": 3,
+    "userId": 4,
+    "missionId": 5,
+    "filePaths": [
+      "C:\\Users\\LEONARDOFELIPEDEGOES\\Documents\\pi2\\projetoIntegrador2ano2025\\uploads\\leonardo_novo_1753799517584.js"
+    ],
+    "submittedAt": "2025-07-29T14:31:57.592Z",
+    "pending": false,
+    "status": "approved",
+    "missionTitle": "novo",
+    "xp": 500,
+    "completed": true,
+    "feedback": "legal"
   }
 ]

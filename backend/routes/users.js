@@ -225,16 +225,19 @@ router.get('/student-history/:id', autenticar, ehMestre, async (req, res) => {
   const { id } = req.params;
   console.log('[DEBUG] Buscando histórico do aluno:', id);
 
-  const user = users.find(u => u.id === parseInt(id));
+  // Ler dados atualizados do arquivo
+  const currentUsers = JSON.parse(await fs.readFile(caminhoUsers, 'utf8'));
+  const user = currentUsers.find(u => u.id === parseInt(id));
   if (!user) {
     return res.status(404).json({ error: 'Usuário não encontrado' });
   }
 
   const history = user.history || [];
+  console.log('[DEBUG] Histórico encontrado:', history);
 
   // Enriquecer o histórico com nomes dos mestres que aplicaram as ações
   const enrichedHistory = history.map(entry => {
-    const master = users.find(u => u.id === entry.appliedBy);
+    const master = currentUsers.find(u => u.id === entry.appliedBy);
     return {
       ...entry,
       appliedByName: master ? master.username : 'Usuário removido'

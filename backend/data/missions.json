@@ -20,7 +20,7 @@
   {
     "id": 3,
     "title": "front",
-    "description": "ajdjsd asdjkajsdk jskd jsdkajdjsd asdjkajsdk jskd jsdkajdjsd asdjkajsdk jskd jsdkajdjsd asdjkajsdk jskd jsdkajdjsd asdjkajsdk jskd jsdkajdjsd asdjkajsdk jskd jsdkajdjsd asdjkajsdk jskd jsdkajdjsd asdjkajsdk jskd jsdkajdjsd asdjkajsdk jskd jsdkajdjsd asdjkajsdk jskd j",
+    "description": "tesssssssssste",
     "xp": 40,
     "targetYear": 1,
     "targetClass": "Elfo do Front-end",
@@ -32,6 +32,15 @@
     "description": "asdasdadsadasd",
     "xp": 4,
     "targetYear": 2,
+    "targetClass": "geral",
+    "status": "ativa"
+  },
+  {
+    "id": 5,
+    "title": "novo",
+    "description": "novo",
+    "xp": 500,
+    "targetYear": null,
     "targetClass": "geral",
     "status": "ativa"
   }

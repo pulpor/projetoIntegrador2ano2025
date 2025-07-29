@@ -4,498 +4,921 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Painel do Mestre - Sistema RPG</title>
-    <!-- Tailwind CSS - CDN para desenvolvimento -->
+
+    <!-- Prevenir flash de tema -->
+    <script>
+      (function () {
+        const t = localStorage.getItem("theme") || "light";
+        document.documentElement.setAttribute("data-theme", t);
+      })();
+    </script>
+
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome - versão 5 estável -->
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
     />
+
+    <!-- Font Awesome - versão mais completa -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+
     <!-- CSS Files -->
     <link rel="stylesheet" href="../css/styles.css" />
+    <link rel="stylesheet" href="../css/helper.css" />
+
+    <style>
+      /* Reset e transições suaves */
+      * {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* Layout moderno */
+      .page-container {
+        padding-top: 150px;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+
+      /* Header fixo com design limpo */
+      .page-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        background: linear-gradient(
+          135deg,
+          #4f46e5 0%,
+          #7c3aed 50%,
+          #db2777 100%
+        );
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        height: 80px;
+      }
+
+      /* Ícone do perfil mais elegante */
+      .profile-icon {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+        transition: all 0.3s ease;
+      }
+
+      .profile-icon:hover {
+        transform: rotate(5deg) scale(1.05);
+        box-shadow: 0 6px 20px rgba(251, 191, 36, 0.4);
+      }
+
+      /* Botão de logout melhorado */
+      .logout-btn {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 20px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .logout-btn:hover {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+      }
+
+      .logout-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+      }
+
+      /* Botão de tema melhorado */
+      .theme-toggle {
+        position: fixed;
+        top: 16px;
+        right: 140px;
+        z-index: 1001;
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        border: none;
+        color: white;
+        font-size: 18px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+      }
+
+      .theme-toggle:hover {
+        background: linear-gradient(135deg, #8b5cf6, #a855f7);
+        transform: scale(1.1) rotate(10deg);
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+      }
+
+      /* Tabs modernos e elegantes */
+      .tab-header {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        position: fixed;
+        top: 80px;
+        left: 0;
+        right: 0;
+        z-index: 999;
+        padding: 18px 0;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+        height: 70px;
+      }
+
+      .tab-button {
+        position: relative;
+        border-radius: 14px;
+        padding: 12px 24px;
+        margin: 0 6px;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: transparent;
+        border: 2px solid transparent;
+        color: #6b7280;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        overflow: hidden;
+      }
+
+      .tab-button::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(99, 102, 241, 0.1),
+          transparent
+        );
+        transition: left 0.5s ease;
+      }
+
+      .tab-button:hover::before {
+        left: 100%;
+      }
+
+      .tab-button.active {
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        color: white;
+        box-shadow: 0 6px 20px rgba(79, 70, 229, 0.3);
+        transform: translateY(-2px);
+        border-color: transparent;
+      }
+
+      .tab-button:not(.active):hover {
+        background: linear-gradient(
+          135deg,
+          rgba(79, 70, 229, 0.08),
+          rgba(124, 58, 237, 0.08)
+        );
+        color: #4f46e5;
+        border-color: rgba(79, 70, 229, 0.2);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
+      }
+
+      .tab-button i {
+        font-size: 16px;
+        transition: transform 0.3s ease;
+      }
+
+      .tab-button:hover i {
+        transform: scale(1.1);
+      }
+
+      .tab-button.active i {
+        transform: scale(1.05);
+      }
+
+      /* Conteúdo com glassmorphism */
+      .main-content {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        margin: 40px 30px 30px 30px;
+        padding: 40px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+
+      /* Cards dos estudantes */
+      .student-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        position: relative;
+      }
+
+      .student-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #4f46e5, #7c3aed, #db2777, #f59e0b);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+        transform-origin: left;
+      }
+
+      .student-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+      }
+
+      .student-card:hover::before {
+        transform: scaleX(1);
+      }
+
+      /* Botões de ação melhorados */
+      .penalty-btn,
+      .reward-btn,
+      .history-btn,
+      .expel-btn {
+        position: relative;
+        overflow: hidden;
+        border: none;
+        cursor: pointer;
+      }
+
+      .penalty-btn::before,
+      .reward-btn::before,
+      .history-btn::before,
+      .expel-btn::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: width 0.3s ease, height 0.3s ease;
+      }
+
+      .penalty-btn:hover::before,
+      .reward-btn:hover::before,
+      .history-btn:hover::before,
+      .expel-btn:hover::before {
+        width: 100%;
+        height: 100%;
+      }
+
+      .penalty-btn:active,
+      .reward-btn:active,
+      .history-btn:active,
+      .expel-btn:active {
+        transform: scale(0.98) translateY(0);
+      }
+
+      /* Filtros */
+      .filter-section {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+      }
+
+      /* Botões modernos */
+      .btn-modern {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 24px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+      }
+
+      .btn-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+      }
+
+      /* Tema escuro melhorado */
+      [data-theme="dark"] .page-container {
+        background: linear-gradient(
+          135deg,
+          #0f172a 0%,
+          #1e293b 50%,
+          #334155 100%
+        );
+      }
+
+      [data-theme="dark"] .page-header {
+        background: linear-gradient(
+          135deg,
+          #1e293b 0%,
+          #334155 50%,
+          #475569 100%
+        );
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      [data-theme="dark"] .tab-header {
+        background: rgba(30, 41, 59, 0.95);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      [data-theme="dark"] .tab-button.active {
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: white;
+      }
+
+      [data-theme="dark"] .tab-button:not(.active) {
+        color: #cbd5e1;
+        background: rgba(30, 41, 59, 0.7);
+        border-color: rgba(255, 255, 255, 0.1);
+      }
+
+      [data-theme="dark"] .tab-button:not(.active):hover {
+        background: linear-gradient(
+          135deg,
+          rgba(99, 102, 241, 0.15),
+          rgba(139, 92, 246, 0.15)
+        );
+        color: #a5b4fc;
+        border-color: rgba(99, 102, 241, 0.3);
+      }
+
+      [data-theme="dark"] .main-content,
+      [data-theme="dark"] .filter-section {
+        background: rgba(30, 41, 59, 0.9);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      [data-theme="dark"] .student-card {
+        background: rgba(30, 41, 59, 0.9);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      }
+
+      [data-theme="dark"] .student-card:hover {
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+      }
+
+      [data-theme="dark"] .theme-toggle {
+        background: linear-gradient(135deg, #475569, #64748b);
+      }
+
+      [data-theme="dark"] .theme-toggle:hover {
+        background: linear-gradient(135deg, #64748b, #94a3b8);
+      }
+
+      [data-theme="dark"] .profile-icon {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+      }
+    </style>
   </head>
-  <body class="bg-gray-50 font-sans page-container navbar-fixed">
+  <body class="bg-gray-50 font-sans page-container">
     <!-- Theme Toggle Button -->
     <button class="theme-toggle" onclick="toggleTheme()" title="Alternar tema">
       <span id="theme-icon">🌙</span>
     </button>
 
-    <!-- Navbar -->
-    <nav class="bg-purple-600 text-white p-4 shadow-md page-header">
-      <div class="container mx-auto flex justify-between items-center">
-        <h1 class="text-xl font-bold">Painel do Mestre</h1>
-        <button
-          id="logout-btn"
-          class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded transition"
-        >
-          <i class="fas fa-sign-out-alt mr-1"></i> Sair
+    <!-- Navbar Moderna -->
+    <nav class="page-header">
+      <div
+        class="container mx-auto flex justify-between items-center px-6 py-4 h-full"
+      >
+        <div class="flex items-center space-x-4">
+          <div class="profile-icon">
+            <i class="fas fa-crown text-xl text-white"></i>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold text-white mb-2">Painel do Mestre</h1>
+          </div>
+        </div>
+        <button id="logout-btn" class="logout-btn">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Sair</span>
         </button>
       </div>
     </nav>
 
-    <!-- Tabs de Navegação -->
+    <!-- Tabs de Navegação Modernos -->
     <div class="tab-header">
-      <div class="container mx-auto flex space-x-4">
-        <button
-          id="tab-pending"
-          class="tab-button active px-4 py-2 font-medium border-b-2 border-purple-500 text-purple-600"
-        >
-          Pendentes
+      <div class="container mx-auto flex justify-center space-x-2 px-6">
+        <button id="tab-pending" class="tab-button active">
+          <i class="fas fa-clock mr-2"></i>Pendentes
         </button>
-        <button
-          id="tab-students"
-          class="tab-button px-4 py-2 font-medium text-gray-500"
-        >
-          Alunos
+        <button id="tab-students" class="tab-button">
+          <i class="fas fa-users mr-2"></i>Alunos
         </button>
-        <button
-          id="tab-submissions"
-          class="tab-button px-4 py-2 font-medium text-gray-500"
-        >
-          Submissões
+        <button id="tab-submissions" class="tab-button">
+          <i class="fas fa-file-alt mr-2"></i>Submissões
         </button>
-        <button
-          id="tab-missions"
-          class="tab-button px-4 py-2 font-medium text-gray-500"
-        >
-          Missões
+        <button id="tab-missions" class="tab-button">
+          <i class="fas fa-tasks mr-2"></i>Missões
         </button>
       </div>
     </div>
 
-    <!-- Filtros (mostrados condicionalmente) -->
-    <div id="students-filters" class="filter-section" style="display: none">
-      <h3 class="text-lg font-semibold mb-4">
-        <i class="fas fa-filter mr-2"></i>Filtros de Alunos
-      </h3>
-      <div class="filter-grid grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2"
-            >Ano</label
-          >
-          <select
-            id="filter-student-year"
-            class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
-          >
-            <option value="">Todos os anos</option>
-            <option value="1">1º ano - Front-end</option>
-            <option value="2">2º ano - Back-end</option>
-            <option value="3">3º ano - Mobile</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2"
-            >Classe</label
-          >
-          <select
-            id="filter-student-class"
-            class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
-          >
-            <option value="">Todas as classes</option>
-            <option value="Arqueiro do JavaScript">
-              Arqueiro do JavaScript
-            </option>
-            <option value="Cafeicultor do Java">Cafeicultor do Java</option>
-            <option value="Mago do CSS">Mago do CSS</option>
-            <option value="Guerreiro do HTML">Guerreiro do HTML</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">XP</label>
-          <select
-            id="filter-student-xp"
-            class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
-          >
-            <option value="">Todos os níveis</option>
-            <option value="0-99">0-99 XP</option>
-            <option value="100-299">100-299 XP</option>
-            <option value="300-599">300-599 XP</option>
-            <option value="600+">600+ XP</option>
-          </select>
-        </div>
-        <div>
-          <button
-            id="apply-student-filters"
-            class="filter-button bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition mt-6"
-          >
-            <i class="fas fa-search mr-2"></i>Aplicar Filtros
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div id="submissions-filters" class="filter-section" style="display: none">
-      <h3 class="text-lg font-semibold mb-4">
-        <i class="fas fa-filter mr-2"></i>Filtros de Submissões
-      </h3>
-      <div class="filter-grid grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2"
-            >Status</label
-          >
-          <select
-            id="filter-submission-status"
-            class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
-          >
-            <option value="">Todos os status</option>
-            <option value="pending">Pendente</option>
-            <option value="approved">Aprovado</option>
-            <option value="rejected">Rejeitado</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2"
-            >Aluno</label
-          >
-          <input
-            type="text"
-            id="filter-submission-student"
-            placeholder="Nome do aluno"
-            class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
-          />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2"
-            >Missão</label
-          >
-          <input
-            type="text"
-            id="filter-submission-mission"
-            placeholder="Nome da missão"
-            class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
-          />
-        </div>
-        <div>
-          <button
-            id="apply-submission-filters"
-            class="filter-button bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition mt-6"
-          >
-            <i class="fas fa-search mr-2"></i>Aplicar Filtros
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div id="missions-filters" class="filter-section" style="display: none">
-      <h3 class="text-lg font-semibold mb-4">
-        <i class="fas fa-filter mr-2"></i>Filtros de Missões
-      </h3>
-      <div class="filter-grid grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2"
-            >Ano</label
-          >
-          <select
-            id="filter-mission-year"
-            class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
-          >
-            <option value="">Todos os anos</option>
-            <option value="1">1º ano - Front-end</option>
-            <option value="2">2º ano - Back-end</option>
-            <option value="3">3º ano - Mobile</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2"
-            >Dificuldade</label
-          >
-          <select
-            id="filter-mission-difficulty"
-            class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
-          >
-            <option value="">Todas as dificuldades</option>
-            <option value="easy">Fácil</option>
-            <option value="medium">Médio</option>
-            <option value="hard">Difícil</option>
-            <option value="very-hard">Muito Difícil</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">XP</label>
-          <select
-            id="filter-mission-xp"
-            class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
-          >
-            <option value="">Todos os XP</option>
-            <option value="0-49">0-49 XP</option>
-            <option value="50-99">50-99 XP</option>
-            <option value="100+">100+ XP</option>
-          </select>
-        </div>
-        <div>
-          <button
-            id="apply-mission-filters"
-            class="filter-button bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition mt-6"
-          >
-            <i class="fas fa-search mr-2"></i>Aplicar Filtros
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Conteúdo das Tabs -->
-    <div class="page-content">
-      <div class="container mx-auto panel-wrapper">
-        <div class="tabs-wrapper">
-          <!-- Tab: Usuários Pendentes -->
-          <div id="pending-content" class="tab-content active">
-            <h2 class="text-xl font-bold mb-4">Usuários Pendentes</h2>
-            <div id="pending-users" class="cards-grid">
-              <!-- Conteúdo será carregado via JavaScript -->
-              <div class="card">
-                <h3 class="font-bold mb-2">João Silva</h3>
-                <p class="text-gray-600">Aguardando aprovação do mestre</p>
-                <p class="text-sm text-gray-500 mt-2">Email: joao@teste.com</p>
-                <div class="mt-4 flex gap-2">
-                  <button
-                    class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
-                  >
-                    Aprovar
-                  </button>
-                  <button
-                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
-                  >
-                    Rejeitar
-                  </button>
-                </div>
-              </div>
-              <div class="card">
-                <h3 class="font-bold mb-2">Maria Santos</h3>
-                <p class="text-gray-600">Aguardando aprovação do mestre</p>
-                <p class="text-sm text-gray-500 mt-2">Email: maria@teste.com</p>
-                <div class="mt-4 flex gap-2">
-                  <button
-                    class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
-                  >
-                    Aprovar
-                  </button>
-                  <button
-                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
-                  >
-                    Rejeitar
-                  </button>
-                </div>
-              </div>
-              <div class="card">
-                <h3 class="font-bold mb-2">Pedro Oliveira</h3>
-                <p class="text-gray-600">Aguardando aprovação do mestre</p>
-                <p class="text-sm text-gray-500 mt-2">Email: pedro@teste.com</p>
-                <div class="mt-4 flex gap-2">
-                  <button
-                    class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
-                  >
-                    Aprovar
-                  </button>
-                  <button
-                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
-                  >
-                    Rejeitar
-                  </button>
-                </div>
-              </div>
-              <div class="card">
-                <h3 class="font-bold mb-2">Ana Costa</h3>
-                <p class="text-gray-600">Aguardando aprovação do mestre</p>
-                <p class="text-sm text-gray-500 mt-2">Email: ana@teste.com</p>
-                <div class="mt-4 flex gap-2">
-                  <button
-                    class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
-                  >
-                    Aprovar
-                  </button>
-                  <button
-                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
-                  >
-                    Rejeitar
-                  </button>
-                </div>
-              </div>
-              <div class="card">
-                <h3 class="font-bold mb-2">Carlos Lima</h3>
-                <p class="text-gray-600">Aguardando aprovação do mestre</p>
-                <p class="text-sm text-gray-500 mt-2">
-                  Email: carlos@teste.com
-                </p>
-                <div class="mt-4 flex gap-2">
-                  <button
-                    class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
-                  >
-                    Aprovar
-                  </button>
-                  <button
-                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
-                  >
-                    Rejeitar
-                  </button>
-                </div>
-              </div>
-              <div class="card">
-                <h3 class="font-bold mb-2">Lucia Rodrigues</h3>
-                <p class="text-gray-600">Aguardando aprovação do mestre</p>
-                <p class="text-sm text-gray-500 mt-2">Email: lucia@teste.com</p>
-                <div class="mt-4 flex gap-2">
-                  <button
-                    class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
-                  >
-                    Aprovar
-                  </button>
-                  <button
-                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
-                  >
-                    Rejeitar
-                  </button>
-                </div>
-              </div>
-            </div>
+    <!-- Conteúdo Principal -->
+    <div class="main-content">
+      <!-- Filtros (mostrados condicionalmente) -->
+      <div id="students-filters" class="filter-section" style="display: none">
+        <h3 class="text-lg font-semibold mb-4">
+          <i class="fas fa-filter mr-2"></i>Filtros de Alunos
+        </h3>
+        <div class="filter-grid grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Ano</label
+            >
+            <select
+              id="filter-student-year"
+              class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
+            >
+              <option value="">Todos os anos</option>
+              <option value="1">1º ano - Front-end</option>
+              <option value="2">2º ano - Back-end</option>
+              <option value="3">3º ano - Mobile</option>
+            </select>
           </div>
-
-          <!-- Tab: Alunos -->
-          <div id="students-content" class="tab-content">
-            <h2 class="text-xl font-bold mb-4">Gerenciar Alunos</h2>
-            <div id="students-list" class="cards-grid">
-              <!-- Conteúdo será carregado via JavaScript -->
-            </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Classe</label
+            >
+            <select
+              id="filter-student-class"
+              class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
+            >
+              <option value="">Todas as classes</option>
+              <option value="Arqueiro do JavaScript">
+                Arqueiro do JavaScript
+              </option>
+              <option value="Cafeicultor do Java">Cafeicultor do Java</option>
+              <option value="Mago do CSS">Mago do CSS</option>
+              <option value="Guerreiro do HTML">Guerreiro do HTML</option>
+            </select>
           </div>
-
-          <!-- Tab: Submissões -->
-          <div id="submissions-content" class="tab-content">
-            <h2 class="text-xl font-bold mb-4">Avaliar Submissões</h2>
-            <div id="submissions-list" class="cards-grid">
-              <!-- Conteúdo será carregado via JavaScript -->
-              <div class="card">
-                <h3 class="font-bold mb-2">Exemplo - Submissão</h3>
-                <p class="text-gray-600">Missão: Criar página de login</p>
-                <p class="text-sm text-gray-500 mt-2">Aluno: João Silva</p>
-                <div class="mt-2">
-                  <span
-                    class="inline-block bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded"
-                  >
-                    Pendente
-                  </span>
-                </div>
-                <div class="mt-4 flex gap-2">
-                  <button
-                    class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
-                  >
-                    Aprovar
-                  </button>
-                  <button
-                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
-                  >
-                    Rejeitar
-                  </button>
-                </div>
-              </div>
-            </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >XP</label
+            >
+            <select
+              id="filter-student-xp"
+              class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
+            >
+              <option value="">Todos os níveis</option>
+              <option value="0-99">0-99 XP</option>
+              <option value="100-299">100-299 XP</option>
+              <option value="300-599">300-599 XP</option>
+              <option value="600+">600+ XP</option>
+            </select>
           </div>
+          <div>
+            <button
+              id="apply-student-filters"
+              class="filter-button bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition mt-6"
+            >
+              <i class="fas fa-search mr-2"></i>Aplicar Filtros
+            </button>
+          </div>
+        </div>
+      </div>
 
-          <!-- Tab: Missões -->
-          <div id="missions-content" class="tab-content">
-            <h2 class="text-xl font-bold mb-4">Gerenciar Missões</h2>
+      <div
+        id="submissions-filters"
+        class="filter-section"
+        style="display: none"
+      >
+        <h3 class="text-lg font-semibold mb-4">
+          <i class="fas fa-filter mr-2"></i>Filtros de Submissões
+        </h3>
+        <div class="filter-grid grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Status</label
+            >
+            <select
+              id="filter-submission-status"
+              class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
+            >
+              <option value="">Todos os status</option>
+              <option value="pending">Pendente</option>
+              <option value="approved">Aprovado</option>
+              <option value="rejected">Rejeitado</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Aluno</label
+            >
+            <input
+              type="text"
+              id="filter-submission-student"
+              placeholder="Nome do aluno"
+              class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Missão</label
+            >
+            <input
+              type="text"
+              id="filter-submission-mission"
+              placeholder="Nome da missão"
+              class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
+            />
+          </div>
+          <div>
+            <button
+              id="apply-submission-filters"
+              class="filter-button bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition mt-6"
+            >
+              <i class="fas fa-search mr-2"></i>Aplicar Filtros
+            </button>
+          </div>
+        </div>
+      </div>
 
-            <!-- Formulário de Criação/Edição de Missões -->
-            <div class="bg-white p-6 rounded-lg shadow mb-6">
-              <h3 class="text-lg font-semibold mb-4">Criar Nova Missão</h3>
-              <div class="space-y-4">
-                <input
-                  id="mission-title"
-                  type="text"
-                  placeholder="Título da missão"
-                  class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-200"
-                />
-                <textarea
-                  id="mission-description"
-                  placeholder="Descrição da missão"
-                  class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-200"
-                  rows="4"
-                ></textarea>
-                <input
-                  id="mission-xp"
-                  type="number"
-                  placeholder="XP da missão"
-                  class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-200"
-                />
-                <select
-                  id="mission-year"
-                  class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-200"
-                >
-                  <option value="">
-                    Ano (opcional - para todas as séries)
-                  </option>
-                  <option value="1">1º ano - Front-end</option>
-                  <option value="2">2º ano - Back-end</option>
-                  <option value="3">3º ano - Mobile</option>
-                </select>
-                <select
-                  id="mission-class"
-                  class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-200"
-                >
-                  <option value="geral" selected>
-                    Geral (todas as classes)
-                  </option>
-                  <option value="Arqueiro do JavaScript">
-                    Arqueiro do JavaScript
-                  </option>
-                  <option value="Cafeicultor do Java">
-                    Cafeicultor do Java
-                  </option>
-                  <option value="Mago do CSS">Mago do CSS</option>
-                  <option value="Paladino do HTML">Paladino do HTML</option>
-                  <option value="Bárbaro do Back-end">
-                    Bárbaro do Back-end
-                  </option>
-                  <option value="Domador de Dados">Domador de Dados</option>
-                  <option value="Elfo do Front-end">Elfo do Front-end</option>
-                  <option value="Caçador de Bugs">Caçador de Bugs</option>
-                </select>
-                <div class="flex gap-3">
-                  <button
-                    id="create-mission-btn"
-                    class="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-lg transition font-medium"
-                  >
-                    <i class="fas fa-plus mr-2"></i>Criar Missão
-                  </button>
-                  <button
-                    id="cancel-edit-btn"
-                    class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg transition font-medium"
-                    style="display: none"
-                  >
-                    <i class="fas fa-times mr-2"></i>Cancelar
-                  </button>
-                </div>
-              </div>
-            </div>
+      <div id="missions-filters" class="filter-section" style="display: none">
+        <h3 class="text-lg font-semibold mb-4">
+          <i class="fas fa-filter mr-2"></i>Filtros de Missões
+        </h3>
+        <div class="filter-grid grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Ano</label
+            >
+            <select
+              id="filter-mission-year"
+              class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
+            >
+              <option value="">Todos os anos</option>
+              <option value="1">1º ano - Front-end</option>
+              <option value="2">2º ano - Back-end</option>
+              <option value="3">3º ano - Mobile</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Dificuldade</label
+            >
+            <select
+              id="filter-mission-difficulty"
+              class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
+            >
+              <option value="">Todas as dificuldades</option>
+              <option value="easy">Fácil</option>
+              <option value="medium">Médio</option>
+              <option value="hard">Difícil</option>
+              <option value="very-hard">Muito Difícil</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >XP</label
+            >
+            <select
+              id="filter-mission-xp"
+              class="filter-input w-full p-2 border rounded-lg focus:ring-2 focus:ring-purple-200"
+            >
+              <option value="">Todos os XP</option>
+              <option value="0-49">0-49 XP</option>
+              <option value="50-99">50-99 XP</option>
+              <option value="100+">100+ XP</option>
+            </select>
+          </div>
+          <div>
+            <button
+              id="apply-mission-filters"
+              class="filter-button bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition mt-6"
+            >
+              <i class="fas fa-search mr-2"></i>Aplicar Filtros
+            </button>
+          </div>
+        </div>
+      </div>
 
-            <!-- Lista de Missões Existentes -->
-            <div class="bg-white p-4 rounded-lg shadow mb-6">
-              <h3 class="text-lg font-semibold mb-4">Missões Existentes</h3>
-              <div id="missions-list" class="cards-grid">
+      <!-- Conteúdo das Tabs -->
+      <div class="page-content">
+        <div class="contend container mx-auto panel-wrapper">
+          <div class="tabs-wrapper">
+            <!-- Tab: Usuários Pendentes -->
+            <div id="pending-content" class="tab-content active">
+              <h2 class="text-xl font-bold mb-2">Usuários Pendentes</h2>
+              <div id="pending-users" class="cards-grid">
                 <!-- Conteúdo será carregado via JavaScript -->
                 <div class="card">
-                  <h3 class="font-bold mb-2">Exemplo - Missão</h3>
-                  <p class="text-gray-600">Criar página de login responsiva</p>
-                  <div class="mt-2 flex gap-2">
-                    <span
-                      class="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded"
-                    >
-                      Fácil
-                    </span>
-                    <span
-                      class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
-                    >
-                      50 XP
-                    </span>
-                  </div>
+                  <h3 class="font-bold mb-2">João Silva</h3>
+                  <p class="text-gray-600">Aguardando aprovação do mestre</p>
+                  <p class="text-sm text-gray-500 mt-2">
+                    Email: joao@teste.com
+                  </p>
                   <div class="mt-4 flex gap-2">
                     <button
-                      class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm"
+                      class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
                     >
-                      Editar
+                      Aprovar
                     </button>
                     <button
                       class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
                     >
-                      Excluir
+                      Rejeitar
                     </button>
+                  </div>
+                </div>
+                <div class="card">
+                  <h3 class="font-bold mb-2">Maria Santos</h3>
+                  <p class="text-gray-600">Aguardando aprovação do mestre</p>
+                  <p class="text-sm text-gray-500 mt-2">
+                    Email: maria@teste.com
+                  </p>
+                  <div class="mt-4 flex gap-2">
+                    <button
+                      class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
+                    >
+                      Aprovar
+                    </button>
+                    <button
+                      class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
+                    >
+                      Rejeitar
+                    </button>
+                  </div>
+                </div>
+                <div class="card">
+                  <h3 class="font-bold mb-2">Pedro Oliveira</h3>
+                  <p class="text-gray-600">Aguardando aprovação do mestre</p>
+                  <p class="text-sm text-gray-500 mt-2">
+                    Email: pedro@teste.com
+                  </p>
+                  <div class="mt-4 flex gap-2">
+                    <button
+                      class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
+                    >
+                      Aprovar
+                    </button>
+                    <button
+                      class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
+                    >
+                      Rejeitar
+                    </button>
+                  </div>
+                </div>
+                <div class="card">
+                  <h3 class="font-bold mb-2">Ana Costa</h3>
+                  <p class="text-gray-600">Aguardando aprovação do mestre</p>
+                  <p class="text-sm text-gray-500 mt-2">Email: ana@teste.com</p>
+                  <div class="mt-4 flex gap-2">
+                    <button
+                      class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
+                    >
+                      Aprovar
+                    </button>
+                    <button
+                      class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
+                    >
+                      Rejeitar
+                    </button>
+                  </div>
+                </div>
+                <div class="card">
+                  <h3 class="font-bold mb-2">Carlos Lima</h3>
+                  <p class="text-gray-600">Aguardando aprovação do mestre</p>
+                  <p class="text-sm text-gray-500 mt-2">
+                    Email: carlos@teste.com
+                  </p>
+                  <div class="mt-4 flex gap-2">
+                    <button
+                      class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
+                    >
+                      Aprovar
+                    </button>
+                    <button
+                      class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
+                    >
+                      Rejeitar
+                    </button>
+                  </div>
+                </div>
+                <div class="card">
+                  <h3 class="font-bold mb-2">Lucia Rodrigues</h3>
+                  <p class="text-gray-600">Aguardando aprovação do mestre</p>
+                  <p class="text-sm text-gray-500 mt-2">
+                    Email: lucia@teste.com
+                  </p>
+                  <div class="mt-4 flex gap-2">
+                    <button
+                      class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
+                    >
+                      Aprovar
+                    </button>
+                    <button
+                      class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
+                    >
+                      Rejeitar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab: Alunos -->
+            <div id="students-content" class="tab-content">
+              <h2 class="text-xl font-bold mb-2">Gerenciar Alunos</h2>
+              <div id="students-list" class="cards-grid">
+                <!-- Conteúdo será carregado via JavaScript -->
+              </div>
+            </div>
+
+            <!-- Tab: Submissões -->
+            <div id="submissions-content" class="tab-content">
+              <h2 class="text-xl font-bold mb-2">Avaliar Submissões</h2>
+              <div id="submissions-list" class="cards-grid">
+                <!-- Conteúdo será carregado via JavaScript -->
+                <div class="card">
+                  <h3 class="font-bold mb-2">Exemplo - Submissão</h3>
+                  <p class="text-gray-600">Missão: Criar página de login</p>
+                  <p class="text-sm text-gray-500 mt-2">Aluno: João Silva</p>
+                  <div class="mt-2">
+                    <span
+                      class="inline-block bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded"
+                    >
+                      Pendente
+                    </span>
+                  </div>
+                  <div class="mt-4 flex gap-2">
+                    <button
+                      class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
+                    >
+                      Aprovar
+                    </button>
+                    <button
+                      class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
+                    >
+                      Rejeitar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab: Missões -->
+            <div id="missions-content" class="tab-content">
+              <h2 class="text-xl font-bold mb-2">Gerenciar Missões</h2>
+
+              <!-- Formulário de Criação/Edição de Missões -->
+              <div class="bg-white p-6 rounded-lg shadow mb-6">
+                <h3 class="text-lg font-semibold mb-4">Criar Nova Missão</h3>
+                <div class="space-y-4">
+                  <input
+                    id="mission-title"
+                    type="text"
+                    placeholder="Título da missão"
+                    class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-200"
+                  />
+                  <textarea
+                    id="mission-description"
+                    placeholder="Descrição da missão"
+                    class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-200"
+                    rows="4"
+                  ></textarea>
+                  <input
+                    id="mission-xp"
+                    type="number"
+                    placeholder="XP da missão"
+                    class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-200"
+                  />
+                  <select
+                    id="mission-year"
+                    class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-200"
+                  >
+                    <option value="">
+                      Ano (opcional - para todas as séries)
+                    </option>
+                    <option value="1">1º ano - Front-end</option>
+                    <option value="2">2º ano - Back-end</option>
+                    <option value="3">3º ano - Mobile</option>
+                  </select>
+                  <select
+                    id="mission-class"
+                    class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-200"
+                  >
+                    <option value="geral" selected>
+                      Geral (todas as classes)
+                    </option>
+                    <option value="Arqueiro do JavaScript">
+                      Arqueiro do JavaScript
+                    </option>
+                    <option value="Cafeicultor do Java">
+                      Cafeicultor do Java
+                    </option>
+                    <option value="Mago do CSS">Mago do CSS</option>
+                    <option value="Paladino do HTML">Paladino do HTML</option>
+                    <option value="Bárbaro do Back-end">
+                      Bárbaro do Back-end
+                    </option>
+                    <option value="Domador de Dados">Domador de Dados</option>
+                    <option value="Elfo do Front-end">Elfo do Front-end</option>
+                    <option value="Caçador de Bugs">Caçador de Bugs</option>
+                  </select>
+                  <div class="flex gap-3">
+                    <button
+                      id="create-mission-btn"
+                      class="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-lg transition font-medium"
+                    >
+                      <i class="fas fa-plus mr-2"></i>Criar Missão
+                    </button>
+                    <button
+                      id="cancel-edit-btn"
+                      class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-lg transition font-medium"
+                      style="display: none"
+                    >
+                      <i class="fas fa-times mr-2"></i>Cancelar
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Lista de Missões Existentes -->
+              <div class="bg-white p-4 rounded-lg shadow mb-6">
+                <h3 class="text-lg font-semibold mb-4">Missões Existentes</h3>
+                <div id="missions-list" class="cards-grid">
+                  <!-- Conteúdo será carregado via JavaScript -->
+                  <div class="card">
+                    <h3 class="font-bold mb-2">Exemplo - Missão</h3>
+                    <p class="text-gray-600">
+                      Criar página de login responsiva
+                    </p>
+                    <div class="mt-2 flex gap-2">
+                      <span
+                        class="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded"
+                      >
+                        Fácil
+                      </span>
+                      <span
+                        class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
+                      >
+                        50 XP
+                      </span>
+                    </div>
+                    <div class="mt-4 flex gap-2">
+                      <button
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
+                      >
+                        Excluir
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -503,145 +926,184 @@
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- JavaScript -->
-    <script type="module">
-      import "../js/master.js";
-    </script>
+      <!-- JavaScript -->
+      <script type="module">
+        import "../js/master.js";
+      </script>
 
-    <script>
-      // Theme toggle function
-      function toggleTheme() {
-        const html = document.documentElement;
-        const icon = document.getElementById("theme-icon");
+      <script>
+        // Theme toggle function
+        function toggleTheme() {
+          const html = document.documentElement;
+          const icon = document.getElementById("theme-icon");
 
-        if (html.getAttribute("data-theme") === "dark") {
-          html.setAttribute("data-theme", "light");
-          icon.textContent = "🌙";
-          localStorage.setItem("theme", "light");
-        } else {
-          html.setAttribute("data-theme", "dark");
-          icon.textContent = "☀️";
-          localStorage.setItem("theme", "dark");
+          if (html.getAttribute("data-theme") === "dark") {
+            html.setAttribute("data-theme", "light");
+            icon.textContent = "🌙";
+            localStorage.setItem("theme", "light");
+          } else {
+            html.setAttribute("data-theme", "dark");
+            icon.textContent = "☀️";
+            localStorage.setItem("theme", "dark");
+          }
         }
-      }
 
-      // Initialize theme on page load
-      function initTheme() {
-        const savedTheme = localStorage.getItem("theme");
-        const prefersDark = window.matchMedia(
-          "(prefers-color-scheme: dark)"
-        ).matches;
-        const initialTheme = savedTheme || (prefersDark ? "dark" : "light");
+        // Initialize theme on page load
+        function initTheme() {
+          const savedTheme = localStorage.getItem("theme");
+          const prefersDark = window.matchMedia(
+            "(prefers-color-scheme: dark)"
+          ).matches;
+          const initialTheme = savedTheme || (prefersDark ? "dark" : "light");
 
-        document.documentElement.setAttribute("data-theme", initialTheme);
+          document.documentElement.setAttribute("data-theme", initialTheme);
 
-        const themeIcon = document.getElementById("theme-icon");
-        if (themeIcon) {
-          themeIcon.textContent = initialTheme === "dark" ? "☀️" : "🌙";
+          const themeIcon = document.getElementById("theme-icon");
+          if (themeIcon) {
+            themeIcon.textContent = initialTheme === "dark" ? "☀️" : "🌙";
+          }
         }
-      }
 
-      // Tab management for fixed layout
-      function initTabs() {
-        const tabButtons = document.querySelectorAll(".tab-button");
-        const tabContents = document.querySelectorAll(".tab-content");
-        const filtersMap = {
-          students: "students-filters",
-          submissions: "submissions-filters",
-          missions: "missions-filters",
-        };
+        // Tab management for fixed layout
+        function initTabs() {
+          const tabButtons = document.querySelectorAll(".tab-button");
+          const tabContents = document.querySelectorAll(".tab-content");
+          const filtersMap = {
+            students: "students-filters",
+            submissions: "submissions-filters",
+            missions: "missions-filters",
+          };
 
-        tabButtons.forEach((button) => {
-          button.addEventListener("click", () => {
-            // Remove active from all buttons and contents
-            tabButtons.forEach((btn) => {
-              btn.classList.remove(
+          tabButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+              // Remove active from all buttons and contents
+              tabButtons.forEach((btn) => {
+                btn.classList.remove(
+                  "active",
+                  "border-purple-500",
+                  "text-purple-600"
+                );
+                btn.classList.add("text-gray-500");
+              });
+              tabContents.forEach((content) => {
+                content.classList.remove("active", "has-active-filters");
+              });
+
+              // Hide all filters
+              Object.values(filtersMap).forEach((filterId) => {
+                const filterElement = document.getElementById(filterId);
+                if (filterElement) {
+                  filterElement.style.display = "none";
+                }
+              });
+
+              // Add active to clicked button
+              button.classList.add(
                 "active",
                 "border-purple-500",
                 "text-purple-600"
               );
-              btn.classList.add("text-gray-500");
-            });
-            tabContents.forEach((content) => {
-              content.classList.remove("active", "has-active-filters");
-            });
+              button.classList.remove("text-gray-500");
 
-            // Hide all filters
-            Object.values(filtersMap).forEach((filterId) => {
-              const filterElement = document.getElementById(filterId);
-              if (filterElement) {
-                filterElement.style.display = "none";
+              // Show corresponding content
+              const targetId = button.id.replace("tab-", "") + "-content";
+              const targetContent = document.getElementById(targetId);
+              if (targetContent) {
+                targetContent.classList.add("active");
               }
-            });
 
-            // Add active to clicked button
-            button.classList.add(
-              "active",
-              "border-purple-500",
-              "text-purple-600"
-            );
-            button.classList.remove("text-gray-500");
-
-            // Show corresponding content
-            const targetId = button.id.replace("tab-", "") + "-content";
-            const targetContent = document.getElementById(targetId);
-            if (targetContent) {
-              targetContent.classList.add("active");
-            }
-
-            // Show corresponding filters if they exist
-            const tabName = button.id.replace("tab-", "");
-            const filterKey = filtersMap[tabName];
-            if (filterKey) {
-              const filterElement = document.getElementById(filterKey);
-              if (filterElement) {
-                filterElement.style.display = "block";
+              // Show corresponding filters if they exist
+              const tabName = button.id.replace("tab-", "");
+              const filterKey = filtersMap[tabName];
+              if (filterKey) {
+                const filterElement = document.getElementById(filterKey);
+                if (filterElement) {
+                  filterElement.style.display = "block";
+                }
               }
-            }
 
-            // Carregar dados específicos da aba quando ela for ativada
-            if (tabName === "students" && window.loadApprovedStudents) {
-              console.log("[DEBUG] Aba de alunos ativada, carregando dados...");
-              window.loadApprovedStudents();
-            } else if (tabName === "submissions" && window.loadSubmissions) {
-              console.log(
-                "[DEBUG] Aba de submissões ativada, carregando dados..."
-              );
-              window.loadSubmissions();
-            } else if (tabName === "missions" && window.loadMissions) {
-              console.log(
-                "[DEBUG] Aba de missões ativada, carregando dados..."
-              );
-              window.loadMissions();
-            } else if (tabName === "pending" && window.loadPendingUsers) {
-              console.log(
-                "[DEBUG] Aba de pendentes ativada, carregando dados..."
-              );
-              window.loadPendingUsers();
-            }
+              // Carregar dados específicos da aba quando ela for ativada
+              if (tabName === "students" && window.loadApprovedStudents) {
+                console.log(
+                  "[DEBUG] Aba de alunos ativada, carregando dados..."
+                );
+                window.loadApprovedStudents();
+              } else if (tabName === "submissions" && window.loadSubmissions) {
+                console.log(
+                  "[DEBUG] Aba de submissões ativada, carregando dados..."
+                );
+                window.loadSubmissions();
+              } else if (tabName === "missions" && window.loadMissions) {
+                console.log(
+                  "[DEBUG] Aba de missões ativada, carregando dados..."
+                );
+                window.loadMissions();
+              } else if (tabName === "pending" && window.loadPendingUsers) {
+                console.log(
+                  "[DEBUG] Aba de pendentes ativada, carregando dados..."
+                );
+                window.loadPendingUsers();
+              }
 
-            // Atualizar espaçamento dos filtros
-            updateFilterSpacing();
+              // Atualizar espaçamento dos filtros
+              updateFilterSpacing();
+            });
           });
+        }
+
+        // Initialize everything when DOM is loaded
+        document.addEventListener("DOMContentLoaded", function () {
+          initTheme();
+          initTabs();
+          initFilterSpacing();
         });
-      }
 
-      // Initialize everything when DOM is loaded
-      document.addEventListener("DOMContentLoaded", function () {
-        initTheme();
-        initTabs();
-        initFilterSpacing();
-      });
+        // Função para gerenciar espaçamento quando filtros aparecem
+        function initFilterSpacing() {
+          const filterSections = document.querySelectorAll(".filter-section");
+          const tabContents = document.querySelectorAll(".tab-content");
 
-      // Função para gerenciar espaçamento quando filtros aparecem
-      function initFilterSpacing() {
-        const filterSections = document.querySelectorAll(".filter-section");
-        const tabContents = document.querySelectorAll(".tab-content");
+          // Observer para detectar mudanças na visibilidade dos filtros
+          const observer = new MutationObserver(function (mutations) {
+            let hasVisibleFilter = false;
 
-        // Observer para detectar mudanças na visibilidade dos filtros
-        const observer = new MutationObserver(function (mutations) {
+            filterSections.forEach((filter) => {
+              const isVisible =
+                filter.style.display === "block" ||
+                filter.classList.contains("active") ||
+                filter.classList.contains("show-filters");
+              if (isVisible) {
+                hasVisibleFilter = true;
+              }
+            });
+
+            // Aplicar ou remover classe baseado na visibilidade dos filtros
+            tabContents.forEach((tabContent) => {
+              if (hasVisibleFilter) {
+                tabContent.classList.add("has-active-filters");
+              } else {
+                tabContent.classList.remove("has-active-filters");
+              }
+            });
+          });
+
+          // Observar mudanças em todos os filtros
+          filterSections.forEach((filter) => {
+            observer.observe(filter, {
+              attributes: true,
+              attributeFilter: ["style", "class"],
+            });
+          });
+
+          // Verificação inicial
+          updateFilterSpacing();
+        }
+
+        // Função auxiliar para atualizar espaçamento
+        function updateFilterSpacing() {
+          const filterSections = document.querySelectorAll(".filter-section");
+          const tabContents = document.querySelectorAll(".tab-content");
           let hasVisibleFilter = false;
 
           filterSections.forEach((filter) => {
@@ -654,7 +1116,7 @@
             }
           });
 
-          // Aplicar ou remover classe baseado na visibilidade dos filtros
+          // Aplicar ou remover classe para todos os tab-contents
           tabContents.forEach((tabContent) => {
             if (hasVisibleFilter) {
               tabContent.classList.add("has-active-filters");
@@ -662,45 +1124,35 @@
               tabContent.classList.remove("has-active-filters");
             }
           });
+        }
+      </script>
+
+      <!-- Scripts -->
+      <script type="module" src="../js/master.js"></script>
+      <script>
+        // Função para alternar tema
+        function toggleTheme() {
+          const html = document.documentElement;
+          const currentTheme = html.getAttribute("data-theme") || "light";
+          const newTheme = currentTheme === "light" ? "dark" : "light";
+
+          html.setAttribute("data-theme", newTheme);
+          localStorage.setItem("theme", newTheme);
+
+          const themeIcon = document.getElementById("theme-icon");
+          themeIcon.textContent = newTheme === "light" ? "🌙" : "☀️";
+        }
+
+        // Aplicar tema salvo na inicialização
+        document.addEventListener("DOMContentLoaded", () => {
+          const savedTheme = localStorage.getItem("theme") || "light";
+          document.documentElement.setAttribute("data-theme", savedTheme);
+
+          const themeIcon = document.getElementById("theme-icon");
+          themeIcon.textContent = savedTheme === "light" ? "🌙" : "☀️";
         });
-
-        // Observar mudanças em todos os filtros
-        filterSections.forEach((filter) => {
-          observer.observe(filter, {
-            attributes: true,
-            attributeFilter: ["style", "class"],
-          });
-        });
-
-        // Verificação inicial
-        updateFilterSpacing();
-      }
-
-      // Função auxiliar para atualizar espaçamento
-      function updateFilterSpacing() {
-        const filterSections = document.querySelectorAll(".filter-section");
-        const tabContents = document.querySelectorAll(".tab-content");
-        let hasVisibleFilter = false;
-
-        filterSections.forEach((filter) => {
-          const isVisible =
-            filter.style.display === "block" ||
-            filter.classList.contains("active") ||
-            filter.classList.contains("show-filters");
-          if (isVisible) {
-            hasVisibleFilter = true;
-          }
-        });
-
-        // Aplicar ou remover classe para todos os tab-contents
-        tabContents.forEach((tabContent) => {
-          if (hasVisibleFilter) {
-            tabContent.classList.add("has-active-filters");
-          } else {
-            tabContent.classList.remove("has-active-filters");
-          }
-        });
-      }
-    </script>
+      </script>
+    </div>
+    <!-- Fim do main-content -->
   </body>
 </html>

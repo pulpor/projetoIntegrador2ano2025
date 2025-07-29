@@ -168,7 +168,14 @@ function renderSubmissions(submissions) {
     return;
   }
 
-  container.innerHTML = submissions.map(submission => createSubmissionCard(submission)).join('');
+  // Ordenar submissions por data - mais recentes primeiro
+  const sortedSubmissions = submissions.sort((a, b) => {
+    const dateA = new Date(a.submittedAt || 0);
+    const dateB = new Date(b.submittedAt || 0);
+    return dateB - dateA; // Ordem decrescente (mais recente primeiro)
+  });
+
+  container.innerHTML = sortedSubmissions.map(submission => createSubmissionCard(submission)).join('');
 }
 
 function renderMissions(missions) {
@@ -232,13 +239,7 @@ function createStudentCard(student) {
     'Arqueiro do JavaScript': 'fab fa-js-square',
     'Cafeicultor do Java': 'fab fa-java',
     'Mago do CSS': 'fab fa-css3-alt',
-    'Guerreiro do HTML': 'fab fa-html5',
-    'Xamã do React': 'fab fa-react',
-    'Necromante do Node.js': 'fab fa-node-js',
-    'Paladino do Python': 'fab fa-python',
-    'Druida do Banco de Dados': 'fas fa-database',
-    'Assassino do Android': 'fab fa-android',
-    'Bardo do iOS': 'fab fa-apple',
+    'Paladino do HTML': 'fab fa-html5',
     'Bárbaro do Back-end': 'fas fa-server',
     'Domador de Dados': 'fas fa-chart-bar',
     'Elfo do Front-end': 'fas fa-paint-brush',
@@ -319,35 +320,35 @@ function createStudentCard(student) {
         <!-- Barra de Progresso -->
         ${progressDisplay}
 
-        <!-- Botões de Ação -->
-        <div class="mt-4 space-y-2">
+        <!-- Botões de Ação Modernos -->
+        <div class="mt-6 space-y-3">
           <!-- Primeira linha de botões -->
-          <div class="grid grid-cols-2 gap-2">
+          <div class="grid grid-cols-2 gap-3">
             <button data-student-id="${student.id}" data-student-name="${student.username}" 
-                    class="penalty-btn bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center group-hover:scale-105">
-              <i class="fas fa-minus-circle mr-1"></i>
+                    class="penalty-btn bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 hover:-translate-y-1">
+              <i class="fas fa-minus-circle mr-2 text-base"></i>
               <span class="hidden sm:inline">Penalidade</span>
               <span class="sm:hidden">-XP</span>
             </button>
             <button data-student-id="${student.id}" data-student-name="${student.username}" 
-                    class="reward-btn bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center group-hover:scale-105">
-              <i class="fas fa-plus-circle mr-1"></i>
+                    class="reward-btn bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 hover:-translate-y-1">
+              <i class="fas fa-plus-circle mr-2 text-base"></i>
               <span class="hidden sm:inline">Recompensa</span>
               <span class="sm:hidden">+XP</span>
             </button>
           </div>
           
           <!-- Segunda linha de botões -->
-          <div class="grid grid-cols-2 gap-2">
+          <div class="grid grid-cols-2 gap-3">
             <button data-student-id="${student.id}" data-student-name="${student.username}" 
-                    class="history-btn bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center group-hover:scale-105">
-              <i class="fas fa-history mr-1"></i>
+                    class="history-btn bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 hover:-translate-y-1">
+              <i class="fas fa-history mr-2 text-base"></i>
               <span class="hidden sm:inline">Histórico</span>
               <span class="sm:hidden">Log</span>
             </button>
             <button data-student-id="${student.id}" data-student-name="${student.username}" 
-                    class="expel-btn bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center group-hover:scale-105">
-              <i class="fas fa-user-times mr-1"></i>
+                    class="expel-btn bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 hover:-translate-y-1">
+              <i class="fas fa-user-times mr-2 text-base"></i>
               <span class="hidden sm:inline">Expulsar</span>
               <span class="sm:hidden">Del</span>
             </button>
@@ -367,103 +368,189 @@ function createStudentCard(student) {
 }
 
 function createSubmissionCard(submission) {
-  let statusClass, statusIcon, statusText;
+  let statusClass, statusIcon, statusText, statusBg;
 
-  // Determinar status baseado nos campos pending e approved
-  if (submission.pending) {
-    statusClass = 'bg-yellow-100 text-yellow-800';
+  // Determinar status - suporte para ambos os padrões (antigo e novo)
+  let isPending, isApproved, isRejected;
+
+  // Verificar padrão novo primeiro (status)
+  if (submission.status) {
+    isPending = submission.status === 'pending';
+    isApproved = submission.status === 'approved';
+    isRejected = submission.status === 'rejected';
+  }
+  // Fallback para padrão antigo (pending + approved)
+  else {
+    isPending = submission.pending === true;
+    isApproved = submission.approved === true && submission.pending === false;
+    isRejected = submission.approved === false && submission.pending === false;
+  }
+
+  // Definir classes e textos baseado no status
+  if (isPending) {
+    statusClass = 'bg-yellow-500 text-white';
+    statusBg = 'border-l-4 border-yellow-400 bg-yellow-50';
     statusIcon = 'clock';
     statusText = 'Pendente';
-  } else if (submission.approved) {
-    statusClass = 'bg-green-100 text-green-800';
+  } else if (isApproved) {
+    statusClass = 'bg-green-500 text-white';
+    statusBg = 'border-l-4 border-green-400 bg-green-50';
     statusIcon = 'check-circle';
     statusText = 'Aprovada';
   } else {
-    statusClass = 'bg-red-100 text-red-800';
+    statusClass = 'bg-red-500 text-white';
+    statusBg = 'border-l-4 border-red-400 bg-red-50';
     statusIcon = 'times-circle';
     statusText = 'Rejeitada';
   }
 
   // Usar submittedAt em vez de submissionDate
-  const submissionDate = submission.submittedAt ? new Date(submission.submittedAt).toLocaleDateString('pt-BR') : 'Data inválida';
+  const submissionDate = submission.submittedAt ? new Date(submission.submittedAt).toLocaleDateString('pt-BR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  }) : 'Data inválida';
+
+  // Calcular tempo decorrido desde a submissão
+  const timeAgo = submission.submittedAt ? (() => {
+    const now = new Date();
+    const submitted = new Date(submission.submittedAt);
+    const diffMs = now - submitted;
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffDays > 0) return `há ${diffDays} dia(s)`;
+    if (diffHours > 0) return `há ${diffHours} hora(s)`;
+    return 'recente';
+  })() : '';
 
   // Processar arquivos enviados
   const filesHtml = submission.filePaths && submission.filePaths.length > 0 ?
     submission.filePaths.map(filePath => {
-      const fileName = filePath.split('\\').pop().split('/').pop(); // Pegar só o nome do arquivo
-      const fileUrl = `http://localhost:3000/uploads/${fileName}`; // URL completa para evitar problemas de sessão
+      const fileName = filePath.split('\\').pop().split('/').pop();
+      const fileUrl = `http://localhost:3000/uploads/${fileName}`;
       const fileExtension = fileName.split('.').pop().toLowerCase();
 
       // Determinar tipo de arquivo e ícone
       let fileIcon = 'file';
       let fileType = 'Arquivo';
+      let iconColor = 'text-gray-600';
+
       if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(fileExtension)) {
         fileIcon = 'image';
         fileType = 'Imagem';
+        iconColor = 'text-purple-600';
       } else if (['pdf'].includes(fileExtension)) {
         fileIcon = 'file-pdf';
         fileType = 'PDF';
+        iconColor = 'text-red-600';
       } else if (['doc', 'docx'].includes(fileExtension)) {
         fileIcon = 'file-word';
         fileType = 'Word';
+        iconColor = 'text-blue-600';
       } else if (['js', 'html', 'css', 'json'].includes(fileExtension)) {
         fileIcon = 'code';
         fileType = 'Código';
+        iconColor = 'text-green-600';
       }
 
       return `
-        <div class="flex items-center space-x-2 mt-2 p-2 bg-gray-50 rounded">
-          <i class="fas fa-${fileIcon} text-blue-500"></i>
-          <span class="text-sm text-gray-600">${fileType}:</span>
-          <button 
-            onclick="openFileSecurely('${fileUrl}'); return false;" 
-            class="text-blue-600 hover:text-blue-800 underline text-sm font-medium cursor-pointer bg-transparent border-none p-0"
-            title="Clique para abrir ${fileName}"
-          >
-            ${fileName}
-          </button>
-          <span class="text-xs text-gray-400">(nova aba)</span>
+        <div class="flex items-center space-x-3 p-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors duration-200">
+          <i class="fas fa-${fileIcon} ${iconColor} text-lg"></i>
+          <div class="flex-1">
+            <div class="flex items-center space-x-2 mb-1">
+              <span class="text-xs font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded">${fileType}</span>
+            </div>
+            <button 
+              onclick="openFileSecurely('${fileUrl}'); return false;" 
+              class="text-blue-600 hover:text-blue-800 font-medium text-sm hover:underline transition-colors duration-200"
+              title="Clique para abrir ${fileName}"
+            >
+              ${fileName}
+            </button>
+          </div>
+          <i class="fas fa-external-link-alt text-gray-400 text-sm"></i>
         </div>
       `;
-    }).join('') : '<p class="text-sm text-gray-400 mt-2">Nenhum arquivo enviado</p>';
+    }).join('') : `
+      <div class="text-center py-6 text-gray-500 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+        <i class="fas fa-folder-open text-3xl mb-2"></i>
+        <p class="text-sm">Nenhum arquivo enviado</p>
+      </div>
+    `;
 
   return `
-    <div class="bg-white p-4 rounded-lg shadow">
-      <div class="flex justify-between items-start">
-        <div class="flex-1">
-          <h3 class="font-bold text-lg">${submission.missionTitle || 'Missão Desconhecida'}</h3>
-          <p class="text-gray-600">Aluno: ${submission.username || 'Desconhecido'}</p>
-          <p class="text-gray-600">Data: ${submissionDate}</p>
-          <p class="text-gray-600">XP: ${submission.xp || 0}</p>
-          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClass}">
+    <div class="bg-white border border-gray-200 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden ${statusBg}">
+      <!-- Botões de Ação no Topo -->
+      ${isPending ? `
+        <div class="p-4 bg-gray-50 border-b border-gray-200 flex justify-end space-x-2">
+          <button class="approve-submission-btn bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 shadow-sm hover:shadow-md" 
+                  data-submission-id="${submission.id}">
+            <i class="fas fa-check mr-1"></i> Aprovar
+          </button>
+          <button class="reject-submission-btn bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 shadow-sm hover:shadow-md" 
+                  data-submission-id="${submission.id}">
+            <i class="fas fa-times mr-1"></i> Rejeitar
+          </button>
+        </div>
+      ` : ''}
+      
+      <!-- Header do Card -->
+      <div class="p-6 border-b border-gray-100">
+        <div class="flex items-center space-x-3 mb-4">
+          <h3 class="font-bold text-xl text-gray-800">${submission.missionTitle || 'Missão Desconhecida'}</h3>
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${statusClass}">
             <i class="fas fa-${statusIcon} mr-1"></i>
             ${statusText}
           </span>
-          
-          <!-- Arquivos enviados -->
-          <div class="mt-3">
-            <h4 class="font-semibold text-sm text-gray-700 mb-1">📁 Arquivos enviados:</h4>
-            ${filesHtml}
+        </div>
+        
+        <div class="space-y-3">
+          <div class="flex items-center text-sm text-gray-600">
+            <i class="fas fa-user w-4 text-blue-500 mr-3"></i>
+            <span class="font-medium">Aluno:</span>
+            <span class="ml-2 font-semibold text-gray-800">${submission.username || 'Desconhecido'}</span>
+          </div>
+          <div class="flex items-center text-sm text-gray-600">
+            <i class="fas fa-graduation-cap w-4 text-indigo-500 mr-3"></i>
+            <span class="font-medium">Turma:</span>
+            <span class="ml-2 text-gray-700">${submission.userYear ? `${submission.userYear}º ano` : 'N/A'}</span>
+            <span class="mx-2 text-gray-400">•</span>
+            <span class="font-medium">Classe:</span>
+            <span class="ml-2 text-gray-700">${submission.userClass || 'N/A'}</span>
+          </div>
+          <div class="flex items-center text-sm text-gray-600">
+            <i class="fas fa-calendar-alt w-4 text-green-500 mr-3"></i>
+            <span class="font-medium">Data:</span>
+            <span class="ml-2 text-gray-700">${submissionDate}</span>
+            <span class="ml-2 text-xs text-green-600 font-medium">(${timeAgo})</span>
+          </div>
+          <div class="flex items-center text-sm text-gray-600">
+            <i class="fas fa-star w-4 text-yellow-500 mr-3"></i>
+            <span class="font-medium">XP:</span>
+            <span class="ml-2 font-bold text-indigo-600 text-lg">${submission.xp || 0}</span>
           </div>
         </div>
-        ${submission.pending ? `
-          <div class="flex space-x-2">
-            <button class="approve-submission-btn bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm" 
-                    data-submission-id="${submission.id}">
-              <i class="fas fa-check mr-1"></i> Aprovar
-            </button>
-            <button class="reject-submission-btn bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm" 
-                    data-submission-id="${submission.id}">
-              <i class="fas fa-times mr-1"></i> Rejeitar
-            </button>
-          </div>
-        ` : ''}
+      </div>
+      
+      <!-- Arquivos enviados -->
+      <div class="p-6">
+        <div class="flex items-center space-x-2 mb-4">
+          <i class="fas fa-paperclip text-gray-600"></i>
+          <h4 class="font-semibold text-gray-800">Arquivos Enviados</h4>
+          <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+            ${submission.filePaths ? submission.filePaths.length : 0} arquivo(s)
+          </span>
+        </div>
+        <div class="space-y-3">
+          ${filesHtml}
+        </div>
       </div>
     </div>
   `;
-}
-
-function createMissionCard(mission) {
+} function createMissionCard(mission) {
   const status = mission.status || 'ativa'; // Fallback para missões sem status
   const statusClass = status === 'ativa' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800';
   const statusIcon = status === 'ativa' ? 'play-circle' : 'pause-circle';

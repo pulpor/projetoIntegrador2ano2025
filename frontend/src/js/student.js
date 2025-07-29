@@ -336,10 +336,48 @@ function updateUserInterface(userData) {
     const xpInfo = LevelSystem.calculateCurrentLevelXP(userData.xp || 0);
     console.log('Informações de XP calculadas:', xpInfo);
 
+    // Mapeamento dos ícones das classes
+    const classIcons = {
+        'Arqueiro do JavaScript': 'fab fa-js-square',
+        'Cafeicultor do Java': 'fab fa-java',
+        'Mago do CSS': 'fab fa-css3-alt',
+        'Paladino do HTML': 'fab fa-html5',
+        'Bárbaro do Back-end': 'fas fa-server',
+        'Domador de Dados': 'fas fa-chart-bar',
+        'Elfo do Front-end': 'fas fa-paint-brush',
+        'Caçador de Bugs': 'fas fa-bug'
+    };
+
+    // Mapeamento das cores dos círculos das classes
+    const classColors = {
+        'Arqueiro do JavaScript': 'bg-yellow-100 text-yellow-600',
+        'Cafeicultor do Java': 'bg-orange-100 text-orange-600',
+        'Mago do CSS': 'bg-blue-100 text-blue-600',
+        'Paladino do HTML': 'bg-red-100 text-red-600',
+        'Bárbaro do Back-end': 'bg-gray-100 text-gray-600',
+        'Domador de Dados': 'bg-green-100 text-green-600',
+        'Elfo do Front-end': 'bg-purple-100 text-purple-600',
+        'Caçador de Bugs': 'bg-pink-100 text-pink-600'
+    };
+
     // Atualizar nome do estudante na header
     const studentNameHeader = document.getElementById('student-name');
     if (studentNameHeader) {
         studentNameHeader.textContent = userData.username || 'Aluno';
+    }
+
+    // Atualizar ícone da classe no header
+    const studentClassIcon = document.getElementById('student-class-icon');
+    const studentClassCircle = document.getElementById('student-class-circle');
+
+    if (studentClassIcon && userData.class) {
+        const iconClass = classIcons[userData.class] || 'fas fa-user';
+        const colorClass = classColors[userData.class] || 'bg-gray-200 text-gray-600';
+
+        studentClassIcon.className = `${iconClass}`;
+        if (studentClassCircle) {
+            studentClassCircle.className = `w-8 h-8 ${colorClass} rounded-full flex items-center justify-center transition-all duration-300`;
+        }
     }
 
     // Atualizar elementos da interface

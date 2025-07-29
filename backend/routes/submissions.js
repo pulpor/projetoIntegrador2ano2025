@@ -96,6 +96,8 @@ router.get('/', autenticar, ehMestre, (req, res) => {
       return {
         ...sub,
         username: user ? user.username : 'Desconhecido',
+        userClass: user ? user.class : 'N/A',
+        userYear: user ? user.year : 'N/A',
         missionTitle: mission ? mission.title : 'Desconhecida'
       };
     });
@@ -135,6 +137,24 @@ router.post('/:id/approve', autenticar, ehMestre, async (req, res) => {
   // Atualizar XP apenas se a missão não foi completada antes
   if (!wasAlreadyCompleted) {
     await updateUserXP(submission.userId, submission.xp);
+
+    // Registrar no histórico do usuário
+    if (!user.history) {
+      user.history = [];
+    }
+
+    user.history.push({
+      type: 'mission_approved',
+      missionId: submission.missionId,
+      missionTitle: submission.missionTitle || 'Missão',
+      xpGained: submission.xp,
+      feedback: feedback || '',
+      appliedBy: req.user.userId,
+      appliedAt: new Date().toISOString()
+    });
+
+    // Salvar o histórico no arquivo users.json
+    await fs.writeFile(caminhoUsers, JSON.stringify(users, null, 2));
   }
 
   try {
@@ -161,6 +181,26 @@ router.post('/:id/reject', autenticar, ehMestre, async (req, res) => {
   submissions[index].pending = false;
   submissions[index].completed = false;
   submissions[index].feedback = req.body.feedback || '';
+
+  // Registrar no histórico do usuário
+  const user = users.find(u => u.id === parseInt(submissions[index].userId));
+  if (user) {
+    if (!user.history) {
+      user.history = [];
+    }
+
+    user.history.push({
+      type: 'mission_rejected',
+      missionId: submissions[index].missionId,
+      missionTitle: submissions[index].missionTitle || 'Missão',
+      feedback: req.body.feedback || '',
+      appliedBy: req.user.userId,
+      appliedAt: new Date().toISOString()
+    });
+
+    // Salvar o histórico no arquivo users.json
+    await fs.writeFile(caminhoUsers, JSON.stringify(users, null, 2));
+  }
 
   try {
     await fs.writeFile(caminhoSubmissions, JSON.stringify(submissions, null, 2));
