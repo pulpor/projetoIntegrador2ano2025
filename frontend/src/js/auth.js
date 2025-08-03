@@ -45,25 +45,39 @@ export function logout() {
 }
 
 export function showRegisterForm() {
-  document.getElementById('login-form').classList.add('hidden');
-  document.getElementById('register-form').classList.remove('hidden');
+  // Remover listeners para permitir que a versão melhorada funcione
+  const loginForm = document.getElementById('login-form');
+  const registerForm = document.getElementById('register-form');
+  
+  if (loginForm && registerForm) {
+    loginForm.classList.add('hidden');
+    registerForm.classList.remove('hidden');
+  }
 }
 
 export function hideRegisterForm() {
-  document.getElementById('register-form').classList.add('hidden');
-  document.getElementById('login-form').classList.remove('hidden');
+  // Remover listeners para permitir que a versão melhorada funcione
+  const loginForm = document.getElementById('login-form');
+  const registerForm = document.getElementById('register-form');
+  
+  if (loginForm && registerForm) {
+    registerForm.classList.add('hidden');
+    loginForm.classList.remove('hidden');
+    
+    // Limpar campos e feedback
+    const inputs = ['reg-username', 'reg-fullname', 'reg-password', 'year-select', 'class-select'];
+    inputs.forEach(id => {
+      const element = document.getElementById(id);
+      if (element) element.value = '';
+    });
 
-  // Limpar campos e feedback
-  document.getElementById('reg-username').value = '';
-  document.getElementById('reg-fullname').value = '';
-  document.getElementById('reg-password').value = '';
-  document.getElementById('year-select').value = '';
-  document.getElementById('class-select').value = '';
-
-  // Esconder feedback
-  document.getElementById('username-feedback').classList.add('hidden');
-  document.getElementById('password-feedback').classList.add('hidden');
-  document.getElementById('password-strength').classList.add('hidden');
+    // Esconder feedback
+    const feedbacks = ['username-feedback', 'password-feedback', 'password-strength'];
+    feedbacks.forEach(id => {
+      const element = document.getElementById(id);
+      if (element) element.classList.add('hidden');
+    });
+  }
 }
 
 // Função para calcular força da senha
