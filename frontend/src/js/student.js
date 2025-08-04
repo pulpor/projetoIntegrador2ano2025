@@ -2,6 +2,8 @@
 // Arquivo: student.js
 
 import { API } from './utils/api.js';
+import { gemini } from './utils/gemini.js';
+import { feedbackModal } from './utils/feedback-modal.js';
 
 // Estado global da aplicação
 const AppState = {
@@ -485,9 +487,14 @@ function setupMissionSubmission() {
             return;
         }
 
+        // Capturar informações da missão selecionada
+        const selectedMissionId = missionSelect.value;
+        const selectedMissionText = missionSelect.options[missionSelect.selectedIndex].text;
+        const uploadedFiles = Array.from(codeUpload.files);
+
         const formData = new FormData();
-        formData.append('missionId', missionSelect.value);
-        Array.from(codeUpload.files).forEach(file => {
+        formData.append('missionId', selectedMissionId);
+        uploadedFiles.forEach(file => {
             formData.append('code', file);
         });
 
@@ -495,6 +502,7 @@ function setupMissionSubmission() {
         submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Enviando...';
 
         try {
+            // 1. Enviar submissão para o backend
             await API.request('/submissoes/submit', {
                 method: 'POST',
                 body: formData,
@@ -504,10 +512,19 @@ function setupMissionSubmission() {
             });
 
             Toast.show('Missão enviada com sucesso!', 'success');
+
+            // 2. Gerar feedback automático com Gemini AI
+            await generateAutomaticFeedback(uploadedFiles, {
+                id: selectedMissionId,
+                title: selectedMissionText,
+                description: `Submissão para a missão: ${selectedMissionText}`
+            });
+
+            // 3. Limpar formulário
             missionSelect.value = '';
             codeUpload.value = '';
 
-            // Recarregar submissões e missões
+            // 4. Recarregar submissões e missões
             const submissions = await loadSubmissions();
             updateSubmissionsInterface(submissions);
 
@@ -668,10 +685,120 @@ function renderSubmissionCard(submission, container) {
         return `<span class="inline-block bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs">${fileName}</span>`;
     }).join(' ')}
                 </div>
+                
+                <!-- Botão para Feedback Automático -->
+                <div class="mt-3 pt-3 border-t border-gray-200">
+                    <button 
+                        onclick="requestFeedbackForSubmission(${submission.id}, '${submission.missionTitle}', ${JSON.stringify(submission.filePaths).replace(/"/g, '&quot;')})"
+                        class="inline-flex items-center px-3 py-2 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white text-xs font-medium rounded-lg transition-all duration-200 hover:scale-105 shadow-sm"
+                        title="Gerar feedback automático com IA"
+                    >
+                        <i class="fas fa-robot mr-2"></i>
+                        Solicitar Feedback IA
+                    </button>
+                    <span class="ml-2 text-xs text-gray-500">
+                        Análise automática do seu código
+                    </span>
+                </div>
             </div>
         ` : ''}
     `;
     container.appendChild(card);
 }
+
+/**
+ * Gera feedback automático usando Gemini AI
+ * @param {Array} files - Arquivos enviados
+ * @param {Object} missionContext - Contexto da missão
+ */
+async function generateAutomaticFeedback(files, missionContext) {
+    try {
+        // Mostrar toast informativo
+        Toast.show('🤖 Gerando feedback automático com IA...', 'info');
+        
+        // Gerar feedback com Gemini
+        const feedbackData = await gemini.analyzeSubmission(files, missionContext);
+        
+        // Preparar informações da submissão para o modal
+        const submissionInfo = {
+            missionTitle: missionContext.title,
+            files: files.map(file => ({ name: file.name, size: file.size })),
+            timestamp: new Date().toISOString()
+        };
+        
+        // Exibir modal com o feedback
+        feedbackModal.show(feedbackData, submissionInfo);
+        
+        if (feedbackData.success) {
+            Toast.show('✨ Feedback automático gerado com sucesso!', 'success');
+        } else {
+            Toast.show('⚠️ Erro ao gerar feedback automático', 'warning');
+        }
+        
+    } catch (error) {
+        console.error('Erro ao gerar feedback automático:', error);
+        Toast.show('Erro ao gerar feedback automático. Tente novamente.', 'error');
+    }
+}
+
+/**
+ * Solicita feedback automático para uma submissão existente
+ * @param {number} submissionId - ID da submissão
+ * @param {string} missionTitle - Título da missão
+ * @param {Array} filePaths - Caminhos dos arquivos
+ */
+async function requestFeedbackForSubmission(submissionId, missionTitle, filePaths) {
+    try {
+        Toast.show('🤖 Preparando análise automática...', 'info');
+        
+        // Como não temos acesso aos arquivos originais no frontend,
+        // vamos criar um feedback baseado nas informações disponíveis
+        const mockFiles = filePaths.map(path => {
+            const fileName = path.split('/').pop() || path.split('\\').pop();
+            return {
+                name: fileName,
+                type: 'text',
+                size: 0,
+                content: `// Arquivo: ${fileName}\n// Esta é uma análise baseada no histórico de submissão.\n// Para uma análise mais detalhada, reenvie o arquivo.`
+            };
+        });
+        
+        const missionContext = {
+            id: submissionId,
+            title: missionTitle,
+            description: `Análise de submissão histórica para: ${missionTitle}`
+        };
+        
+        // Gerar feedback com Gemini
+        const feedbackData = await gemini.analyzeSubmission(mockFiles, missionContext);
+        
+        // Preparar informações da submissão para o modal
+        const submissionInfo = {
+            missionTitle: missionTitle,
+            files: filePaths.map(path => ({ 
+                name: path.split('/').pop() || path.split('\\').pop(),
+                size: 'N/A'
+            })),
+            timestamp: new Date().toISOString(),
+            isHistorical: true
+        };
+        
+        // Exibir modal com o feedback
+        feedbackModal.show(feedbackData, submissionInfo);
+        
+        if (feedbackData.success) {
+            Toast.show('✨ Análise automática concluída!', 'success');
+        } else {
+            Toast.show('⚠️ Erro ao gerar análise automática', 'warning');
+        }
+        
+    } catch (error) {
+        console.error('Erro ao solicitar feedback para submissão:', error);
+        Toast.show('Erro ao gerar análise. Tente novamente.', 'error');
+    }
+}
+
+// Fazer a função disponível globalmente
+window.requestFeedbackForSubmission = requestFeedbackForSubmission;
 
 document.addEventListener('DOMContentLoaded', initializeApp);
