@@ -48,7 +48,7 @@ export function showRegisterForm() {
   // Remover listeners para permitir que a versão melhorada funcione
   const loginForm = document.getElementById('login-form');
   const registerForm = document.getElementById('register-form');
-  
+
   if (loginForm && registerForm) {
     loginForm.classList.add('hidden');
     registerForm.classList.remove('hidden');
@@ -59,11 +59,11 @@ export function hideRegisterForm() {
   // Remover listeners para permitir que a versão melhorada funcione
   const loginForm = document.getElementById('login-form');
   const registerForm = document.getElementById('register-form');
-  
+
   if (loginForm && registerForm) {
     registerForm.classList.add('hidden');
     loginForm.classList.remove('hidden');
-    
+
     // Limpar campos e feedback
     const inputs = ['reg-username', 'reg-fullname', 'reg-password', 'year-select', 'class-select'];
     inputs.forEach(id => {
@@ -82,24 +82,41 @@ export function hideRegisterForm() {
 
 // Função para calcular força da senha
 function calculatePasswordStrength(password) {
+  const validation = validatePassword(password);
+
+  // Contar quantos critérios foram atendidos
   let score = 0;
-  const checks = [
-    password.length >= 8,
-    /[A-Z]/.test(password),
-    /[a-z]/.test(password),
-    /\d/.test(password),
-    /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)
-  ];
+  if (validation.strength.length) score++;
+  if (validation.strength.upper) score++;
+  if (validation.strength.lower) score++;
+  if (validation.strength.number) score++;
+  if (validation.strength.symbol) score++;
 
-  score = checks.filter(Boolean).length;
+  // Só é forte quando TODOS os 5 critérios estão atendidos
+  let level, color;
 
-  const levels = ['Muito fraca', 'Fraca', 'Razoável', 'Boa', 'Forte'];
-  const colors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-blue-500', 'bg-green-500'];
+  if (score === 5 && validation.isValid) {
+    level = 'Forte';
+    color = 'bg-green-500';
+  } else if (score === 4) {
+    level = 'Boa';
+    color = 'bg-blue-500';
+  } else if (score === 3) {
+    level = 'Razoável';
+    color = 'bg-yellow-500';
+  } else if (score === 2) {
+    level = 'Fraca';
+    color = 'bg-orange-500';
+  } else {
+    level = 'Muito fraca';
+    color = 'bg-red-500';
+  }
 
   return {
     score,
-    level: levels[Math.max(0, score - 1)] || 'Muito fraca',
-    color: colors[Math.max(0, score - 1)] || 'bg-red-500'
+    level,
+    color,
+    isStrong: score === 5 && validation.isValid
   };
 }
 
@@ -122,19 +139,80 @@ function updatePasswordFeedback(password) {
   const validation = validatePassword(password);
   const strength = calculatePasswordStrength(password);
 
-  // Atualizar barras de força
+  // Atualizar barras de força - só fica verde quando TODOS os critérios estão atendidos
   bars.forEach((bar, index) => {
-    bar.className = 'password-bar flex-1 h-1 rounded ' +
-      (index < strength.score ? strength.color : 'bg-gray-200');
+    if (index < strength.score) {
+      // Se tem todos os 5 critérios, fica verde, senão usa a cor correspondente ao nível
+      const barColor = (strength.score === 5 && validation.isValid) ? 'bg-green-500' :
+        (strength.score === 4) ? 'bg-blue-500' :
+          (strength.score === 3) ? 'bg-yellow-500' :
+            (strength.score === 2) ? 'bg-orange-500' : 'bg-red-500';
+      bar.className = `password-bar flex-1 h-1 rounded ${barColor}`;
+    } else {
+      bar.className = 'password-bar flex-1 h-1 rounded bg-gray-200';
+    }
   });
 
-  strengthText.textContent = `Força: ${strength.level}`;
+  // Remover o texto "Força: X" - usar apenas a validação de critérios
+  strengthText.textContent = '';
 
-  // Mostrar erros específicos
-  if (!validation.isValid) {
-    feedbackDiv.innerHTML = `<span class="text-red-500">Faltam: ${validation.errors.join(', ')}</span>`;
+  // Mostrar critérios detalhados
+  const criteriaHtml = `
+    <div class="text-xs space-y-2 mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+      <div class="flex items-center space-x-2">
+        <span class="${validation.strength.length ? 'text-green-500' : 'text-red-500'}">
+          ${validation.strength.length ? '✓' : '✗'}
+        </span>
+        <span class="${validation.strength.length ? 'text-green-600' : 'text-gray-600'}">
+          Pelo menos 8 caracteres
+        </span>
+      </div>
+      <div class="flex items-center space-x-2">
+        <span class="${validation.strength.upper ? 'text-green-500' : 'text-red-500'}">
+          ${validation.strength.upper ? '✓' : '✗'}
+        </span>
+        <span class="${validation.strength.upper ? 'text-green-600' : 'text-gray-600'}">
+          Uma letra maiúscula (A-Z)
+        </span>
+      </div>
+      <div class="flex items-center space-x-2">
+        <span class="${validation.strength.lower ? 'text-green-500' : 'text-red-500'}">
+          ${validation.strength.lower ? '✓' : '✗'}
+        </span>
+        <span class="${validation.strength.lower ? 'text-green-600' : 'text-gray-600'}">
+          Uma letra minúscula (a-z)
+        </span>
+      </div>
+      <div class="flex items-center space-x-2">
+        <span class="${validation.strength.number ? 'text-green-500' : 'text-red-500'}">
+          ${validation.strength.number ? '✓' : '✗'}
+        </span>
+        <span class="${validation.strength.number ? 'text-green-600' : 'text-gray-600'}">
+          Um número (0-9)
+        </span>
+      </div>
+      <div class="flex items-center space-x-2">
+        <span class="${validation.strength.symbol ? 'text-green-500' : 'text-red-500'}">
+          ${validation.strength.symbol ? '✓' : '✗'}
+        </span>
+        <span class="${validation.strength.symbol ? 'text-green-600' : 'text-gray-600'}">
+          Um símbolo (!@#$%^&* etc.)
+        </span>
+      </div>
+    </div>
+  `;
+
+  if (validation.isValid && validation.strength.length && validation.strength.upper &&
+    validation.strength.lower && validation.strength.number && validation.strength.symbol) {
+    feedbackDiv.innerHTML = `
+      <span class="text-green-500 font-semibold">✓ Senha forte e válida!</span>
+      ${criteriaHtml}
+    `;
   } else {
-    feedbackDiv.innerHTML = `<span class="text-green-500">✓ Senha válida</span>`;
+    feedbackDiv.innerHTML = `
+      <span class="text-red-500 font-semibold">⚠ Senha deve atender todos os critérios:</span>
+      ${criteriaHtml}
+    `;
   }
 }
 
@@ -163,7 +241,7 @@ function validatePassword(password) {
   const hasUpperCase = /[A-Z]/.test(password);
   const hasLowerCase = /[a-z]/.test(password);
   const hasNumbers = /\d/.test(password);
-  const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+  const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]/.test(password);
 
   const errors = [];
 
@@ -171,21 +249,35 @@ function validatePassword(password) {
     errors.push(`pelo menos ${minLength} caracteres`);
   }
   if (!hasUpperCase) {
-    errors.push('pelo menos uma letra maiúscula');
+    errors.push('pelo menos uma letra maiúscula (A-Z)');
   }
   if (!hasLowerCase) {
-    errors.push('pelo menos uma letra minúscula');
+    errors.push('pelo menos uma letra minúscula (a-z)');
   }
   if (!hasNumbers) {
-    errors.push('pelo menos um número');
+    errors.push('pelo menos um número (0-9)');
   }
   if (!hasSpecialChar) {
-    errors.push('pelo menos um caractere especial (!@#$%^&*etc.)');
+    errors.push('pelo menos um símbolo (!@#$%^&*etc.)');
   }
 
+  // Senha só é válida se TODOS os critérios forem atendidos
+  const isValid = password.length >= minLength &&
+    hasUpperCase &&
+    hasLowerCase &&
+    hasNumbers &&
+    hasSpecialChar;
+
   return {
-    isValid: errors.length === 0,
-    errors: errors
+    isValid: isValid,
+    errors: errors,
+    strength: {
+      length: password.length >= minLength,
+      upper: hasUpperCase,
+      lower: hasLowerCase,
+      number: hasNumbers,
+      symbol: hasSpecialChar
+    }
   };
 }
 
@@ -267,20 +359,64 @@ export async function register() {
   }
 }
 
+// Função para verificar se o formulário pode ser submetido
+function updateFormValidation() {
+  const username = document.getElementById('reg-username')?.value.trim() || '';
+  const password = document.getElementById('reg-password')?.value || '';
+  const fullname = document.getElementById('reg-fullname')?.value.trim() || '';
+  const yearSelect = document.getElementById('year-select')?.value || '';
+  const classSelect = document.getElementById('class-select')?.value || '';
+  const submitButton = document.getElementById('registerSubmitButton');
+
+  const usernameValid = validateUsername(username).isValid;
+  const passwordValid = validatePassword(password).isValid;
+  const fieldsComplete = fullname && yearSelect && classSelect;
+
+  const canSubmit = usernameValid && passwordValid && fieldsComplete;
+
+  if (submitButton) {
+    submitButton.disabled = !canSubmit;
+    submitButton.className = `w-full py-3 px-4 rounded-xl font-semibold transition-all duration-300 ${canSubmit
+      ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
+      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+      }`;
+  }
+}
+
 // Função para inicializar validações em tempo real
 export function initializeValidationListeners() {
   const usernameInput = document.getElementById('reg-username');
   const passwordInput = document.getElementById('reg-password');
+  const fullnameInput = document.getElementById('reg-fullname');
+  const yearSelect = document.getElementById('year-select');
+  const classSelect = document.getElementById('class-select');
 
   if (usernameInput) {
     usernameInput.addEventListener('input', (e) => {
       updateUsernameFeedback(e.target.value.trim());
+      updateFormValidation();
     });
   }
 
   if (passwordInput) {
     passwordInput.addEventListener('input', (e) => {
       updatePasswordFeedback(e.target.value);
+      updateFormValidation();
     });
   }
+
+  if (fullnameInput) {
+    fullnameInput.addEventListener('input', updateFormValidation);
+  }
+
+  if (yearSelect) {
+    yearSelect.addEventListener('change', updateFormValidation);
+  }
+
+  if (classSelect) {
+    classSelect.addEventListener('change', updateFormValidation);
+  }
+
+  // Inicializar estado do formulário
+  updateFormValidation();
 }
