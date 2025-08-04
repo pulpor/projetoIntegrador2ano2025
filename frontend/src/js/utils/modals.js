@@ -135,6 +135,30 @@ export async function showPenaltyRewardModal(type, studentName) {
     const reasonInput = modal.querySelector('#reason-text');
     const charCount = modal.querySelector('#char-count');
     const confirmBtn = modal.querySelector('#confirm-btn');
+    const cancelBtn = modal.querySelector('#cancel-btn');
+
+    // Detectar tema atual e aplicar estilos apropriados para dark mode
+    const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+    
+    if (isDarkMode && cancelBtn) {
+      // Aplicar estilos específicos para o botão cancelar em dark mode
+      cancelBtn.style.backgroundColor = 'rgba(55, 65, 81, 0.9)';
+      cancelBtn.style.borderColor = 'rgba(156, 163, 175, 0.5)';
+      cancelBtn.style.color = '#f3f4f6';
+      
+      // Estilo hover para botão cancelar
+      cancelBtn.addEventListener('mouseenter', () => {
+        cancelBtn.style.backgroundColor = 'rgba(75, 85, 99, 0.9)';
+        cancelBtn.style.borderColor = 'rgba(156, 163, 175, 0.7)';
+        cancelBtn.style.color = '#ffffff';
+      });
+      
+      cancelBtn.addEventListener('mouseleave', () => {
+        cancelBtn.style.backgroundColor = 'rgba(55, 65, 81, 0.9)';
+        cancelBtn.style.borderColor = 'rgba(156, 163, 175, 0.5)';
+        cancelBtn.style.color = '#f3f4f6';
+      });
+    }
 
     amountInput.focus();
 
@@ -170,6 +194,13 @@ export async function showPenaltyRewardModal(type, studentName) {
         confirmBtn.className = `flex-1 px-6 py-3 ${isReward ? 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700' : 'bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700'} text-white rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105`;
       } else {
         confirmBtn.className = 'flex-1 px-6 py-3 bg-gray-300 text-gray-500 rounded-xl cursor-not-allowed font-medium transition-all duration-200';
+        
+        // Aplicar estilos específicos para dark mode no botão desabilitado
+        if (isDarkMode) {
+          confirmBtn.style.backgroundColor = 'rgba(75, 85, 99, 0.6)';
+          confirmBtn.style.color = 'rgba(156, 163, 175, 0.8)';
+          confirmBtn.style.border = '1px solid rgba(156, 163, 175, 0.3)';
+        }
       }
     };
 
@@ -315,7 +346,7 @@ export async function showStudentHistoryModal(studentId, studentName) {
         }
 
         return `
-            <div class="${cardBg} border-2 ${borderColor} rounded-xl p-4 mb-4 shadow-sm hover:shadow-md transition-all duration-200">
+            <div class="${cardBg} border-2 ${borderColor} rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-200">
               <div class="flex items-start space-x-4">
                 <div class="${iconBg} p-2 rounded-full shadow-lg flex-shrink-0">
                   <i class="${icon} text-white"></i>
@@ -434,7 +465,7 @@ export async function showStudentHistoryModal(studentId, studentName) {
                 </div>
               ` : ''}
             </div>
-            <div class="space-y-0">
+            <div class="space-y-4 history-container">
               ${historyHTML}
             </div>
           </div>

@@ -62,5 +62,17 @@
     "level": 1,
     "xp": 0,
     "pending": false
+  },
+  {
+    "id": 6,
+    "username": "fulano",
+    "fullname": "fulano da silva",
+    "password": "$2b$10$ZIkh9/ldv8lCyIWrOAbkBen9.R1TuL0VP7W2qZv1NH/OCzSblBOKe",
+    "class": "Mago do CSS",
+    "year": 2,
+    "isMaster": false,
+    "level": 1,
+    "xp": 0,
+    "pending": true
   }
 ]

@@ -232,6 +232,161 @@
         color: #e5e7eb !important;
       }
 
+      /* ===== ESTILOS PARA MODAIS NO DARK MODE ===== */
+      /* Modal de histórico - backgrounds em dark mode */
+      html[data-theme="dark"] .bg-gradient-to-r.from-green-50.to-emerald-50 {
+        background: linear-gradient(to right, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1)) !important;
+      }
+
+      html[data-theme="dark"] .bg-gradient-to-r.from-red-50.to-rose-50 {
+        background: linear-gradient(to right, rgba(239, 68, 68, 0.1), rgba(225, 29, 72, 0.1)) !important;
+      }
+
+      html[data-theme="dark"] .bg-gradient-to-r.from-blue-50.to-cyan-50 {
+        background: linear-gradient(to right, rgba(59, 130, 246, 0.1), rgba(6, 182, 212, 0.1)) !important;
+      }
+
+      html[data-theme="dark"] .bg-gradient-to-r.from-orange-50.to-red-50 {
+        background: linear-gradient(to right, rgba(251, 146, 60, 0.1), rgba(239, 68, 68, 0.1)) !important;
+      }
+
+      html[data-theme="dark"] .bg-gradient-to-r.from-gray-50.to-blue-50 {
+        background: linear-gradient(to right, rgba(75, 85, 99, 0.2), rgba(59, 130, 246, 0.1)) !important;
+      }
+
+      /* Bordas dos cards de histórico em dark mode */
+      html[data-theme="dark"] .border-green-200 {
+        border-color: rgba(16, 185, 129, 0.3) !important;
+      }
+
+      html[data-theme="dark"] .border-red-200 {
+        border-color: rgba(239, 68, 68, 0.3) !important;
+      }
+
+      html[data-theme="dark"] .border-blue-200 {
+        border-color: rgba(59, 130, 246, 0.3) !important;
+      }
+
+      html[data-theme="dark"] .border-orange-200 {
+        border-color: rgba(251, 146, 60, 0.3) !important;
+      }
+
+      /* Badges de XP em dark mode */
+      html[data-theme="dark"] .bg-green-100.text-green-800 {
+        background-color: rgba(16, 185, 129, 0.2) !important;
+        color: #86efac !important;
+      }
+
+      html[data-theme="dark"] .bg-red-100.text-red-800 {
+        background-color: rgba(239, 68, 68, 0.2) !important;
+        color: #fca5a5 !important;
+      }
+
+      html[data-theme="dark"] .bg-blue-100.text-blue-800 {
+        background-color: rgba(59, 130, 246, 0.2) !important;
+        color: #93c5fd !important;
+      }
+
+      html[data-theme="dark"] .bg-orange-100.text-orange-800 {
+        background-color: rgba(251, 146, 60, 0.2) !important;
+        color: #fdba74 !important;
+      }
+
+      /* Cards de estatísticas no modal */
+      html[data-theme="dark"] .bg-white.rounded-xl.p-3.shadow-sm {
+        background-color: rgba(55, 65, 81, 0.8) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      }
+
+      /* Footer do modal */
+      html[data-theme="dark"] .bg-gray-50 {
+        background-color: rgba(31, 41, 55, 0.8) !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+      }
+
+      /* Espaçamento melhorado para entradas do histórico */
+      .space-y-0 > * + * {
+        margin-top: 1rem !important;
+      }
+
+      /* Container do histórico com espaçamento otimizado */
+      .history-container {
+        padding: 0.5rem 0 !important;
+      }
+
+      .history-container .mb-4:last-child {
+        margin-bottom: 0 !important;
+      }
+
+      /* ===== ESTILOS PARA BOTÕES DE MODAL NO DARK MODE ===== */
+      /* Botões de modal com selotores mais específicos */
+      html[data-theme="dark"] button[id="cancel-btn"] {
+        background-color: rgba(55, 65, 81, 0.9) !important;
+        border-color: rgba(156, 163, 175, 0.5) !important;
+        color: #f3f4f6 !important;
+      }
+
+      html[data-theme="dark"] button[id="cancel-btn"]:hover {
+        background-color: rgba(75, 85, 99, 0.9) !important;
+        border-color: rgba(156, 163, 175, 0.7) !important;
+        color: #ffffff !important;
+      }
+
+      /* Botão desabilitado no modal */
+      html[data-theme="dark"] button[id="confirm-btn"]:disabled {
+        background-color: rgba(75, 85, 99, 0.6) !important;
+        color: rgba(156, 163, 175, 0.8) !important;
+        border: 1px solid rgba(156, 163, 175, 0.3) !important;
+      }
+
+      /* Botão Cancelar no modal - fundo branco com bordas */
+      html[data-theme="dark"] .bg-white.border-2.border-gray-300.text-gray-700 {
+        background-color: rgba(55, 65, 81, 0.9) !important;
+        border-color: rgba(156, 163, 175, 0.5) !important;
+        color: #f3f4f6 !important;
+      }
+
+      html[data-theme="dark"] .bg-white.border-2.border-gray-300.text-gray-700:hover {
+        background-color: rgba(75, 85, 99, 0.9) !important;
+        border-color: rgba(156, 163, 175, 0.7) !important;
+      }
+
+      /* Botão desabilitado no modal */
+      html[data-theme="dark"] .bg-gray-300.text-gray-500 {
+        background-color: rgba(75, 85, 99, 0.6) !important;
+        color: rgba(156, 163, 175, 0.8) !important;
+      }
+
+      /* Footer do modal com botões */
+      html[data-theme="dark"] .bg-gray-50 {
+        background-color: rgba(31, 41, 55, 0.9) !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+      }
+
+      /* Texto e input labels no modal */
+      html[data-theme="dark"] .text-gray-700 {
+        color: #f3f4f6 !important;
+      }
+
+      html[data-theme="dark"] .text-gray-600 {
+        color: #d1d5db !important;
+      }
+
+      html[data-theme="dark"] .text-gray-500 {
+        color: #9ca3af !important;
+      }
+
+      /* Inputs e textareas no modal */
+      html[data-theme="dark"] .border-gray-200 {
+        border-color: rgba(75, 85, 99, 0.8) !important;
+        background-color: rgba(55, 65, 81, 0.8) !important;
+      }
+
+      /* Contador de caracteres */
+      html[data-theme="dark"] .text-xs.font-medium {
+        color: #d1d5db !important;
+      }
+
       /* ===== FALLBACK PARA ÍCONES ===== */
       /* Garantir que Font Awesome seja carregado corretamente */
       .fa,
@@ -247,12 +402,8 @@
       }
 
       /* ===== COMPONENTES ESPECIAIS ===== */
-      /* Botão de tema COMPACTO - Padronizado */
-      .theme-toggle {
-        position: fixed;
-        top: 16px;
-        right: 16px;
-        z-index: 1001;
+      /* Botão de tema no header */
+      .theme-toggle-header {
         width: 40px;
         height: 40px;
         border-radius: 12px;
@@ -272,29 +423,50 @@
         position: relative;
       }
 
-      /* Responsividade do botão de tema */
+      .theme-toggle-header:hover {
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 
+          0 8px 25px rgba(102, 126, 234, 0.4),
+          0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .theme-toggle-header:active {
+        transform: translateY(0) scale(0.95);
+      }
+
+      /* Ícone do tema */
+      #theme-icon {
+        font-size: 18px;
+        transition: all 0.3s ease;
+      }
+
+      .theme-icon-moon {
+        color: #ffd700;
+      }
+
+      .theme-icon-sun {
+        color: #ff6b35;
+      }
+
+      /* Responsividade do botão de tema no header */
       @media (max-width: 768px) {
-        .theme-toggle {
+        .theme-toggle-header {
           width: 36px;
           height: 36px;
-          top: 12px;
-          right: 12px;
         }
         
-        #theme-icon {
+        .theme-toggle-header #theme-icon {
           font-size: 16px !important;
         }
       }
 
       @media (max-width: 480px) {
-        .theme-toggle {
+        .theme-toggle-header {
           width: 32px;
           height: 32px;
-          top: 10px;
-          right: 10px;
         }
         
-        #theme-icon {
+        .theme-toggle-header #theme-icon {
           font-size: 14px !important;
         }
       }
@@ -823,6 +995,16 @@
           </div>
         </div>
         <div class="flex items-center space-x-4">
+          <button
+            id="theme-toggle"
+            class="theme-toggle-header"
+            title="Alternar tema"
+          >
+            <i
+              id="theme-icon"
+              class="fas fa-moon theme-icon-moon"
+            ></i>
+          </button>
           <button id="logout-btn" class="logout-btn">
             <i class="fas fa-sign-out-alt"></i>
             <span>Sair</span>
@@ -830,18 +1012,6 @@
         </div>
       </div>
     </header>
-
-    <!-- Theme Toggle Button - Posicionamento absoluto -->
-    <button
-      id="theme-toggle"
-      class="theme-toggle"
-      title="Alternar tema"
-    >
-      <i
-        id="theme-icon"
-        class="fas fa-moon theme-icon-moon"
-      ></i>
-    </button>
 
     <!-- Tabs de Navegação Modernos -->
     <div class="tab-header">
