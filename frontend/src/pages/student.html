@@ -234,6 +234,109 @@
         color: #e5e7eb !important;
       }
 
+      /* ===== ESTILOS PARA HISTÓRICO DE SUBMISSÕES NO DARK MODE ===== */
+      /* Cards de penalidade no dark mode */
+      html[data-theme="dark"] .border-red-500 {
+        border-color: rgba(239, 68, 68, 0.6) !important;
+      }
+
+      html[data-theme="dark"] .border-green-500 {
+        border-color: rgba(16, 185, 129, 0.6) !important;
+      }
+
+      /* Backgrounds de status no dark mode */
+      html[data-theme="dark"] .bg-red-50 {
+        background-color: rgba(127, 29, 29, 0.2) !important;
+      }
+
+      html[data-theme="dark"] .bg-green-50 {
+        background-color: rgba(6, 78, 59, 0.2) !important;
+      }
+
+      html[data-theme="dark"] .bg-blue-50 {
+        background-color: rgba(30, 58, 138, 0.2) !important;
+      }
+
+      html[data-theme="dark"] .bg-yellow-50 {
+        background-color: rgba(146, 64, 14, 0.2) !important;
+      }
+
+      html[data-theme="dark"] .bg-gray-50 {
+        background-color: rgba(55, 65, 81, 0.3) !important;
+      }
+
+      /* Badges de status no dark mode */
+      html[data-theme="dark"] .bg-red-100.text-red-800 {
+        background-color: rgba(239, 68, 68, 0.2) !important;
+        color: #fca5a5 !important;
+      }
+
+      html[data-theme="dark"] .bg-green-100.text-green-800 {
+        background-color: rgba(16, 185, 129, 0.2) !important;
+        color: #86efac !important;
+      }
+
+      html[data-theme="dark"] .bg-yellow-100.text-yellow-800 {
+        background-color: rgba(245, 158, 11, 0.2) !important;
+        color: #fde047 !important;
+      }
+
+      html[data-theme="dark"] .bg-blue-100.text-blue-800 {
+        background-color: rgba(59, 130, 246, 0.2) !important;
+        color: #93c5fd !important;
+      }
+
+      html[data-theme="dark"] .bg-gray-200.text-gray-700 {
+        background-color: rgba(75, 85, 99, 0.4) !important;
+        color: #d1d5db !important;
+      }
+
+      /* Textos de status no dark mode */
+      html[data-theme="dark"] .text-red-800 {
+        color: #fca5a5 !important;
+      }
+
+      html[data-theme="dark"] .text-green-800 {
+        color: #86efac !important;
+      }
+
+      html[data-theme="dark"] .text-red-600 {
+        color: #f87171 !important;
+      }
+
+      html[data-theme="dark"] .text-green-600 {
+        color: #4ade80 !important;
+      }
+
+      html[data-theme="dark"] .text-blue-600 {
+        color: #60a5fa !important;
+      }
+
+      html[data-theme="dark"] .text-red-700 {
+        color: #fca5a5 !important;
+      }
+
+      html[data-theme="dark"] .text-green-700 {
+        color: #86efac !important;
+      }
+
+      html[data-theme="dark"] .text-blue-700 {
+        color: #93c5fd !important;
+      }
+
+      html[data-theme="dark"] .text-gray-700 {
+        color: #d1d5db !important;
+      }
+
+      /* Bordas laterais de feedback no dark mode */
+      html[data-theme="dark"] .border-l-4.border-red-400 {
+        border-left-color: rgba(248, 113, 113, 0.6) !important;
+      }
+
+      html[data-theme="dark"] .border-l-4.border-blue-400 {
+        border-left-color: rgba(96, 165, 250, 0.6) !important;
+      }
+
       /* ===== FALLBACK PARA ÍCONES ===== */
       /* Garantir que Font Awesome seja carregado corretamente */
       .fa,
@@ -249,27 +352,19 @@
       }
 
       /* ===== COMPONENTES ESPECIAIS ===== */
-      /* Botão de tema COMPACTO - Padronizado */
-      .theme-toggle {
-        position: fixed;
-        top: 16px;
-        right: 16px;
-        z-index: 1001;
+      /* Botão de tema no header */
+      .theme-toggle-header {
         width: 40px;
         height: 40px;
         border-radius: 12px;
-        background: linear-gradient(
-          135deg,
-          #667eea 0%,
-          #764ba2 50%,
-          #f093fb 100%
-        );
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
         backdrop-filter: blur(20px);
-        border: 2px solid rgba(255, 255, 255, 0.3);
+        border: 2px solid rgba(255, 255, 255, 0.2);
         color: white;
         cursor: pointer;
-        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3),
-          0 3px 10px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        box-shadow: 
+          0 6px 20px rgba(102, 126, 234, 0.3),
+          0 2px 8px rgba(0, 0, 0, 0.1);
         transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         display: flex;
         align-items: center;
@@ -278,165 +373,52 @@
         position: relative;
       }
 
-      /* Responsividade do botão de tema */
+      .theme-toggle-header:hover {
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 
+          0 8px 25px rgba(102, 126, 234, 0.4),
+          0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .theme-toggle-header:active {
+        transform: translateY(0) scale(0.95);
+      }
+
+      /* Ícone do tema */
+      #theme-icon {
+        font-size: 18px;
+        transition: all 0.3s ease;
+      }
+
+      .theme-icon-moon {
+        color: #ffd700;
+      }
+
+      .theme-icon-sun {
+        color: #ff6b35;
+      }
+
+      /* Responsividade do botão de tema no header */
       @media (max-width: 768px) {
-        .theme-toggle {
+        .theme-toggle-header {
           width: 36px;
           height: 36px;
-          top: 12px;
-          right: 12px;
         }
-
-        #theme-icon {
+        
+        .theme-toggle-header #theme-icon {
           font-size: 16px !important;
         }
       }
 
       @media (max-width: 480px) {
-        .theme-toggle {
+        .theme-toggle-header {
           width: 32px;
           height: 32px;
-          top: 10px;
-          right: 10px;
         }
-
-        #theme-icon {
+        
+        .theme-toggle-header #theme-icon {
           font-size: 14px !important;
         }
-      }
-
-      .theme-toggle::before {
-        content: "";
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: conic-gradient(
-          from 0deg,
-          #667eea,
-          #764ba2,
-          #f093fb,
-          #f5576c,
-          #667eea
-        );
-        opacity: 0;
-        transition: all 0.3s ease;
-        border-radius: 12px;
-        animation: rotate 6s linear infinite;
-      }
-
-      @keyframes rotate {
-        0% {
-          transform: rotate(0deg);
-        }
-        100% {
-          transform: rotate(360deg);
-        }
-      }
-
-      .theme-toggle::after {
-        content: "";
-        position: absolute;
-        top: 2px;
-        left: 2px;
-        right: 2px;
-        bottom: 2px;
-        background: linear-gradient(
-          135deg,
-          #667eea 0%,
-          #764ba2 50%,
-          #f093fb 100%
-        );
-        border-radius: 10px;
-        z-index: 1;
-      }
-
-      .theme-toggle:hover {
-        transform: scale(1.1);
-        box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5),
-          0 4px 12px rgba(0, 0, 0, 0.15);
-      }
-
-      .theme-toggle:hover::before {
-        opacity: 0.7;
-        animation-duration: 3s;
-      }
-
-      .theme-toggle:active {
-        transform: scale(0.95);
-      }
-
-      /* Ícones do tema com design melhorado */
-      #theme-icon {
-        font-size: 18px;
-        z-index: 3;
-        position: relative;
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        display: inline-block;
-        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
-      }
-
-      .theme-toggle:hover #theme-icon {
-        transform: rotate(180deg) scale(1.1);
-        filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
-        text-shadow: 0 0 12px rgba(255, 255, 255, 0.6);
-      }
-
-      /* Estados específicos para ícones */
-      .theme-icon-sun {
-        color: #fbbf24;
-        filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.6));
-      }
-
-      .theme-icon-moon {
-        color: #e2e8f0;
-        filter: drop-shadow(0 0 8px rgba(226, 232, 240, 0.6));
-      }
-
-      /* Tema escuro - visual completamente diferente */
-      [data-theme="dark"] .theme-toggle {
-        background: linear-gradient(
-          135deg,
-          #1e293b 0%,
-          #334155 50%,
-          #475569 100%
-        );
-        border-color: rgba(148, 163, 184, 0.3);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6),
-          0 4px 16px rgba(148, 163, 184, 0.2),
-          inset 0 1px 0 rgba(148, 163, 184, 0.2);
-      }
-
-      [data-theme="dark"] .theme-toggle::before {
-        background: conic-gradient(
-          from 0deg,
-          #fbbf24,
-          #f59e0b,
-          #f97316,
-          #ef4444,
-          #fbbf24
-        );
-      }
-
-      [data-theme="dark"] .theme-toggle::after {
-        background: linear-gradient(
-          135deg,
-          #1e293b 0%,
-          #334155 50%,
-          #475569 100%
-        );
-      }
-
-      [data-theme="dark"] .theme-toggle:hover {
-        transform: scale(1.15) rotate(-5deg);
-        box-shadow: 0 20px 60px rgba(251, 191, 36, 0.4),
-          0 8px 25px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(251, 191, 36, 0.3);
-      }
-
-      [data-theme="dark"] .theme-toggle:hover #theme-icon {
-        filter: drop-shadow(0 0 15px rgba(251, 191, 36, 1));
-        text-shadow: 0 0 25px rgba(251, 191, 36, 0.9);
       }
 
       /* Progress bar */
@@ -566,6 +548,16 @@
               </span>
             </div>
             <button
+              id="theme-toggle"
+              class="theme-toggle-header"
+              title="Alternar tema"
+            >
+              <i
+                id="theme-icon"
+                class="fas fa-moon theme-icon-moon"
+              ></i>
+            </button>
+            <button
               id="logout-btn"
               class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
             >
@@ -575,11 +567,6 @@
         </div>
       </div>
     </header>
-
-    <!-- Theme Toggle Button - Posicionamento absoluto -->
-    <button id="theme-toggle" class="theme-toggle" title="Alternar tema">
-      <i id="theme-icon" class="fas fa-moon theme-icon-moon"></i>
-    </button>
 
     <!-- Main Content -->
     <main class="container mx-auto px-4 py-8 page-container">
