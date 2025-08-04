@@ -112,31 +112,58 @@ async function apiRequest(endpoint, options = {}) {
     }
 }
 
-// Sistema de XP e Níveis
+// Sistema de XP e Níveis (sincronizado com backend)
 const LevelSystem = {
-    baseXP: 100,
-    multiplier: 1.5,
+    XP_LEVELS: [
+        { level: 1, minXP: 0 },
+        { level: 2, minXP: 100 },
+        { level: 3, minXP: 250 },
+        { level: 4, minXP: 450 },
+        { level: 5, minXP: 700 },
+        { level: 6, minXP: 1000 },
+        { level: 7, minXP: 1400 },
+        { level: 8, minXP: 2000 },
+        { level: 9, minXP: 3000 },
+        { level: 10, minXP: 5000 }
+    ],
 
-    calculateNextLevelXP(level) {
-        return Math.round(this.baseXP * Math.pow(this.multiplier, level - 1));
-    },
+    calculateLevel(currentXP) {
+        // Encontrar o nível atual
+        let currentLevel = 1;
+        for (let i = this.XP_LEVELS.length - 1; i >= 0; i--) {
+            if (currentXP >= this.XP_LEVELS[i].minXP) {
+                currentLevel = this.XP_LEVELS[i].level;
+                break;
+            }
+        }
 
-    calculateCurrentLevelXP(totalXP) {
-        let level = 1;
-        let xpForNextLevel = this.baseXP;
-        let accumulatedXP = 0;
+        // Calcular XP para o próximo nível
+        const nextLevelData = this.XP_LEVELS.find(level => level.level === currentLevel + 1);
+        const currentLevelData = this.XP_LEVELS.find(level => level.level === currentLevel);
 
-        while (totalXP >= accumulatedXP + xpForNextLevel) {
-            accumulatedXP += xpForNextLevel;
-            level++;
-            xpForNextLevel = this.calculateNextLevelXP(level);
+        let xpForNextLevel = null;
+        let xpProgressInCurrentLevel = 0;
+        let xpNeededForCurrentLevel = 0;
+
+        if (nextLevelData) {
+            xpForNextLevel = nextLevelData.minXP;
+            xpNeededForCurrentLevel = nextLevelData.minXP - currentLevelData.minXP;
+            xpProgressInCurrentLevel = currentXP - currentLevelData.minXP;
+        } else {
+            // Nível máximo atingido
+            xpProgressInCurrentLevel = currentXP - currentLevelData.minXP;
+            xpNeededForCurrentLevel = 0;
         }
 
         return {
-            level,
-            currentXP: totalXP - accumulatedXP,
-            nextLevelXP: xpForNextLevel,
-            totalXP
+            level: currentLevel,
+            currentXP: xpProgressInCurrentLevel, // XP atual dentro do nível
+            nextLevelXP: xpNeededForCurrentLevel, // Total XP necessário para o próximo nível
+            totalXP: currentXP, // XP total acumulado
+            xpForNextLevel,
+            progressPercentage: xpNeededForCurrentLevel > 0 ?
+                Math.round((xpProgressInCurrentLevel / xpNeededForCurrentLevel) * 100) : 100,
+            isMaxLevel: currentLevel === 10
         };
     }
 };
@@ -157,18 +184,20 @@ async function initializeApp() {
     console.log('Token atual:', localStorage.getItem('token')); showLoadingStates();
 
     try {
-        const [userData, missionsData, submissionsData] = await Promise.all([
+        const [userData, missionsData, submissionsData, completedMissionsData] = await Promise.all([
             loadUserProfile(),
             loadMissions(),
-            loadSubmissions()
+            loadSubmissions(),
+            loadCompletedMissions()
         ]);
 
         AppState.set('user', userData);
         AppState.set('missions', missionsData);
         AppState.set('submissions', submissionsData);
+        AppState.set('completedMissions', completedMissionsData);
 
         updateUserInterface(userData);
-        updateMissionsInterface(missionsData);
+        updateMissionsInterface(missionsData, completedMissionsData);
         updateSubmissionsInterface(submissionsData);
         setupMissionSubmission();
         setupTabs();
@@ -331,11 +360,39 @@ async function loadSubmissions() {
     }
 }
 
+async function loadCompletedMissions() {
+    console.log('Carregando missões concluídas...');
+    try {
+        // Carregar todas as missões
+        const allMissions = await apiRequest('/missoes/all'); // Nova rota para todas as missões
+        
+        // Carregar submissões aprovadas
+        const submissions = await apiRequest('/submissoes/my-submissions');
+        const approvedSubmissions = submissions.filter(sub => sub.status === 'approved');
+        
+        // Mapear submissões aprovadas com dados das missões
+        const completedMissions = approvedSubmissions.map(submission => {
+            const mission = allMissions.find(m => m.id === submission.missionId);
+            return {
+                ...mission,
+                ...submission,
+                completedAt: submission.submittedAt,
+                earnedXP: submission.xp || mission?.xp || 0
+            };
+        });
+
+        return completedMissions;
+    } catch (error) {
+        console.error('Erro ao carregar missões concluídas:', error);
+        return [];
+    }
+}
+
 function updateUserInterface(userData) {
     console.log('Atualizando interface do usuário:', userData);
 
     // Calcular nível e XP
-    const xpInfo = LevelSystem.calculateCurrentLevelXP(userData.xp || 0);
+    const xpInfo = LevelSystem.calculateLevel(userData.xp || 0);
     console.log('Informações de XP calculadas:', xpInfo);
 
     // Mapeamento dos ícones das classes
@@ -388,7 +445,7 @@ function updateUserInterface(userData) {
         'student-class': userData.class || 'Não definida',
         'total-xp': xpInfo.totalXP,
         'current-xp': xpInfo.currentXP,
-        'next-level-xp': xpInfo.nextLevelXP,
+        'remaining-for-next': Math.max(0, xpInfo.nextLevelXP - xpInfo.currentXP),
         'student-year': `${userData.year || 1}º ano`
     };
 
@@ -400,18 +457,23 @@ function updateUserInterface(userData) {
     });
 
     // Atualizar barra de progresso
-    const progress = Math.min(Math.round((xpInfo.currentXP / xpInfo.nextLevelXP) * 100), 100);
+    const progress = xpInfo.progressPercentage;
     const progressBar = document.getElementById('xp-bar');
     const progressPercentage = document.getElementById('progress-percentage');
     const remainingXp = document.getElementById('remaining-xp');
 
     if (progressBar) progressBar.style.width = `${progress}%`;
     if (progressPercentage) progressPercentage.textContent = `${progress}%`;
-    if (remainingXp) remainingXp.textContent = xpInfo.nextLevelXP - xpInfo.currentXP;
+    if (remainingXp) {
+        const xpRemaining = xpInfo.nextLevelXP - xpInfo.currentXP;
+        remainingXp.textContent = xpRemaining > 0 ? xpRemaining : 0;
+    }
 }
 
-function updateMissionsInterface(missions) {
+function updateMissionsInterface(missions, completedMissions = []) {
     console.log('Atualizando interface de missões:', missions);
+    console.log('Missões concluídas:', completedMissions);
+    
     const missionsList = document.getElementById('missions');
     if (!missionsList) {
         console.error('Elemento de missões não encontrado');
@@ -420,48 +482,106 @@ function updateMissionsInterface(missions) {
 
     missionsList.innerHTML = '';
 
-    if (missions.length === 0) {
+    // Seção de missões concluídas
+    if (completedMissions.length > 0) {
+        const completedSection = document.createElement('div');
+        completedSection.className = 'mb-8';
+        completedSection.innerHTML = `
+            <h3 class="text-lg font-semibold text-green-700 mb-4 flex items-center">
+                <i class="fas fa-trophy text-yellow-500 mr-2"></i>
+                Missões Concluídas (${completedMissions.length})
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="completed-missions-list"></div>
+        `;
+        missionsList.appendChild(completedSection);
+
+        const completedList = document.getElementById('completed-missions-list');
+        completedMissions.forEach(mission => {
+            const card = document.createElement('div');
+            card.className = 'bg-gradient-to-r from-green-50 to-green-100 border border-green-200 rounded-lg p-4 hover:shadow-md transition-all duration-300';
+            card.innerHTML = `
+                <div class="flex justify-between items-start mb-3">
+                    <h4 class="text-lg font-bold text-green-800">${mission.title}</h4>
+                    <div class="flex flex-col items-end">
+                        <span class="bg-green-500 text-white text-sm font-semibold px-3 py-1 rounded-full mb-1">
+                            +${mission.earnedXP} XP
+                        </span>
+                        <span class="text-xs text-green-600">
+                            <i class="fas fa-check-circle mr-1"></i>Concluída
+                        </span>
+                    </div>
+                </div>
+                <p class="text-green-700 text-sm mb-3">${mission.description}</p>
+                <div class="flex justify-between items-center text-xs text-green-600">
+                    <span>
+                        <i class="fas fa-calendar-alt mr-1"></i>
+                        ${new Date(mission.completedAt).toLocaleDateString('pt-BR')}
+                    </span>
+                    <span>
+                        <i class="fas fa-users mr-1"></i> ${mission.targetClass}
+                    </span>
+                </div>
+            `;
+            completedList.appendChild(card);
+        });
+    }
+
+    // Seção de missões disponíveis
+    if (missions.length > 0) {
+        const availableSection = document.createElement('div');
+        availableSection.innerHTML = `
+            <h3 class="text-lg font-semibold text-blue-700 mb-4 flex items-center">
+                <i class="fas fa-scroll text-blue-500 mr-2"></i>
+                Missões Disponíveis (${missions.length})
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="available-missions-list"></div>
+        `;
+        missionsList.appendChild(availableSection);
+
+        const availableList = document.getElementById('available-missions-list');
+        missions.forEach(mission => {
+            const card = document.createElement('div');
+            card.className = 'bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-300';
+            card.innerHTML = `
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">${mission.title}</h3>
+                    <span class="bg-blue-100 text-blue-800 text-sm font-semibold px-3 py-1 rounded-full">
+                        ${mission.xp} XP
+                    </span>
+                </div>
+                <p class="text-gray-600 mb-4">${mission.description}</p>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-500">
+                        <i class="fas fa-users mr-1"></i> ${mission.targetClass}
+                    </span>
+                </div>
+            `;
+            availableList.appendChild(card);
+        });
+    } else if (completedMissions.length === 0) {
         missionsList.innerHTML = `
-            <div class="col-span-full text-center py-12">
+            <div class="text-center py-12">
                 <i class="fas fa-scroll text-gray-400 text-4xl mb-4"></i>
                 <p class="text-gray-500">Nenhuma missão disponível no momento.</p>
             </div>
         `;
-        return;
     }
 
-    missions.forEach(mission => {
-        const card = document.createElement('div');
-        card.className = 'bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-300';
-        card.innerHTML = `
-            <div class="flex justify-between items-start mb-4">
-                <h3 class="text-xl font-bold text-gray-800">${mission.title}</h3>
-                <span class="bg-blue-100 text-blue-800 text-sm font-semibold px-3 py-1 rounded-full">
-                    ${mission.xp} XP
-                </span>
-            </div>
-            <p class="text-gray-600 mb-4">${mission.description}</p>
-            <div class="flex justify-between items-center">
-                <span class="text-sm text-gray-500">
-                    <i class="fas fa-users mr-1"></i> ${mission.targetClass}
-                </span>
-            </div>
-        `;
-        missionsList.appendChild(card);
-    });
-
-    updateMissionCounters(missions);
+    updateMissionCounters(missions, completedMissions);
     updateMissionSelect(missions);
 }
 
-function updateMissionCounters(missions) {
+function updateMissionCounters(missions, completedMissions = []) {
     const total = document.getElementById('total-missions');
     const completed = document.getElementById('completed-missions');
     const pending = document.getElementById('pending-missions');
 
-    if (total) total.textContent = missions.length;
-    if (completed) completed.textContent = missions.filter(m => m.status === 'completed').length;
-    if (pending) pending.textContent = missions.filter(m => m.status === 'active').length;
+    // Total de missões disponíveis + concluídas
+    const totalMissions = missions.length + completedMissions.length;
+    
+    if (total) total.textContent = totalMissions;
+    if (completed) completed.textContent = completedMissions.length;
+    if (pending) pending.textContent = missions.length;
 }
 
 function setupMissionSubmission() {
@@ -730,7 +850,11 @@ async function generateAutomaticFeedback(files, missionContext) {
         feedbackModal.show(feedbackData, submissionInfo);
         
         if (feedbackData.success) {
-            Toast.show('✨ Feedback automático gerado com sucesso!', 'success');
+            if (feedbackData.isDemoFeedback) {
+                Toast.show('📚 Feedback de demonstração gerado! Configure Gemini para IA personalizada.', 'info');
+            } else {
+                Toast.show('✨ Feedback automático gerado com sucesso!', 'success');
+            }
         } else {
             Toast.show('⚠️ Erro ao gerar feedback automático', 'warning');
         }

@@ -21,6 +21,13 @@ router.use((req, res, next) => {
   next();
 });
 
+router.get('/all', autenticar, (req, res) => {
+  console.log('Acessando /missoes/all:', { user: req.user });
+  
+  // Retorna todas as missões (usado para mostrar missões concluídas)
+  res.json(missions);
+});
+
 router.get('/', autenticar, (req, res) => {
   console.log('Acessando /missoes:', { user: req.user });
 

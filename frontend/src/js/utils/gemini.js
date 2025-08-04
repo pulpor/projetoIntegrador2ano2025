@@ -3,8 +3,7 @@
 
 export class GeminiAPI {
     constructor() {
-        this.apiKey = 'AIzaSyD89OyI9jpSfvw1dQeN3dAW0ERf_FK1uzg';
-        this.baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
+        this.baseUrl = 'http://localhost:3000/gemini';
     }
 
     /**
@@ -18,17 +17,10 @@ export class GeminiAPI {
             // Preparar o conteúdo dos arquivos
             const filesContent = await this.prepareFilesContent(files);
             
-            // Construir o prompt para o Gemini
-            const prompt = this.buildAnalysisPrompt(filesContent, missionContext);
+            // Fazer a requisição para o backend
+            const response = await this.callBackendAPI(filesContent, missionContext);
             
-            // Fazer a requisição para o Gemini API
-            const response = await this.callGeminiAPI(prompt);
-            
-            return {
-                success: true,
-                feedback: response,
-                timestamp: new Date().toISOString()
-            };
+            return response;
         } catch (error) {
             console.error('Erro ao analisar submissão com Gemini:', error);
             return {
@@ -99,116 +91,96 @@ export class GeminiAPI {
     }
 
     /**
-     * Constrói o prompt para análise do Gemini
+     * Faz a chamada para o backend que se comunica com o Gemini API
      * @param {Array} filesContent - Conteúdo dos arquivos
      * @param {Object} missionContext - Contexto da missão
-     * @returns {string} - Prompt formatado
+     * @returns {Promise<Object>} - Resposta do backend
      */
-    buildAnalysisPrompt(filesContent, missionContext) {
-        const mission = missionContext.title || 'Missão não especificada';
-        const description = missionContext.description || '';
+    async callBackendAPI(filesContent, missionContext) {
+        const token = localStorage.getItem('token');
         
-        let prompt = `
-# Análise de Submissão de Código - Sistema Educacional RPG
+        try {
+            const response = await fetch(`${this.baseUrl}/analyze`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    files: filesContent,
+                    missionContext: missionContext
+                })
+            });
 
-## Contexto da Missão
-**Título:** ${mission}
-**Descrição:** ${description}
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                
+                // Se o backend não estiver disponível, usar fallback
+                if (response.status === 404 || response.status === 500) {
+                    return this.generateFallbackFeedback(filesContent, missionContext);
+                }
+                
+                throw new Error(errorData.error || `Erro HTTP: ${response.status}`);
+            }
 
-## Arquivos Submetidos
-`;
-
-        filesContent.forEach((file, index) => {
-            prompt += `
-### Arquivo ${index + 1}: ${file.name}
-**Tipo:** ${file.type}
-**Tamanho:** ${file.size} bytes
-
-\`\`\`${file.type}
-${file.content}
-\`\`\`
-
-`;
-        });
-
-        prompt += `
-## Tarefa de Análise
-
-Por favor, analise os arquivos submetidos e forneça um feedback educacional detalhado seguindo esta estrutura:
-
-### 📊 **Pontuação Geral**: [0-100]
-
-### ✅ **Pontos Positivos**
-- Liste os aspectos bem implementados
-- Destaque boas práticas de programação
-- Reconheça soluções criativas
-
-### ⚠️ **Áreas de Melhoria**
-- Identifique problemas no código
-- Sugira melhorias específicas
-- Aponte erros de sintaxe ou lógica
-
-### 💡 **Sugestões Detalhadas**
-- Forneça dicas práticas para melhorar
-- Sugira recursos de aprendizado
-- Indique próximos passos
-
-### 🎯 **Cumprimento dos Objetivos**
-- Avalie se a submissão atende aos requisitos da missão
-- Identifique objetivos alcançados e não alcançados
-
-### 📚 **Recursos Recomendados**
-- Sugira materiais de estudo
-- Indique documentações relevantes
-- Recomende exercícios complementares
-
-**Importante:** 
-- Use linguagem encorajadora e educativa
-- Seja específico nas sugestões
-- Foque no aprendizado do aluno
-- Use emojis para tornar o feedback mais visual e engajante
-`;
-
-        return prompt;
+            return await response.json();
+        } catch (error) {
+            // Se não conseguir conectar ao backend, usar fallback
+            if (error.name === 'TypeError' || error.message.includes('Failed to fetch')) {
+                console.warn('Backend não disponível, usando feedback de demonstração');
+                return this.generateFallbackFeedback(filesContent, missionContext);
+            }
+            throw error;
+        }
     }
 
     /**
-     * Faz a chamada para a API do Gemini
-     * @param {string} prompt - Prompt para análise
-     * @returns {Promise<string>} - Resposta do Gemini
+     * Gera feedback de demonstração quando o backend não está disponível
+     * @param {Array} filesContent - Conteúdo dos arquivos
+     * @param {Object} missionContext - Contexto da missão
+     * @returns {Object} - Feedback de demonstração
      */
-    async callGeminiAPI(prompt) {
-        const response = await fetch(`${this.baseUrl}?key=${this.apiKey}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                contents: [{
-                    parts: [{
-                        text: prompt
-                    }]
-                }],
-                generationConfig: {
-                    temperature: 0.7,
-                    topK: 40,
-                    topP: 0.95,
-                    maxOutputTokens: 2048,
-                }
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error(`Erro na API do Gemini: ${response.status} ${response.statusText}`);
-        }
-
-        const data = await response.json();
+    generateFallbackFeedback(filesContent, missionContext) {
+        const mission = missionContext.title || 'Missão';
+        const fileCount = filesContent.length;
         
-        if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
-            throw new Error('Resposta inválida da API do Gemini');
-        }
+        return {
+            success: true,
+            feedback: `
+# 📊 **Pontuação Geral**: 85/100
 
-        return data.candidates[0].content.parts[0].text;
+## ✅ **Pontos Positivos**
+- Código bem estruturado e organizado
+- Bom uso de comentários para explicar a lógica
+- Implementação funcional das funcionalidades principais
+- ${fileCount > 1 ? 'Boa separação de responsabilidades entre arquivos' : 'Código concentrado e focado'}
+
+## ⚠️ **Áreas de Melhoria**
+- Considere adicionar validação de entrada mais robusta
+- Algumas funções poderiam ser quebradas em partes menores
+- Adicione tratamento de erros mais específico
+- Considere usar const/let em vez de var quando aplicável
+
+## 💡 **Sugestões Detalhadas**
+- **Validação**: Implemente verificações para entradas inválidas
+- **Modularização**: Divida funções grandes em funções menores e mais específicas
+- **Documentação**: Adicione JSDoc para funções principais
+- **Testes**: Considere escrever testes unitários para suas funções
+
+## 🎯 **Cumprimento dos Objetivos**
+Sua submissão para "${mission}" demonstra compreensão sólida dos conceitos fundamentais. Os objetivos principais foram alcançados com implementação funcional.
+
+## 📚 **Recursos Recomendados**
+- [MDN Web Docs](https://developer.mozilla.org/) - Documentação completa sobre JavaScript
+- [JavaScript.info](https://javascript.info/) - Tutorial interativo de JavaScript
+- [Clean Code Principles](https://blog.cleancoder.com/) - Boas práticas de programação
+
+---
+**💡 Nota**: Este é um feedback de demonstração. Para análise personalizada com IA, configure a API do Gemini no backend.
+            `,
+            timestamp: new Date().toISOString(),
+            isDemoFeedback: true
+        };
     }
 
     /**

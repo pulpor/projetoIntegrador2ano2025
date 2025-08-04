@@ -1,3 +1,6 @@
+// Carregar variáveis de ambiente
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -16,6 +19,7 @@ const autenticacaoRotas = require('./routes/auth');
 const missoesRotas = require('./routes/missions');
 const usuariosRotas = require('./routes/users');
 const submissoesRotas = require('./routes/submissions');
+const geminiRotas = require('./routes/gemini');
 
 const app = express();
 const port = 3000;
@@ -48,6 +52,7 @@ app.use('/auth', autenticacaoRotas);
 app.use('/missoes', missoesRotas);
 app.use('/usuarios', usuariosRotas);
 app.use('/submissoes', submissoesRotas);
+app.use('/gemini', geminiRotas);
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 console.log('[SERVER] ✅ Rotas configuradas');
 

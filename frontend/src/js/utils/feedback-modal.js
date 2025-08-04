@@ -147,7 +147,7 @@ export class FeedbackModal {
             </div>
 
             <!-- Conteúdo do Feedback -->
-            <div class="flex-1 overflow-y-auto">
+            <div class="flex-1 overflow-y-auto max-h-96 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-gray-100 dark:scrollbar-track-gray-800">
                 ${feedbackContent}
             </div>
 
@@ -156,7 +156,10 @@ export class FeedbackModal {
                 <div class="flex items-center justify-between">
                     <div class="text-sm text-gray-500 dark:text-gray-400">
                         <i class="fas fa-lightbulb text-yellow-500 mr-1"></i>
-                        Este feedback foi gerado automaticamente pela IA e pode conter sugestões para melhoria.
+                        ${feedbackData.isDemoFeedback ? 
+                            'Este é um feedback de demonstração. Configure a API do Gemini para análise personalizada.' : 
+                            'Este feedback foi gerado automaticamente pela IA e pode conter sugestões para melhoria.'
+                        }
                     </div>
                     <div class="flex space-x-2">
                         <button 
