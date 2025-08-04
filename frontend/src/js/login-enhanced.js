@@ -192,15 +192,5 @@ style.textContent = `
     .has-content {
         background: rgba(255, 255, 255, 0.95) !important;
     }
-    
-    /* Garantir que has-content não afete ícones */
-    .has-content + .input-icon {
-        position: absolute !important;
-        left: 16px !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        z-index: 100 !important;
-        pointer-events: none !important;
-    }
 `;
 document.head.appendChild(style);

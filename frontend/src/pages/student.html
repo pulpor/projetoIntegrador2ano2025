@@ -248,25 +248,195 @@
         -moz-osx-font-smoothing: grayscale !important;
       }
 
-      /* ===== COMPONENTES ESPECIAIS ===== */ /* ===== BOTÃO DE TEMA ===== */
-      #theme-toggle {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-        border: none;
+      /* ===== COMPONENTES ESPECIAIS ===== */
+      /* Botão de tema COMPACTO - Padronizado */
+      .theme-toggle {
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        z-index: 1001;
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: linear-gradient(
+          135deg,
+          #667eea 0%,
+          #764ba2 50%,
+          #f093fb 100%
+        );
+        backdrop-filter: blur(20px);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        cursor: pointer;
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3),
+          0 3px 10px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        position: relative;
       }
 
-      html[data-theme="dark"] #theme-toggle {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);
+      /* Responsividade do botão de tema */
+      @media (max-width: 768px) {
+        .theme-toggle {
+          width: 36px;
+          height: 36px;
+          top: 12px;
+          right: 12px;
+        }
+
+        #theme-icon {
+          font-size: 16px !important;
+        }
       }
 
-      #theme-toggle:hover {
-        transform: scale(1.1) !important;
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6) !important;
+      @media (max-width: 480px) {
+        .theme-toggle {
+          width: 32px;
+          height: 32px;
+          top: 10px;
+          right: 10px;
+        }
+
+        #theme-icon {
+          font-size: 14px !important;
+        }
       }
 
-      html[data-theme="dark"] #theme-toggle:hover {
-        box-shadow: 0 6px 20px rgba(240, 147, 251, 0.6) !important;
+      .theme-toggle::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: conic-gradient(
+          from 0deg,
+          #667eea,
+          #764ba2,
+          #f093fb,
+          #f5576c,
+          #667eea
+        );
+        opacity: 0;
+        transition: all 0.3s ease;
+        border-radius: 12px;
+        animation: rotate 6s linear infinite;
+      }
+
+      @keyframes rotate {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .theme-toggle::after {
+        content: "";
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        right: 2px;
+        bottom: 2px;
+        background: linear-gradient(
+          135deg,
+          #667eea 0%,
+          #764ba2 50%,
+          #f093fb 100%
+        );
+        border-radius: 10px;
+        z-index: 1;
+      }
+
+      .theme-toggle:hover {
+        transform: scale(1.1);
+        box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5),
+          0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .theme-toggle:hover::before {
+        opacity: 0.7;
+        animation-duration: 3s;
+      }
+
+      .theme-toggle:active {
+        transform: scale(0.95);
+      }
+
+      /* Ícones do tema com design melhorado */
+      #theme-icon {
+        font-size: 18px;
+        z-index: 3;
+        position: relative;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        display: inline-block;
+        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .theme-toggle:hover #theme-icon {
+        transform: rotate(180deg) scale(1.1);
+        filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+        text-shadow: 0 0 12px rgba(255, 255, 255, 0.6);
+      }
+
+      /* Estados específicos para ícones */
+      .theme-icon-sun {
+        color: #fbbf24;
+        filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.6));
+      }
+
+      .theme-icon-moon {
+        color: #e2e8f0;
+        filter: drop-shadow(0 0 8px rgba(226, 232, 240, 0.6));
+      }
+
+      /* Tema escuro - visual completamente diferente */
+      [data-theme="dark"] .theme-toggle {
+        background: linear-gradient(
+          135deg,
+          #1e293b 0%,
+          #334155 50%,
+          #475569 100%
+        );
+        border-color: rgba(148, 163, 184, 0.3);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6),
+          0 4px 16px rgba(148, 163, 184, 0.2),
+          inset 0 1px 0 rgba(148, 163, 184, 0.2);
+      }
+
+      [data-theme="dark"] .theme-toggle::before {
+        background: conic-gradient(
+          from 0deg,
+          #fbbf24,
+          #f59e0b,
+          #f97316,
+          #ef4444,
+          #fbbf24
+        );
+      }
+
+      [data-theme="dark"] .theme-toggle::after {
+        background: linear-gradient(
+          135deg,
+          #1e293b 0%,
+          #334155 50%,
+          #475569 100%
+        );
+      }
+
+      [data-theme="dark"] .theme-toggle:hover {
+        transform: scale(1.15) rotate(-5deg);
+        box-shadow: 0 20px 60px rgba(251, 191, 36, 0.4),
+          0 8px 25px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(251, 191, 36, 0.3);
+      }
+
+      [data-theme="dark"] .theme-toggle:hover #theme-icon {
+        filter: drop-shadow(0 0 15px rgba(251, 191, 36, 1));
+        text-shadow: 0 0 25px rgba(251, 191, 36, 0.9);
       }
 
       /* Progress bar */
@@ -380,10 +550,13 @@
           <div class="flex items-center space-x-4">
             <div class="flex items-center space-x-2">
               <div
-                id="student-class-circle" 
+                id="student-class-circle"
                 class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center transition-all duration-300"
               >
-                <i id="student-class-icon" class="fas fa-user text-gray-600"></i>
+                <i
+                  id="student-class-icon"
+                  class="fas fa-user text-gray-600"
+                ></i>
               </div>
               <span class="text-gray-600">
                 Olá,
@@ -392,17 +565,6 @@
                 >
               </span>
             </div>
-            <!-- Theme Toggle Button -->
-            <button
-              id="theme-toggle"
-              class="w-10 h-10 text-white shadow-lg hover:shadow-xl rounded-full transition-all duration-300 hover:scale-110 active:scale-95"
-              title="Alternar tema"
-            >
-              <i
-                id="theme-icon"
-                class="fas fa-moon text-lg transition-transform duration-300"
-              ></i>
-            </button>
             <button
               id="logout-btn"
               class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
@@ -413,6 +575,11 @@
         </div>
       </div>
     </header>
+
+    <!-- Theme Toggle Button - Posicionamento absoluto -->
+    <button id="theme-toggle" class="theme-toggle" title="Alternar tema">
+      <i id="theme-icon" class="fas fa-moon theme-icon-moon"></i>
+    </button>
 
     <!-- Main Content -->
     <main class="container mx-auto px-4 py-8 page-container">
@@ -698,30 +865,55 @@
               e.preventDefault();
               console.log("🖱️ Botão de tema clicado (backup)!");
 
-              // Função de toggle simplificada
-              const currentTheme =
-                document.documentElement.getAttribute("data-theme") || "light";
-              const newTheme = currentTheme === "light" ? "dark" : "light";
-
-              document.documentElement.setAttribute("data-theme", newTheme);
-              localStorage.setItem("theme", newTheme);
-
-              // Atualizar ícone
+              // Função de toggle atualizada com ícones modernos
+              const html = document.documentElement;
               const icon = document.getElementById("theme-icon");
-              if (icon) {
-                if (newTheme === "dark") {
-                  icon.className =
-                    "fas fa-sun text-xl transition-transform duration-300";
-                } else {
-                  icon.className =
-                    "fas fa-moon text-xl transition-transform duration-300";
-                }
+              const currentTheme = html.getAttribute("data-theme") || "light";
+
+              console.log("Tema atual:", currentTheme);
+
+              if (currentTheme === "dark") {
+                // Estava no escuro, vai para claro -> mostra lua elegante
+                html.setAttribute("data-theme", "light");
+                icon.className = "fas fa-moon theme-icon-moon";
+                localStorage.setItem("theme", "light");
+                console.log("Mudou para light mode");
+              } else {
+                // Estava no claro, vai para escuro -> mostra sol brilhante
+                html.setAttribute("data-theme", "dark");
+                icon.className = "fas fa-sun theme-icon-sun";
+                localStorage.setItem("theme", "dark");
+                console.log("Mudou para dark mode");
               }
 
-              console.log("🎨 Tema alterado para:", newTheme);
+              console.log(
+                "🎨 Tema alterado para:",
+                html.getAttribute("data-theme")
+              );
             });
 
             console.log("✅ Event listener de backup configurado");
+          }
+
+          // Inicializar ícone do tema corretamente
+          const savedTheme = localStorage.getItem("theme");
+          const prefersDark = window.matchMedia(
+            "(prefers-color-scheme: dark)"
+          ).matches;
+          const initialTheme = savedTheme || (prefersDark ? "dark" : "light");
+
+          console.log("Inicializando tema:", initialTheme);
+          document.documentElement.setAttribute("data-theme", initialTheme);
+
+          const themeIcon = document.getElementById("theme-icon");
+          if (themeIcon) {
+            // Se está no dark mode, mostra sol dourado (para ir pro claro)
+            // Se está no light mode, mostra lua prateada (para ir pro escuro)
+            if (initialTheme === "dark") {
+              themeIcon.className = "fas fa-sun theme-icon-sun";
+            } else {
+              themeIcon.className = "fas fa-moon theme-icon-moon";
+            }
           }
         }, 100);
       });
