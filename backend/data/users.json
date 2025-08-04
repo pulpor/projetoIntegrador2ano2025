@@ -48,6 +48,14 @@
         "feedback": "legal",
         "appliedBy": 1,
         "appliedAt": "2025-07-29T14:32:19.222Z"
+      },
+      {
+        "type": "mission_rejected",
+        "missionId": 6,
+        "missionTitle": "oiiiiiii",
+        "feedback": "teste",
+        "appliedBy": 1,
+        "appliedAt": "2025-08-04T23:56:30.128Z"
       }
     ]
   },
@@ -73,6 +81,6 @@
     "isMaster": false,
     "level": 1,
     "xp": 0,
-    "pending": true
+    "pending": false
   }
 ]
