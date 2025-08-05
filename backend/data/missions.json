@@ -52,5 +52,32 @@
     "targetYear": null,
     "targetClass": "geral",
     "status": "ativa"
+  },
+  {
+    "id": 7,
+    "title": "rrrrrrrrrrrrrr",
+    "description": "rrrrrrrrrrrrrrrrrr",
+    "xp": 4,
+    "targetYear": null,
+    "targetClass": "geral",
+    "status": "ativa"
+  },
+  {
+    "id": 8,
+    "title": "caçador",
+    "description": "caçador",
+    "xp": 4,
+    "targetYear": null,
+    "targetClass": "Caçador de Bugs",
+    "status": "ativa"
+  },
+  {
+    "id": 9,
+    "title": "elfo",
+    "description": "elfo",
+    "xp": 3,
+    "targetYear": null,
+    "targetClass": "Elfo do Front-end",
+    "status": "ativa"
   }
 ]

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - Token e Submissões</title>
+</head>
+<body>
+    <h1>Debug do Sistema</h1>
+    <div id="debug-info"></div>
+    
+    <script>
+        function debugInfo() {
+            const token = localStorage.getItem('token');
+            const username = localStorage.getItem('username');
+            
+            document.getElementById('debug-info').innerHTML = `
+                <h2>Informações de Debug:</h2>
+                <p><strong>Token presente:</strong> ${token ? 'Sim' : 'Não'}</p>
+                <p><strong>Username:</strong> ${username || 'Não definido'}</p>
+                <p><strong>Token (primeiros 50 chars):</strong> ${token ? token.substring(0, 50) + '...' : 'N/A'}</p>
+                
+                <h3>LocalStorage completo:</h3>
+                <pre>${JSON.stringify({
+                    token: token ? token.substring(0, 50) + '...' : null,
+                    username: username,
+                    theme: localStorage.getItem('theme')
+                }, null, 2)}</pre>
+                
+                <h3>Teste de Login:</h3>
+                <button onclick="testarLogin()">Fazer Login como Leonardo</button>
+                <button onclick="testarSubmissoes()">Carregar Submissões</button>
+                <div id="results"></div>
+            `;
+        }
+        
+        async function testarLogin() {
+            try {
+                const response = await fetch('http://localhost:3000/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: 'leonardo',
+                        password: 'leonardo123'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('username', data.user.username);
+                    document.getElementById('results').innerHTML = '<p style="color: green;">Login realizado com sucesso!</p>';
+                    debugInfo(); // Atualizar info
+                } else {
+                    document.getElementById('results').innerHTML = '<p style="color: red;">Erro no login: ' + data.error + '</p>';
+                }
+            } catch (error) {
+                document.getElementById('results').innerHTML = '<p style="color: red;">Erro: ' + error.message + '</p>';
+            }
+        }
+        
+        async function testarSubmissoes() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                document.getElementById('results').innerHTML = '<p style="color: red;">Faça login primeiro!</p>';
+                return;
+            }
+            
+            try {
+                const response = await fetch('http://localhost:3000/submissoes/my-submissions', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    const pendingCount = data.filter(s => s.status === 'pending').length;
+                    document.getElementById('results').innerHTML = `
+                        <h4>Submissões carregadas com sucesso!</h4>
+                        <p><strong>Total:</strong> ${data.length}</p>
+                        <p><strong>Pendentes:</strong> ${pendingCount}</p>
+                        <details>
+                            <summary>Ver detalhes</summary>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </details>
+                    `;
+                } else {
+                    document.getElementById('results').innerHTML = '<p style="color: red;">Erro ao carregar submissões: ' + data.error + '</p>';
+                }
+            } catch (error) {
+                document.getElementById('results').innerHTML = '<p style="color: red;">Erro: ' + error.message + '</p>';
+            }
+        }
+        
+        // Executar quando carregar
+        debugInfo();
+    </script>
+</body>
+</html>

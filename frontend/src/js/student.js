@@ -74,13 +74,13 @@ const API_URL = 'http://localhost:3000'; // Altere isso para a URL correta do se
 async function apiRequest(endpoint, options = {}) {
     const token = localStorage.getItem('token');
     if (!token) {
-        console.error('Token não encontrado');
+        console.error('❌ Token não encontrado');
         window.location.href = '/';
         throw new Error('Token não encontrado');
     }
 
     const url = API_URL + endpoint;
-    console.log(`Fazendo requisição para: ${url}`);
+    console.log(`🌐 Fazendo requisição para: ${url}`);
 
     const defaultOptions = {
         headers: {
@@ -91,20 +91,22 @@ async function apiRequest(endpoint, options = {}) {
 
     try {
         const response = await fetch(url, { ...defaultOptions, ...options });
-        console.log(`Resposta da API (${endpoint}):`, response.status);
+        console.log(`📡 Resposta da API (${endpoint}):`, response.status, response.statusText);
 
         if (!response.ok) {
             if (response.status === 401) {
-                console.error('Token inválido ou expirado');
+                console.error('❌ Token inválido ou expirado');
                 localStorage.removeItem('token');
                 window.location.href = '/';
                 throw new Error('Sessão expirada. Por favor, faça login novamente.');
             }
-            throw new Error(`Erro na requisição: ${response.status}`);
+            const errorText = await response.text();
+            console.error(`❌ Erro na resposta (${response.status}):`, errorText);
+            throw new Error(`Erro na requisição: ${response.status} - ${errorText}`);
         }
 
         const data = await response.json();
-        console.log(`Dados recebidos (${endpoint}):`, data);
+        console.log(`✅ Dados recebidos (${endpoint}):`, data);
         return data;
     } catch (error) {
         console.error(`Erro na requisição para ${endpoint}:`, error);
@@ -184,6 +186,8 @@ async function initializeApp() {
     console.log('Token atual:', localStorage.getItem('token')); showLoadingStates();
 
     try {
+        console.log('🚀 Iniciando carregamento dos dados...');
+        
         const [userData, missionsData, submissionsData, completedMissionsData] = await Promise.all([
             loadUserProfile(),
             loadMissions(),
@@ -191,13 +195,20 @@ async function initializeApp() {
             loadCompletedMissions()
         ]);
 
+        console.log('📊 Dados carregados:', {
+            user: userData?.username,
+            missions: missionsData?.length,
+            submissions: submissionsData?.length,
+            completedMissions: completedMissionsData?.length
+        });
+
         AppState.set('user', userData);
         AppState.set('missions', missionsData);
         AppState.set('submissions', submissionsData);
         AppState.set('completedMissions', completedMissionsData);
 
         updateUserInterface(userData);
-        updateMissionsInterface(missionsData, completedMissionsData);
+        updateMissionsInterface(missionsData, completedMissionsData, submissionsData);
         updateSubmissionsInterface(submissionsData);
         setupMissionSubmission();
         setupTabs();
@@ -327,18 +338,29 @@ async function loadMissions() {
 }
 
 async function loadSubmissions() {
-    console.log('Carregando submissões...');
+    console.log('🔍 Carregando submissões...');
     try {
+        console.log('🔑 Token atual:', localStorage.getItem('token') ? 'Presente' : 'Ausente');
+        
         const [submissions, penaltiesRewards] = await Promise.all([
             apiRequest('/submissoes/my-submissions'),
             apiRequest('/usuarios/my-penalties-rewards').catch(() => []) // Fallback se rota não existir
         ]);
+
+        console.log('📥 Submissões recebidas da API:', submissions);
+        console.log('🎯 Submissões por status:', {
+            total: submissions.length,
+            pending: submissions.filter(s => s.status === 'pending').length,
+            approved: submissions.filter(s => s.status === 'approved').length,
+            rejected: submissions.filter(s => s.status === 'rejected').length
+        });
 
         // Combinar submissões com penalidades/recompensas
         const allItems = [...submissions];
 
         // Adicionar penalidades e recompensas como itens do histórico
         if (penaltiesRewards && penaltiesRewards.length > 0) {
+            console.log('🎁 Penalidades/Recompensas encontradas:', penaltiesRewards.length);
             penaltiesRewards.forEach(item => {
                 allItems.push({
                     ...item,
@@ -351,6 +373,9 @@ async function loadSubmissions() {
 
         // Ordenar por data (mais recentes primeiro)
         allItems.sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+
+        console.log('📋 Submissões carregadas do servidor:', submissions);
+        console.log('📋 Todas as submissões (incluindo penalidades):', allItems);
 
         return allItems;
     } catch (error) {
@@ -470,9 +495,10 @@ function updateUserInterface(userData) {
     }
 }
 
-function updateMissionsInterface(missions, completedMissions = []) {
+function updateMissionsInterface(missions, completedMissions = [], submissions = []) {
     console.log('Atualizando interface de missões:', missions);
     console.log('Missões concluídas:', completedMissions);
+    console.log('Submissões para contadores:', submissions);
     
     const missionsList = document.getElementById('missions');
     if (!missionsList) {
@@ -567,11 +593,11 @@ function updateMissionsInterface(missions, completedMissions = []) {
         `;
     }
 
-    updateMissionCounters(missions, completedMissions);
+    updateMissionCounters(missions, completedMissions, submissions);
     updateMissionSelect(missions);
 }
 
-function updateMissionCounters(missions, completedMissions = []) {
+function updateMissionCounters(missions, completedMissions = [], submissions = []) {
     const total = document.getElementById('total-missions');
     const completed = document.getElementById('completed-missions');
     const pending = document.getElementById('pending-missions');
@@ -579,9 +605,12 @@ function updateMissionCounters(missions, completedMissions = []) {
     // Total de missões disponíveis + concluídas
     const totalMissions = missions.length + completedMissions.length;
     
+    // Contar submissões pendentes (não penalidades/recompensas)
+    const pendingSubmissions = submissions.filter(s => !s.isPenaltyReward && s.status === 'pending').length;
+    
     if (total) total.textContent = totalMissions;
     if (completed) completed.textContent = completedMissions.length;
-    if (pending) pending.textContent = missions.length;
+    if (pending) pending.textContent = pendingSubmissions;
 }
 
 function setupMissionSubmission() {
@@ -631,7 +660,24 @@ function setupMissionSubmission() {
                 }
             });
 
-            Toast.show('Missão enviada com sucesso!', 'success');
+            Toast.show('Missão enviada com sucesso! Status: Pendente - aguardando aprovação do mestre.', 'success');
+            
+            // 1.5. Adicionar submissão pendente temporariamente à lista local para feedback imediato
+            const tempSubmission = {
+                id: 'temp-' + Date.now(),
+                missionTitle: selectedMissionText,
+                status: 'pending',
+                submittedAt: new Date().toISOString(),
+                filePaths: uploadedFiles.map(f => f.name),
+                xp: null,
+                feedback: null
+            };
+            
+            // Adicionar à lista atual de submissões do estado global
+            const currentSubmissions = AppState.get('submissions') || [];
+            currentSubmissions.unshift(tempSubmission);
+            AppState.set('submissions', currentSubmissions);
+            updateSubmissionsInterface(currentSubmissions);
 
             // 2. Gerar feedback automático com Gemini AI
             await generateAutomaticFeedback(uploadedFiles, {
@@ -644,8 +690,13 @@ function setupMissionSubmission() {
             missionSelect.value = '';
             codeUpload.value = '';
 
-            // 4. Recarregar submissões e missões
+            // 4. Recarregar submissões e missões (dados reais do servidor)
+            console.log('🔄 Recarregando dados após submissão...');
             const submissions = await loadSubmissions();
+            console.log('📊 Submissões carregadas:', submissions);
+            
+            // Atualizar estado global com dados reais
+            AppState.set('submissions', submissions);
             updateSubmissionsInterface(submissions);
 
             // Recarregar missões para atualizar a lista
@@ -654,7 +705,18 @@ function setupMissionSubmission() {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 }
             });
-            updateMissionsInterface(missions);
+            
+            // Recarregar também as missões concluídas para manter as estatísticas corretas
+            const completedMissions = await loadCompletedMissions();
+            
+            // Atualizar estado global e interface com todas as informações
+            AppState.set('submissions', submissions);
+            updateMissionsInterface(missions, completedMissions, submissions);
+            
+            // Mostrar toast sobre onde encontrar a submissão pendente
+            setTimeout(() => {
+                Toast.show('📋 Sua submissão está pendente! Verifique o "Histórico de Submissões" para acompanhar o status.', 'info');
+            }, 2000);
         } catch (error) {
             console.error('Erro ao enviar missão:', error);
             Toast.show('Erro ao enviar missão. Tente novamente.', 'error');
@@ -678,7 +740,21 @@ function updateMissionSelect(missions) {
 }
 
 function updateSubmissionsInterface(submissions) {
-    console.log('Atualizando interface de submissões:', submissions);
+    console.log('🔄 Atualizando interface de submissões:', submissions);
+    
+    // Filtrar submissões por status para debug
+    const pendingSubmissions = submissions.filter(s => !s.isPenaltyReward && s.status === 'pending');
+    const approvedSubmissions = submissions.filter(s => !s.isPenaltyReward && s.status === 'approved');
+    const rejectedSubmissions = submissions.filter(s => !s.isPenaltyReward && s.status === 'rejected');
+    
+    console.log('📊 Status das submissões:', {
+        total: submissions.length,
+        pending: pendingSubmissions.length,
+        approved: approvedSubmissions.length,
+        rejected: rejectedSubmissions.length,
+        penaltiesRewards: submissions.filter(s => s.isPenaltyReward).length
+    });
+    
     const submissionsList = document.getElementById('submission-history');
     if (!submissionsList) return;
 
@@ -689,6 +765,7 @@ function updateSubmissionsInterface(submissions) {
             <div class="text-center py-12">
                 <i class="fas fa-history text-gray-400 text-4xl mb-4"></i>
                 <p class="text-gray-500">Nenhuma submissão encontrada.</p>
+                <p class="text-sm text-gray-400 mt-2">Suas submissões aparecerão aqui após enviar uma missão.</p>
             </div>
         `;
         return;
@@ -702,6 +779,30 @@ function updateSubmissionsInterface(submissions) {
             renderSubmissionCard(submission, submissionsList);
         }
     });
+
+    // Adicionar informação sobre submissões pendentes se houver alguma
+    const pendingCount = submissions.filter(s => !s.isPenaltyReward && s.status === 'pending').length;
+    if (pendingCount > 0) {
+        // Adicionar aviso no topo
+        const pendingNotice = document.createElement('div');
+        pendingNotice.className = 'bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6';
+        pendingNotice.innerHTML = `
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-clock text-yellow-600 text-xl"></i>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-yellow-800">
+                        Você tem ${pendingCount} submissão${pendingCount > 1 ? 'ões' : ''} pendente${pendingCount > 1 ? 's' : ''}
+                    </h3>
+                    <p class="text-sm text-yellow-700 mt-1">
+                        Suas submissões estão aguardando revisão do mestre. Você será notificado quando forem aprovadas ou rejeitadas.
+                    </p>
+                </div>
+            </div>
+        `;
+        submissionsList.insertBefore(pendingNotice, submissionsList.firstChild);
+    }
 }
 
 function renderPenaltyRewardCard(item, container) {
@@ -745,13 +846,13 @@ function renderPenaltyRewardCard(item, container) {
 
 function renderSubmissionCard(submission, container) {
     const statusColors = {
-        pending: 'bg-yellow-100 text-yellow-800',
-        approved: 'bg-green-100 text-green-800',
-        rejected: 'bg-red-100 text-red-800'
+        pending: 'bg-yellow-100 text-yellow-800 border-yellow-300',
+        approved: 'bg-green-100 text-green-800 border-green-300',
+        rejected: 'bg-red-100 text-red-800 border-red-300'
     };
 
     const statusText = {
-        pending: 'Pendente',
+        pending: 'Pendente - Aguardando Aprovação',
         approved: 'Aprovada',
         rejected: 'Rejeitada'
     };
@@ -762,12 +863,28 @@ function renderSubmissionCard(submission, container) {
         rejected: 'fas fa-times-circle'
     };
 
+    const isPending = submission.status === 'pending';
+    const isRecent = new Date() - new Date(submission.submittedAt) < 60000; // Últimos 60 segundos
     const card = document.createElement('div');
-    card.className = 'bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-300';
+    
+    // Adicionar uma borda especial para submissões pendentes
+    let cardClasses = 'bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-300';
+    
+    if (isPending) {
+        cardClasses += ' border-l-4 border-yellow-400';
+        if (isRecent) {
+            cardClasses += ' ring-2 ring-yellow-300 ring-opacity-50';
+        }
+    }
+    
+    card.className = cardClasses;
     card.innerHTML = `
         <div class="flex justify-between items-start mb-4">
-            <div>
-                <h3 class="text-lg font-semibold text-gray-800">${submission.missionTitle}</h3>
+            <div class="flex-1">
+                <div class="flex items-center gap-2 mb-2">
+                    <h3 class="text-lg font-semibold text-gray-800">${submission.missionTitle}</h3>
+                    ${isRecent && isPending ? '<span class="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-bold animate-pulse">NOVA</span>' : ''}
+                </div>
                 <p class="text-sm text-gray-500">
                     <i class="fas fa-calendar-alt mr-1"></i>
                     Enviado em ${new Date(submission.submittedAt).toLocaleString()}

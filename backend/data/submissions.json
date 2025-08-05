@@ -86,5 +86,48 @@
     "missionTitle": "oiiiiiii",
     "xp": 1,
     "completed": false
+  },
+  {
+    "id": 7,
+    "userId": 4,
+    "missionId": 7,
+    "filePaths": [
+      "C:\\Users\\pulpp\\Documents\\projetoIntegrador2ano2025\\uploads\\leonardo_rrrrrrrrrrrrrr_1754418879239.css"
+    ],
+    "submittedAt": "2025-08-05T18:34:39.243Z",
+    "pending": true,
+    "status": "pending",
+    "missionTitle": "rrrrrrrrrrrrrr",
+    "xp": 4,
+    "completed": false
+  },
+  {
+    "id": 8,
+    "userId": 4,
+    "missionId": 8,
+    "filePaths": [
+      "C:\\Users\\pulpp\\Documents\\projetoIntegrador2ano2025\\uploads\\leonardo_ca_ador_1754420479535.css"
+    ],
+    "submittedAt": "2025-08-05T19:01:19.539Z",
+    "pending": false,
+    "status": "rejected",
+    "missionTitle": "caçador",
+    "xp": 4,
+    "completed": false,
+    "feedback": "teste"
+  },
+  {
+    "id": 9,
+    "userId": 4,
+    "missionId": 8,
+    "filePaths": [
+      "C:\\Users\\pulpp\\Documents\\projetoIntegrador2ano2025\\uploads\\leonardo_ca_ador_1754420635302.css"
+    ],
+    "submittedAt": "2025-08-05T19:03:55.307Z",
+    "pending": true,
+    "status": "pending",
+    "missionTitle": "caçador",
+    "xp": 4,
+    "completed": false
   }
 ]

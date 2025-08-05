@@ -56,6 +56,14 @@
         "feedback": "teste",
         "appliedBy": 1,
         "appliedAt": "2025-08-04T23:56:30.128Z"
+      },
+      {
+        "type": "mission_rejected",
+        "missionId": 8,
+        "missionTitle": "caçador",
+        "feedback": "teste",
+        "appliedBy": 1,
+        "appliedAt": "2025-08-05T19:03:14.294Z"
       }
     ]
   },
