@@ -6,7 +6,7 @@ export default defineConfig({
     outDir: '../dist',
     rollupOptions: {
       input: {
-        index: './index.html',
+        login: './login.html',
         master: './src/pages/master.html',
         student: './src/pages/student.html',
       },

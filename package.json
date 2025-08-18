@@ -14,6 +14,7 @@
     "setup-db": "node backend/config/initializeDB.js"
   },
   "dependencies": {
+    "all": "^0.0.0",
     "autoprefixer": "^10.4.21",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
@@ -24,7 +25,7 @@
     "node-fetch": "^2.7.0",
     "toastify-js": "^1.12.0",
     "undici": "^7.13.0",
-    "vite": "^7.0.6"
+    "vite": "^7.1.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.11",
