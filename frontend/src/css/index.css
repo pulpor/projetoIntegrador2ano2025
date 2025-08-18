@@ -19,24 +19,6 @@
     }
 }
 
-/* Partículas flutuantes */
-.particles {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    pointer-events: none;
-}
-
-.particle {
-    position: absolute;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-    animation: float 6s ease-in-out infinite;
-}
-
 @keyframes float {
 
     0%,
@@ -99,8 +81,6 @@
     background: rgba(255, 255, 255, 0.9);
     box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
 }
-
-/* ======= ÍCONES DOS INPUTS - SOLUÇÃO DEFINITIVA ======= */
 
 /* Base para todos os ícones - MÁXIMA PRIORIDADE */
 #login-screen .input-icon,

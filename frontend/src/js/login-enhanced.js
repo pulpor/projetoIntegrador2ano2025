@@ -1,7 +1,3 @@
-// =================================================================
-// LOGIN ENHANCED INTERACTIONS - Interações melhoradas para login
-// =================================================================
-
 // Adicionar interações melhoradas quando o DOM estiver carregado
 document.addEventListener('DOMContentLoaded', function () {
     initializeEnhancedLogin();

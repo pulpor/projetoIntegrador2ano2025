@@ -10,6 +10,11 @@ let originalMissions = [];
 let originalSubmissions = [];
 let originalStudents = [];
 
+(function () {
+  const t = localStorage.getItem("theme") || "light";
+  document.documentElement.setAttribute("data-theme", t);
+})();
+
 // ====== INICIALIZAÇÃO ======
 document.addEventListener('DOMContentLoaded', () => {
   console.log('[DEBUG] DOM carregado, iniciando aplicação master');
@@ -934,4 +939,197 @@ function cancelEdit() {
     console.error('Erro ao cancelar edição:', err);
     showError('Erro ao cancelar edição');
   }
+}
+
+// Theme toggle function
+function toggleTheme() {
+  const html = document.documentElement;
+  const icon = document.getElementById("theme-icon");
+
+  if (html.getAttribute("data-theme") === "dark") {
+    html.setAttribute("data-theme", "light");
+    icon.textContent = "🌙";
+    localStorage.setItem("theme", "light");
+  } else {
+    html.setAttribute("data-theme", "dark");
+    icon.textContent = "☀️";
+    localStorage.setItem("theme", "dark");
+  }
+}
+
+// Initialize theme on page load
+function initTheme() {
+  const savedTheme = localStorage.getItem("theme");
+  const prefersDark = window.matchMedia(
+    "(prefers-color-scheme: dark)"
+  ).matches;
+  const initialTheme = savedTheme || (prefersDark ? "dark" : "light");
+
+  document.documentElement.setAttribute("data-theme", initialTheme);
+
+  const themeIcon = document.getElementById("theme-icon");
+  if (themeIcon) {
+    themeIcon.textContent = initialTheme === "dark" ? "☀️" : "🌙";
+  }
+}
+
+// Tab management for fixed layout
+function initTabs() {
+  const tabButtons = document.querySelectorAll(".tab-button");
+  const tabContents = document.querySelectorAll(".tab-content");
+  const filtersMap = {
+    students: "students-filters",
+    submissions: "submissions-filters",
+    missions: "missions-filters",
+  };
+
+  tabButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      // Remove active from all buttons and contents
+      tabButtons.forEach((btn) => {
+        btn.classList.remove(
+          "active",
+          "border-purple-500",
+          "text-purple-600"
+        );
+        btn.classList.add("text-gray-500");
+      });
+      tabContents.forEach((content) => {
+        content.classList.remove("active", "has-active-filters");
+      });
+
+      // Hide all filters
+      Object.values(filtersMap).forEach((filterId) => {
+        const filterElement = document.getElementById(filterId);
+        if (filterElement) {
+          filterElement.style.display = "none";
+        }
+      });
+
+      // Add active to clicked button
+      button.classList.add(
+        "active",
+        "border-purple-500",
+        "text-purple-600"
+      );
+      button.classList.remove("text-gray-500");
+
+      // Show corresponding content
+      const targetId = button.id.replace("tab-", "") + "-content";
+      const targetContent = document.getElementById(targetId);
+      if (targetContent) {
+        targetContent.classList.add("active");
+      }
+
+      // Show corresponding filters if they exist
+      const tabName = button.id.replace("tab-", "");
+      const filterKey = filtersMap[tabName];
+      if (filterKey) {
+        const filterElement = document.getElementById(filterKey);
+        if (filterElement) {
+          filterElement.style.display = "block";
+        }
+      }
+
+      // Carregar dados específicos da aba quando ela for ativada
+      if (tabName === "students" && window.loadApprovedStudents) {
+        console.log(
+          "[DEBUG] Aba de alunos ativada, carregando dados..."
+        );
+        window.loadApprovedStudents();
+      } else if (tabName === "submissions" && window.loadSubmissions) {
+        console.log(
+          "[DEBUG] Aba de submissões ativada, carregando dados..."
+        );
+        window.loadSubmissions();
+      } else if (tabName === "missions" && window.loadMissions) {
+        console.log(
+          "[DEBUG] Aba de missões ativada, carregando dados..."
+        );
+        window.loadMissions();
+      } else if (tabName === "pending" && window.loadPendingUsers) {
+        console.log(
+          "[DEBUG] Aba de pendentes ativada, carregando dados..."
+        );
+        window.loadPendingUsers();
+      }
+
+      // Atualizar espaçamento dos filtros
+      updateFilterSpacing();
+    });
+  });
+}
+
+// Initialize everything when DOM is loaded
+document.addEventListener("DOMContentLoaded", function () {
+  initTheme();
+  initTabs();
+  initFilterSpacing();
+});
+
+// Função para gerenciar espaçamento quando filtros aparecem
+function initFilterSpacing() {
+  const filterSections = document.querySelectorAll(".filter-section");
+  const tabContents = document.querySelectorAll(".tab-content");
+
+  // Observer para detectar mudanças na visibilidade dos filtros
+  const observer = new MutationObserver(function (mutations) {
+    let hasVisibleFilter = false;
+
+    filterSections.forEach((filter) => {
+      const isVisible =
+        filter.style.display === "block" ||
+        filter.classList.contains("active") ||
+        filter.classList.contains("show-filters");
+      if (isVisible) {
+        hasVisibleFilter = true;
+      }
+    });
+
+    // Aplicar ou remover classe baseado na visibilidade dos filtros
+    tabContents.forEach((tabContent) => {
+      if (hasVisibleFilter) {
+        tabContent.classList.add("has-active-filters");
+      } else {
+        tabContent.classList.remove("has-active-filters");
+      }
+    });
+  });
+
+  // Observar mudanças em todos os filtros
+  filterSections.forEach((filter) => {
+    observer.observe(filter, {
+      attributes: true,
+      attributeFilter: ["style", "class"],
+    });
+  });
+
+  // Verificação inicial
+  updateFilterSpacing();
+}
+
+// Função auxiliar para atualizar espaçamento
+function updateFilterSpacing() {
+  const filterSections = document.querySelectorAll(".filter-section");
+  const tabContents = document.querySelectorAll(".tab-content");
+  let hasVisibleFilter = false;
+
+  filterSections.forEach((filter) => {
+    const isVisible =
+      filter.style.display === "block" ||
+      filter.classList.contains("active") ||
+      filter.classList.contains("show-filters");
+    if (isVisible) {
+      hasVisibleFilter = true;
+    }
+  });
+
+  // Aplicar ou remover classe para todos os tab-contents
+  tabContents.forEach((tabContent) => {
+    if (hasVisibleFilter) {
+      tabContent.classList.add("has-active-filters");
+    } else {
+      tabContent.classList.remove("has-active-filters");
+    }
+  });
 }

@@ -5,6 +5,11 @@ import { API } from './utils/api.js';
 import { gemini } from './utils/gemini.js';
 import { feedbackModal } from './utils/feedback-modal.js';
 
+(function () {
+    const t = localStorage.getItem("theme") || "light";
+    document.documentElement.setAttribute("data-theme", t);
+})();
+
 // Estado global da aplicação
 const AppState = {
     data: {},
@@ -187,7 +192,7 @@ async function initializeApp() {
 
     try {
         console.log('🚀 Iniciando carregamento dos dados...');
-        
+
         const [userData, missionsData, submissionsData, completedMissionsData] = await Promise.all([
             loadUserProfile(),
             loadMissions(),
@@ -341,7 +346,7 @@ async function loadSubmissions() {
     console.log('🔍 Carregando submissões...');
     try {
         console.log('🔑 Token atual:', localStorage.getItem('token') ? 'Presente' : 'Ausente');
-        
+
         const [submissions, penaltiesRewards] = await Promise.all([
             apiRequest('/submissoes/my-submissions'),
             apiRequest('/usuarios/my-penalties-rewards').catch(() => []) // Fallback se rota não existir
@@ -390,11 +395,11 @@ async function loadCompletedMissions() {
     try {
         // Carregar todas as missões
         const allMissions = await apiRequest('/missoes/all'); // Nova rota para todas as missões
-        
+
         // Carregar submissões aprovadas
         const submissions = await apiRequest('/submissoes/my-submissions');
         const approvedSubmissions = submissions.filter(sub => sub.status === 'approved');
-        
+
         // Mapear submissões aprovadas com dados das missões
         const completedMissions = approvedSubmissions.map(submission => {
             const mission = allMissions.find(m => m.id === submission.missionId);
@@ -499,7 +504,7 @@ function updateMissionsInterface(missions, completedMissions = [], submissions =
     console.log('Atualizando interface de missões:', missions);
     console.log('Missões concluídas:', completedMissions);
     console.log('Submissões para contadores:', submissions);
-    
+
     const missionsList = document.getElementById('missions');
     if (!missionsList) {
         console.error('Elemento de missões não encontrado');
@@ -604,10 +609,10 @@ function updateMissionCounters(missions, completedMissions = [], submissions = [
 
     // Total de missões disponíveis + concluídas
     const totalMissions = missions.length + completedMissions.length;
-    
+
     // Contar submissões pendentes (não penalidades/recompensas)
     const pendingSubmissions = submissions.filter(s => !s.isPenaltyReward && s.status === 'pending').length;
-    
+
     if (total) total.textContent = totalMissions;
     if (completed) completed.textContent = completedMissions.length;
     if (pending) pending.textContent = pendingSubmissions;
@@ -661,7 +666,7 @@ function setupMissionSubmission() {
             });
 
             Toast.show('Missão enviada com sucesso! Status: Pendente - aguardando aprovação do mestre.', 'success');
-            
+
             // 1.5. Adicionar submissão pendente temporariamente à lista local para feedback imediato
             const tempSubmission = {
                 id: 'temp-' + Date.now(),
@@ -672,7 +677,7 @@ function setupMissionSubmission() {
                 xp: null,
                 feedback: null
             };
-            
+
             // Adicionar à lista atual de submissões do estado global
             const currentSubmissions = AppState.get('submissions') || [];
             currentSubmissions.unshift(tempSubmission);
@@ -694,7 +699,7 @@ function setupMissionSubmission() {
             console.log('🔄 Recarregando dados após submissão...');
             const submissions = await loadSubmissions();
             console.log('📊 Submissões carregadas:', submissions);
-            
+
             // Atualizar estado global com dados reais
             AppState.set('submissions', submissions);
             updateSubmissionsInterface(submissions);
@@ -705,14 +710,14 @@ function setupMissionSubmission() {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 }
             });
-            
+
             // Recarregar também as missões concluídas para manter as estatísticas corretas
             const completedMissions = await loadCompletedMissions();
-            
+
             // Atualizar estado global e interface com todas as informações
             AppState.set('submissions', submissions);
             updateMissionsInterface(missions, completedMissions, submissions);
-            
+
             // Mostrar toast sobre onde encontrar a submissão pendente
             setTimeout(() => {
                 Toast.show('📋 Sua submissão está pendente! Verifique o "Histórico de Submissões" para acompanhar o status.', 'info');
@@ -741,12 +746,12 @@ function updateMissionSelect(missions) {
 
 function updateSubmissionsInterface(submissions) {
     console.log('🔄 Atualizando interface de submissões:', submissions);
-    
+
     // Filtrar submissões por status para debug
     const pendingSubmissions = submissions.filter(s => !s.isPenaltyReward && s.status === 'pending');
     const approvedSubmissions = submissions.filter(s => !s.isPenaltyReward && s.status === 'approved');
     const rejectedSubmissions = submissions.filter(s => !s.isPenaltyReward && s.status === 'rejected');
-    
+
     console.log('📊 Status das submissões:', {
         total: submissions.length,
         pending: pendingSubmissions.length,
@@ -754,7 +759,7 @@ function updateSubmissionsInterface(submissions) {
         rejected: rejectedSubmissions.length,
         penaltiesRewards: submissions.filter(s => s.isPenaltyReward).length
     });
-    
+
     const submissionsList = document.getElementById('submission-history');
     if (!submissionsList) return;
 
@@ -866,17 +871,17 @@ function renderSubmissionCard(submission, container) {
     const isPending = submission.status === 'pending';
     const isRecent = new Date() - new Date(submission.submittedAt) < 60000; // Últimos 60 segundos
     const card = document.createElement('div');
-    
+
     // Adicionar uma borda especial para submissões pendentes
     let cardClasses = 'bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-300';
-    
+
     if (isPending) {
         cardClasses += ' border-l-4 border-yellow-400';
         if (isRecent) {
             cardClasses += ' ring-2 ring-yellow-300 ring-opacity-50';
         }
     }
-    
+
     card.className = cardClasses;
     card.innerHTML = `
         <div class="flex justify-between items-start mb-4">
@@ -952,20 +957,20 @@ async function generateAutomaticFeedback(files, missionContext) {
     try {
         // Mostrar toast informativo
         Toast.show('🤖 Gerando feedback automático com IA...', 'info');
-        
+
         // Gerar feedback com Gemini
         const feedbackData = await gemini.analyzeSubmission(files, missionContext);
-        
+
         // Preparar informações da submissão para o modal
         const submissionInfo = {
             missionTitle: missionContext.title,
             files: files.map(file => ({ name: file.name, size: file.size })),
             timestamp: new Date().toISOString()
         };
-        
+
         // Exibir modal com o feedback
         feedbackModal.show(feedbackData, submissionInfo);
-        
+
         if (feedbackData.success) {
             if (feedbackData.isDemoFeedback) {
                 Toast.show('📚 Feedback de demonstração gerado! Configure Gemini para IA personalizada.', 'info');
@@ -975,7 +980,7 @@ async function generateAutomaticFeedback(files, missionContext) {
         } else {
             Toast.show('⚠️ Erro ao gerar feedback automático', 'warning');
         }
-        
+
     } catch (error) {
         console.error('Erro ao gerar feedback automático:', error);
         Toast.show('Erro ao gerar feedback automático. Tente novamente.', 'error');
@@ -991,7 +996,7 @@ async function generateAutomaticFeedback(files, missionContext) {
 async function requestFeedbackForSubmission(submissionId, missionTitle, filePaths) {
     try {
         Toast.show('🤖 Preparando análise automática...', 'info');
-        
+
         // Como não temos acesso aos arquivos originais no frontend,
         // vamos criar um feedback baseado nas informações disponíveis
         const mockFiles = filePaths.map(path => {
@@ -1003,36 +1008,36 @@ async function requestFeedbackForSubmission(submissionId, missionTitle, filePath
                 content: `// Arquivo: ${fileName}\n// Esta é uma análise baseada no histórico de submissão.\n// Para uma análise mais detalhada, reenvie o arquivo.`
             };
         });
-        
+
         const missionContext = {
             id: submissionId,
             title: missionTitle,
             description: `Análise de submissão histórica para: ${missionTitle}`
         };
-        
+
         // Gerar feedback com Gemini
         const feedbackData = await gemini.analyzeSubmission(mockFiles, missionContext);
-        
+
         // Preparar informações da submissão para o modal
         const submissionInfo = {
             missionTitle: missionTitle,
-            files: filePaths.map(path => ({ 
+            files: filePaths.map(path => ({
                 name: path.split('/').pop() || path.split('\\').pop(),
                 size: 'N/A'
             })),
             timestamp: new Date().toISOString(),
             isHistorical: true
         };
-        
+
         // Exibir modal com o feedback
         feedbackModal.show(feedbackData, submissionInfo);
-        
+
         if (feedbackData.success) {
             Toast.show('✨ Análise automática concluída!', 'success');
         } else {
             Toast.show('⚠️ Erro ao gerar análise automática', 'warning');
         }
-        
+
     } catch (error) {
         console.error('Erro ao solicitar feedback para submissão:', error);
         Toast.show('Erro ao gerar análise. Tente novamente.', 'error');
@@ -1043,3 +1048,61 @@ async function requestFeedbackForSubmission(submissionId, missionTitle, filePath
 window.requestFeedbackForSubmission = requestFeedbackForSubmission;
 
 document.addEventListener('DOMContentLoaded', initializeApp);
+
+document.addEventListener("DOMContentLoaded", function () {
+    console.log("🚀 Script de backup carregado");
+
+    setTimeout(function () {
+        const themeToggleBackup = document.getElementById("theme-toggle");
+        console.log("🔍 Botão de tema (backup):", themeToggleBackup);
+
+        if (themeToggleBackup && !themeToggleBackup.hasAttribute("data-backup-configured")) {
+            themeToggleBackup.setAttribute("data-backup-configured", "true");
+
+            themeToggleBackup.addEventListener("click", function (e) {
+                e.preventDefault();
+                console.log("🖱️ Botão de tema clicado (backup)!");
+
+                const html = document.documentElement;
+                const icon = document.getElementById("theme-icon");
+                const currentTheme = html.getAttribute("data-theme") || "light";
+
+                console.log("Tema atual:", currentTheme);
+
+                if (currentTheme === "dark") {
+                    html.setAttribute("data-theme", "light");
+                    icon.className = "fas fa-moon theme-icon-moon";
+                    localStorage.setItem("theme", "light");
+                    console.log("Mudou para light mode");
+                } else {
+                    html.setAttribute("data-theme", "dark");
+                    icon.className = "fas fa-sun theme-icon-sun";
+                    localStorage.setItem("theme", "dark");
+                    console.log("Mudou para dark mode");
+                }
+
+                console.log("🎨 Tema alterado para:", html.getAttribute("data-theme"));
+            });
+
+            console.log("✅ Event listener de backup configurado");
+        }
+
+        // Inicializar ícone do tema corretamente
+        const savedTheme = localStorage.getItem("theme");
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        const initialTheme = savedTheme || (prefersDark ? "dark" : "light");
+
+        console.log("Inicializando tema:", initialTheme);
+
+        document.documentElement.setAttribute("data-theme", initialTheme);
+
+        const themeIcon = document.getElementById("theme-icon");
+        if (themeIcon) {
+            if (initialTheme === "dark") {
+                themeIcon.className = "fas fa-sun theme-icon-sun";
+            } else {
+                themeIcon.className = "fas fa-moon theme-icon-moon";
+            }
+        }
+    }, 100);
+});

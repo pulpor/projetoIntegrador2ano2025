@@ -1,7 +1,3 @@
-/* =================================================================
-   LOGIN ENHANCED STYLES - Estilos melhorados para tela de login
-   ================================================================= */
-
 /* Loading Animation para botões */
 .btn-loading {
     position: relative;
@@ -211,13 +207,8 @@
     .input-field {
         padding: 14px 14px 14px 45px;
     }
-    
-    .particles {
-        display: none; /* Remove particles on mobile for performance */
-    }
 }
 
-/* Accessibility improvements */
 @media (prefers-reduced-motion: reduce) {
     .animated-bg,
     .particle,
