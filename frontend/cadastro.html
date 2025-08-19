@@ -11,6 +11,9 @@
     <link rel="stylesheet" href="./src/css/index.css" />
   </head>
   <body class="animated-bg font-sans h-screen overflow-hidden">
+    <script>
+      document.documentElement.setAttribute("data-theme", localStorage.getItem("theme") || "light");
+    </script>
     <div class="h-full flex items-center justify-center p-4">
       <div class="login-card max-w-md w-full rounded-2xl max-h-full overflow-y-auto">
         <button class="theme-toggle" onclick="toggleTheme()" title="Alternar tema">
@@ -53,28 +56,24 @@
             <div id="password-strength-text" class="text-xs text-gray-600"></div>
           </div>
           <div class="input-group">
-            <select id="year-select" class="input-field">
-              <option value="">Escolha seu ano</option>
-              <option value="1">🎯 1º ano - Front-end</option>
-              <option value="2">⚡ 2º ano - Back-end</option>
-              <option value="3">📱 3º ano - Mobile</option>
+            <select id="curso-select" class="input-field">
+              <option value="">Escolha seu curso</option>
+              <option value="beleza">👒 Beleza</option>
+              <option value="gastronomia">👨‍🍳 Gastronomia</option>
+              <option value="gestao">👩‍🎓 Gestão</option>
+              <option value="idiomas">🌐 Idiomas</option>
+              <option value="oftalmo">👁️ Oftalmologia</option>
+              <option value="tecnologia">🖥️ Tecnologia</option>
             </select>
             <i class="fas fa-graduation-cap input-icon"></i>
           </div>
           <div class="input-group">
-            <select id="class-select" class="input-field">
-              <option value="">Escolha sua classe RPG</option>
-              <option value="Arqueiro do JavaScript">🏹 Arqueiro do JavaScript</option>
-              <option value="Cafeicultor do Java">☕ Cafeicultor do Java</option>
-              <option value="Mago do CSS">🔮 Mago do CSS</option>
-              <option value="Paladino do HTML">🛡️ Paladino do HTML</option>
-              <option value="Bárbaro do Back-end">⚔️ Bárbaro do Back-end</option>
-              <option value="Domador de Dados">📊 Domador de Dados</option>
-              <option value="Elfo do Front-end">🧝 Elfo do Front-end</option>
-              <option value="Caçador de Bugs">🐛 Caçador de Bugs</option>
+            <select id="class-select" class="input-field" disabled>
+              <option value="">Escolha o curso primeiro</option>
             </select>
             <i class="fas fa-dice-d20 input-icon"></i>
           </div>
+          <div id="register-message" class="text-sm mt-2 text-center text-red-500 hidden"></div>
           <div class="flex gap-3 mt-6">
             <a href="login.html"><button id="backButton" class="flex-1 btn-secondary">
               <i class="fas fa-arrow-left mr-2"></i>
@@ -88,7 +87,14 @@
         </div>
       </div>
     </div>
-    <script type="module" src="./src/js/login-enhanced.js"></script>
-    <script type="module" src="./src/js/index.js"></script>
+
+    <script type="module">
+      import { applyThemeOnLoad, toggleTheme } from './src/js/mode.js';
+      applyThemeOnLoad();
+      window.toggleTheme = toggleTheme;
+      import './src/js/cadastro.js';
+    </script>
+
   </body>
 </html>
+

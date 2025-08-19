@@ -1,9 +1,31 @@
 [
   {
     "id": 1,
-    "username": "mestre",
+    "username": "tecno",
     "password": "$2b$10$w4lNjfROKuiCyp6JGGTYv.w8fcOXjQ1qz372Etu/YtZ4FvZzk7/Fu",
-    "class": "Mestre Fullstack",
+    "class": "Guardião da Lógica",
+    "year": null,
+    "isMaster": true,
+    "level": 1,
+    "xp": 0,
+    "pending": false
+  },
+  {
+    "id": 2,
+    "username": "gastro",
+    "password": "$2b$10$w4lNjfROKuiCyp6JGGTYv.w8fcOXjQ1qz372Etu/YtZ4FvZzk7/Fu",
+    "class": "Grand Maître Cuisinier",
+    "year": null,
+    "isMaster": true,
+    "level": 1,
+    "xp": 0,
+    "pending": false
+  },
+  {
+    "id": 3,
+    "username": "gestao",
+    "password": "$2b$10$w4lNjfROKuiCyp6JGGTYv.w8fcOXjQ1qz372Etu/YtZ4FvZzk7/Fu",
+    "class": "Chanceler Supremo",
     "year": null,
     "isMaster": true,
     "level": 1,
@@ -12,81 +34,43 @@
   },
   {
     "id": 4,
-    "username": "leonardo",
-    "fullname": "leonardo",
-    "password": "$2b$10$vEvGp1kOfh7qCRWbD5JInOK5ZT6sKmf5mkq9tKKilnlKxybgPUMXK",
-    "class": "Caçador de Bugs",
-    "year": 3,
-    "isMaster": false,
-    "level": 4,
-    "xp": 550,
-    "pending": false,
-    "history": [
-      {
-        "type": "reward",
-        "amount": 25,
-        "reason": "Excelente trabalho na resolução de bugs",
-        "oldXp": 25,
-        "newXp": 50,
-        "appliedBy": 1,
-        "appliedAt": "2025-07-29T10:30:00.000Z"
-      },
-      {
-        "type": "penalty",
-        "amount": 10,
-        "reason": "Código não seguiu as especificações",
-        "oldXp": 35,
-        "newXp": 25,
-        "appliedBy": 1,
-        "appliedAt": "2025-07-28T14:15:00.000Z"
-      },
-      {
-        "type": "mission_approved",
-        "missionId": 5,
-        "missionTitle": "novo",
-        "xpGained": 500,
-        "feedback": "legal",
-        "appliedBy": 1,
-        "appliedAt": "2025-07-29T14:32:19.222Z"
-      },
-      {
-        "type": "mission_rejected",
-        "missionId": 6,
-        "missionTitle": "oiiiiiii",
-        "feedback": "teste",
-        "appliedBy": 1,
-        "appliedAt": "2025-08-04T23:56:30.128Z"
-      },
-      {
-        "type": "mission_rejected",
-        "missionId": 8,
-        "missionTitle": "caçador",
-        "feedback": "teste",
-        "appliedBy": 1,
-        "appliedAt": "2025-08-05T19:03:14.294Z"
-      }
-    ]
+    "username": "oftalmo",
+    "password": "$2b$10$w4lNjfROKuiCyp6JGGTYv.w8fcOXjQ1qz372Etu/YtZ4FvZzk7/Fu",
+    "class": "Oráculo da Visão",
+    "year": null,
+    "isMaster": true,
+    "level": 1,
+    "xp": 0,
+    "pending": false
   },
   {
     "id": 5,
-    "username": "pulpor",
-    "fullname": "pulpor",
-    "password": "$2b$10$UHZVVYm.yOh1jWybcIFcBOCQHyXWV7TWicM1OKDHzrP5MDNhtsIPq",
-    "class": "Cafeicultor do Java",
-    "year": 2,
-    "isMaster": false,
+    "username": "beleza",
+    "password": "$2b$10$w4lNjfROKuiCyp6JGGTYv.w8fcOXjQ1qz372Etu/YtZ4FvZzk7/Fu",
+    "class": "Artista Supremo da Forma",
+    "year": null,
+    "isMaster": true,
     "level": 1,
     "xp": 0,
     "pending": false
   },
   {
     "id": 6,
-    "username": "fulano",
-    "fullname": "fulano da silva",
-    "password": "$2b$10$ZIkh9/ldv8lCyIWrOAbkBen9.R1TuL0VP7W2qZv1NH/OCzSblBOKe",
-    "class": "Mago do CSS",
-    "year": 2,
-    "isMaster": false,
+    "username": "idioma",
+    "password": "$2b$10$w4lNjfROKuiCyp6JGGTYv.w8fcOXjQ1qz372Etu/YtZ4FvZzk7/Fu",
+    "class": "Orador Supremo",
+    "year": null,
+    "isMaster": true,
+    "level": 1,
+    "xp": 0,
+    "pending": false
+  },
+  {
+    "id": 7,
+    "username": "mestre",
+    "password": "$2b$10$w4lNjfROKuiCyp6JGGTYv.w8fcOXjQ1qz372Etu/YtZ4FvZzk7/Fu",
+    "class": "Mestre Fullstack",
+    "isMaster": true,
     "level": 1,
     "xp": 0,
     "pending": false

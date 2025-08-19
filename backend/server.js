@@ -43,6 +43,10 @@ app.use((err, req, res, next) => {
 // Middleware de logs
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  // Log extra para login
+  if (req.method === "POST" && req.url === "/auth/login") {
+    console.log("[LOGIN DEBUG] Body recebido:", req.body);
+  }
   next();
 });
 
@@ -62,6 +66,13 @@ app.use(express.static(path.join(__dirname, '..', 'frontend')));
 // Rota padrão para servir index.html
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'frontend', 'index.html'));
+});
+
+app.post('/api/register', (req, res) => {
+  // Receba os dados, salve em uma lista de pendentes, não em users.json
+  // Exemplo:
+  // pendingUsers.push({ ...req.body });
+  // res.json({ success: true });
 });
 
 // Iniciar servidor

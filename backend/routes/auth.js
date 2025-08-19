@@ -123,10 +123,25 @@ router.post('/register', async (req, res) => {
 
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;
+  console.log("[LOGIN] username recebido:", username);
   const user = users.find(u => u.username === username);
-  if (!user || !(await bcrypt.compare(password, user.password))) {
+  console.log("[LOGIN] usuário encontrado:", user ? user.username : null);
+
+  if (!user) {
+    console.log("[LOGIN] Usuário não encontrado.");
     return res.status(401).json({ error: 'Credenciais inválidas' });
   }
+
+  const passwordMatch = await bcrypt.compare(password, user.password);
+  console.log("[LOGIN] senha recebida:", password);
+  console.log("[LOGIN] senha hash:", user.password);
+  console.log("[LOGIN] senha confere?", passwordMatch);
+
+  if (!passwordMatch) {
+    console.log("[LOGIN] Senha inválida.");
+    return res.status(401).json({ error: 'Credenciais inválidas' });
+  }
+
   if (user.pending && !user.isMaster) {
     return res.status(403).json({ error: 'Cadastro pendente de aprovação pelo mestre' });
   }

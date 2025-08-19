@@ -18,13 +18,13 @@ let submissionIdCounter = { value: 1 };
 // Carregar dados persistentes
 async function carregarDados() {
   try {
+    // Carregar usuários
     if (await fs.access(caminhoUsers).then(() => true).catch(() => false)) {
       const dadosUsuarios = JSON.parse(await fs.readFile(caminhoUsers));
-      users.length = 0; // Limpa a array mantendo a referência
-      users.push(...dadosUsuarios); // Adiciona os dados carregados
+      users.length = 0;
+      users.push(...dadosUsuarios);
       userIdCounter.value = Math.max(...users.map(u => u.id), 0) + 1;
 
-      // Atualizar níveis de todos os usuários usando o novo sistema
       let needsUpdate = false;
       users.forEach(user => {
         const oldLevel = user.level;
@@ -35,7 +35,6 @@ async function carregarDados() {
         }
       });
 
-      // Salvar se houve atualizações
       if (needsUpdate) {
         await fs.writeFile(caminhoUsers, JSON.stringify(users, null, 2));
         console.log('[INIT] Níveis de usuários atualizados e salvos');
@@ -43,6 +42,25 @@ async function carregarDados() {
 
       console.log(`[INIT] ${users.length} usuários carregados`);
     }
+
+    // Garante que o mestre existe e não duplica
+    if (!users.find(u => u.username === 'mestre')) {
+      const hashedPassword = await bcrypt.hash('123456', 10);
+      users.push({
+        id: userIdCounter.value++,
+        username: 'mestre',
+        password: hashedPassword,
+        class: 'Mestre Fullstack',
+        isMaster: true,
+        level: 1,
+        xp: 0,
+        pending: false
+      });
+      await fs.writeFile(caminhoUsers, JSON.stringify(users, null, 2));
+      console.log('[INIT] Usuário mestre criado');
+    }
+
+    // Carregar missões
     if (await fs.access(caminhoMissions).then(() => true).catch(() => false)) {
       const dadosMissoes = JSON.parse(await fs.readFile(caminhoMissions));
       missions.length = 0;
@@ -50,6 +68,7 @@ async function carregarDados() {
       missionIdCounter.value = Math.max(...missions.map(m => m.id), 0) + 1;
       console.log(`[INIT] ${missions.length} missões carregadas`);
     }
+    // Carregar submissões
     if (await fs.access(caminhoSubmissions).then(() => true).catch(() => false)) {
       const dadosSubmissoes = JSON.parse(await fs.readFile(caminhoSubmissions));
       submissions.length = 0;
@@ -59,22 +78,6 @@ async function carregarDados() {
     }
   } catch (err) {
     console.error('Erro ao carregar dados persistentes:', err);
-  }
-
-  // Mestre Fullstack padrão
-  if (!users.find(u => u.username === 'mestre')) {
-    const hashedPassword = await bcrypt.hash('fullstack123', 10);
-    users.push({
-      id: userIdCounter.value++,
-      username: 'mestre',
-      password: hashedPassword,
-      class: 'Mestre Fullstack',
-      isMaster: true,
-      level: 1,
-      xp: 0,
-      pending: false
-    });
-    await fs.writeFile(caminhoUsers, JSON.stringify(users, null, 2));
   }
 }
 

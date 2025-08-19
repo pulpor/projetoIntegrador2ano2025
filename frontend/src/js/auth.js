@@ -1,9 +1,18 @@
 import { showSuccess, showError, showWarning } from './utils/toast.js';
 
-
 export async function login() {
-  const username = document.getElementById('username').value;
-  const password = document.getElementById('password').value;
+  alert("Função login chamada!"); // Teste visual
+  console.log("Função login chamada!");
+
+  const usernameInput = document.getElementById('username');
+  const passwordInput = document.getElementById('password');
+  if (!usernameInput || !passwordInput) {
+    alert("Elementos de login não encontrados!");
+    return;
+  }
+  const username = usernameInput.value;
+  const password = passwordInput.value;
+
   try {
     const response = await fetch('http://localhost:3000/auth/login', { 
       method: 'POST',
@@ -11,16 +20,14 @@ export async function login() {
       body: JSON.stringify({ username, password }),
     });
     const data = await response.json();
+    console.log("Resposta do backend:", data);
     if (response.ok) {
       localStorage.setItem('token', data.token);
       localStorage.setItem('username', data.user.username);
       localStorage.setItem('isMaster', data.user.isMaster);
 
-      console.log('[DEBUG AUTH] Login realizado com sucesso:', {
-        username: data.user.username,
-        isMaster: data.user.isMaster,
-        token: data.token.substring(0, 20) + '...'
-      });
+      if (window.showSuccess) showSuccess('Login realizado com sucesso!');
+      else alert('Login realizado com sucesso!');
 
       // Redirecionar baseado no tipo de usuário
       if (data.user.isMaster) {
@@ -29,11 +36,13 @@ export async function login() {
         window.location.href = '/src/pages/student.html';
       }
     } else {
-      showError('Login falhou: ' + data.error);
+      if (window.showError) showError('Login falhou: ' + data.error);
+      else alert('Login falhou: ' + data.error);
     }
   } catch (err) {
     console.error('Erro no login:', err);
-    showError('Erro ao conectar com o servidor');
+    if (window.showError) showError('Erro ao conectar com o servidor');
+    else alert('Erro ao conectar com o servidor');
   }
 }
 

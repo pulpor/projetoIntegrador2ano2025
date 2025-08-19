@@ -1,5 +1,4 @@
-
-      // Função para alternar tema (global)
+// Função para alternar tema (global)
       function toggleTheme() {
         const html = document.documentElement;
         const icon = document.getElementById("theme-icon");
@@ -228,50 +227,63 @@
         }, 1000);
       });
  
-      import {
-        login,
-        showRegisterForm,
-        hideRegisterForm,
-        register,
-        initializeValidationListeners,
-      } from "./auth.js";
+      // Remova temporariamente o import do auth.js e todos os outros event listeners
+      // import { showRegisterForm, hideRegisterForm, register, initializeValidationListeners } from "./auth.js";
 
-      document.getElementById("loginButton").addEventListener("click", login);
-      document
-        .getElementById("registerButton")
-        .addEventListener("click", showRegisterForm);
-      document
-        .getElementById("backButton")
-        .addEventListener("click", hideRegisterForm);
-      document
-        .getElementById("registerSubmitButton")
-        .addEventListener("click", register);
+      // Função de login usando toast
+function showToastify(message, type = "info") {
+  Toastify({
+    text: message,
+    duration: 3500,
+    gravity: "top",
+    position: "center",
+    style: {
+      background:
+        type === "success" ? "#22c55e"
+        : type === "error" ? "#ef4444"
+        : "#6366f1"
+    },
+    stopOnFocus: true,
+    close: true,
+  }).showToast();
+}
 
-      // Inicializar validações em tempo real
-      initializeValidationListeners();
+function login() {
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value;
 
-      // Adicionar funcionalidade de Enter para login
-      document
-        .getElementById("username")
-        .addEventListener("keypress", function (event) {
-          if (event.key === "Enter") {
-            login();
-          }
-        });
+  if (!username || !password) {
+    showToastify("Preencha usuário e senha!", "error");
+    return;
+  }
 
-      document
-        .getElementById("password")
-        .addEventListener("keypress", function (event) {
-          if (event.key === "Enter") {
-            login();
-          }
-        });
+  fetch("http://localhost:3000/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password }),
+  })
+    .then(async (res) => {
+      let data = {};
+      try {
+        data = await res.json();
+      } catch {}
+      if (!res.ok) {
+        // Mostra mensagem do backend se existir, senão mostra erro HTTP
+        showToastify(data.message || data.error || `Erro ${res.status}: ${res.statusText}`, "error");
+        return;
+      }
+      if (data.success) {
+        showToastify("Login realizado com sucesso!", "success");
+        // Redirecionar ou atualizar UI
+      } else {
+        showToastify(data.message || "Usuário ou senha inválidos.", "error");
+      }
+    })
+    .catch((err) => {
+      showToastify("Erro de conexão com o servidor.", "error");
+    });
+}
 
-      // Adicionar funcionalidade de Enter para campos de registro
-      document.querySelectorAll("#register-form input").forEach((input) => {
-        input.addEventListener("keypress", function (event) {
-          if (event.key === "Enter") {
-            register();
-          }
-        });
-      });
+document.addEventListener("DOMContentLoaded", function () {
+  document.getElementById("loginButton").addEventListener("click", login);
+});
