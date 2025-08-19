@@ -74,16 +74,23 @@ function openFileSecurely(fileUrl) {
   }
 }
 
-// ====== FUNÇÕES DE CARREGAMENTO DE DADOS ======
+// ====== FUNÇÕES DE CARREGAMENTO DE DADOS ======  
+ 
 async function loadPendingUsers() {
   try {
-    const data = await apiRequest('/usuarios/pending-users');
-    renderPendingUsers(data);
+    const masterUsername = localStorage.getItem('username');
+   
+    const res = await fetch('/auth/users');
+    if (!res.ok) throw new Error('Rota /auth/users não encontrada no backend');
+    const allUsers = await res.json();
+
+    const pendingUsers = getPendingUsersForMaster(allUsers, masterUsername);
+    renderPendingUsersSpecifique(pendingUsers);
   } catch (err) {
     console.error('Erro ao carregar usuários pendentes:', err);
     showErrorContainer('pending-users', err.message);
   }
-}
+} 
 
 async function loadApprovedStudents() {
   try {
@@ -137,16 +144,26 @@ async function loadMissions() {
 }
 
 // ====== FUNÇÕES DE RENDERIZAÇÃO ======
-function renderPendingUsers(users) {
+function renderPendingUsersSpecifique(users) {
   const container = document.getElementById('pending-users');
-  if (!container) return;
-
+  container.innerHTML = '';
   if (users.length === 0) {
-    container.innerHTML = '<p class="text-gray-500 py-4">Nenhum usuário pendente encontrado.</p>';
+    container.innerHTML = '<div class="text-gray-500 text-center py-6">Nenhum usuário pendente para sua área.</div>';
     return;
   }
-
-  container.innerHTML = users.map(user => createUserCard(user)).join('');
+  users.forEach(user => {
+    container.innerHTML += `
+      <div class="card">
+        <h3 class="font-bold mb-2">${user.fullname} (${user.username})</h3>
+        <p class="text-gray-600">Curso: ${user.curso}</p>
+        <p class="text-gray-600">Classe: ${user.class}</p>
+        <div class="mt-2">
+          <span class="inline-block bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">Pendente</span>
+        </div>
+        <!-- Adicione botões de aprovação/rejeição conforme sua lógica -->
+      </div>
+    `;
+  });
 }
 
 function renderStudents(students) {
@@ -1133,3 +1150,9 @@ function updateFilterSpacing() {
     }
   });
 }
+
+// Função para filtrar usuários pendentes do mestre logado
+function getPendingUsersForMaster(allUsers, masterUsername) {
+  return allUsers.filter(u => u.pending && u.masterUsername === masterUsername);
+}
+

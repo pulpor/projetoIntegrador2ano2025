@@ -74,5 +74,31 @@
     "level": 1,
     "xp": 0,
     "pending": false
+  },
+  {
+    "id": 8,
+    "username": "gastrobar",
+    "fullname": "gastro",
+    "password": "$2b$10$Qw5.wlVYWZ4W.MvJCfWbheInqdn7QPhGkHdeEUQUVqAWvpCEAlai.",
+    "curso": "gastronomia",
+    "class": "Sommelier Sagrado",
+    "isMaster": false,
+    "level": 1,
+    "xp": 0,
+    "pending": true,
+    "masterUsername": "gastro"
+  },
+  {
+    "id": 9,
+    "username": "maria",
+    "fullname": "teste",
+    "password": "$2b$10$8wXGf1K.IsZS9QuBP/x1P.CXjE.OadI6oG7VI5uJe2skrH2cRaDzi",
+    "curso": "beleza",
+    "class": "Encantador de Cores",
+    "isMaster": false,
+    "level": 1,
+    "xp": 0,
+    "pending": true,
+    "masterUsername": "beleza"
   }
 ]

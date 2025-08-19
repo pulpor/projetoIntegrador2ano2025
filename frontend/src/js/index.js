@@ -229,31 +229,14 @@
  
       // Remova temporariamente o import do auth.js e todos os outros event listeners
       // import { showRegisterForm, hideRegisterForm, register, initializeValidationListeners } from "./auth.js";
+import { showToast } from './utils/toast.js';
 
-      // Função de login usando toast
-function showToastify(message, type = "info") {
-  Toastify({
-    text: message,
-    duration: 3500,
-    gravity: "top",
-    position: "center",
-    style: {
-      background:
-        type === "success" ? "#22c55e"
-        : type === "error" ? "#ef4444"
-        : "#6366f1"
-    },
-    stopOnFocus: true,
-    close: true,
-  }).showToast();
-}
-
-function login() {
+      function login() {
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value;
 
   if (!username || !password) {
-    showToastify("Preencha usuário e senha!", "error");
+    showToast("Preencha usuário e senha!", "error");
     return;
   }
 
@@ -267,23 +250,50 @@ function login() {
       try {
         data = await res.json();
       } catch {}
+      console.log("[LOGIN] status:", res.status);
+      console.log("[LOGIN] resposta:", data);
+
       if (!res.ok) {
-        // Mostra mensagem do backend se existir, senão mostra erro HTTP
-        showToastify(data.message || data.error || `Erro ${res.status}: ${res.statusText}`, "error");
+        showToast(data.message || data.error || `Erro ${res.status}: ${res.statusText}`, "error");
         return;
       }
-      if (data.success) {
-        showToastify("Login realizado com sucesso!", "success");
-        // Redirecionar ou atualizar UI
+      if (data.success || data.user) {
+        showToast("Login realizado com sucesso!", "success");
+        // Salva token e dados do usuário para manter sessão
+        if (data.token) {
+          localStorage.setItem("token", data.token);
+        }
+        if (data.user) {
+          localStorage.setItem("username", data.user.username);
+          localStorage.setItem("isMaster", data.user.isMaster);
+        }
+        // Redireciona para painel do mestre se for mestre
+        if (data.user && data.user.isMaster) {
+          window.location.href = "/src/pages/master.html";
+        } else {
+          window.location.href = "/src/pages/student.html";
+        }
       } else {
-        showToastify(data.message || "Usuário ou senha inválidos.", "error");
+        showToast(data.message || "Usuário ou senha inválidos.", "error");
       }
     })
     .catch((err) => {
-      showToastify("Erro de conexão com o servidor.", "error");
+      showToast("Erro de conexão com o servidor.", "error");
     });
 }
 
 document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("loginButton").addEventListener("click", login);
+
+  // Permite login ao pressionar Enter nos campos de usuário ou senha
+  ["username", "password"].forEach(id => {
+    const input = document.getElementById(id);
+    if (input) {
+      input.addEventListener("keypress", function (event) {
+        if (event.key === "Enter") {
+          login();
+        }
+      });
+    }
+  });
 });

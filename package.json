@@ -10,8 +10,7 @@
     "frontend": "cd frontend && npm run dev",
     "install-all": "npm install && cd frontend && npm install && cd ../backend && npm install",
     "dev-full": "concurrently \"npm run dev\" \"npm run frontend\"",
-    "test": "jest",
-    "setup-db": "node backend/config/initializeDB.js"
+    "test": "jest"
   },
   "dependencies": {
     "all": "^0.0.0",

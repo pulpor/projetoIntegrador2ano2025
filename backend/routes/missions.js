@@ -6,7 +6,6 @@ const router = express.Router();
 // Caminho correto para o arquivo missions.json
 const caminhoMissions = path.join(__dirname, '../data/missions.json');
 
-
 const { autenticar, ehMestre } = require('../middleware/auth');
 
 const { missions, missionIdCounter, users, submissions } = require('../inicializacao');

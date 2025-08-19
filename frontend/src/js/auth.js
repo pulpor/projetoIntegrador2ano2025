@@ -73,13 +73,6 @@ export function hideRegisterForm() {
     registerForm.classList.add('hidden');
     loginForm.classList.remove('hidden');
 
-    // Limpar campos e feedback
-    const inputs = ['reg-username', 'reg-fullname', 'reg-password', 'year-select', 'class-select'];
-    inputs.forEach(id => {
-      const element = document.getElementById(id);
-      if (element) element.value = '';
-    });
-
     // Esconder feedback
     const feedbacks = ['username-feedback', 'password-feedback', 'password-strength'];
     feedbacks.forEach(id => {
@@ -314,17 +307,12 @@ export async function register() {
   const username = document.getElementById('reg-username').value.trim();
   const fullname = document.getElementById('reg-fullname').value.trim();
   const password = document.getElementById('reg-password').value;
-  const yearSelect = document.getElementById('year-select').value;
+  const cursoSelect = document.getElementById('curso-select').value;
   const classSelect = document.getElementById('class-select').value.trim();
 
   // Validações básicas
-  if (!username || !fullname || !password || !classSelect) {
+  if (!username || !fullname || !password || !classSelect || !cursoSelect) {
     showError('Por favor, preencha todos os campos obrigatórios.');
-    return;
-  }
-
-  if (!yearSelect) {
-    showWarning('Por favor, selecione seu ano.');
     return;
   }
 
@@ -343,15 +331,15 @@ export async function register() {
   }
 
   try {
-    const response = await fetch('http://localhost:3000/auth/register', { // Corrigido para /auth/register
+    const response = await fetch('http://localhost:3000/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         username,
         fullname,
         password,
+        curso: cursoSelect,
         class: classSelect,
-        year: parseInt(yearSelect),
         isMaster: false
       }),
     });
@@ -373,13 +361,13 @@ function updateFormValidation() {
   const username = document.getElementById('reg-username')?.value.trim() || '';
   const password = document.getElementById('reg-password')?.value || '';
   const fullname = document.getElementById('reg-fullname')?.value.trim() || '';
-  const yearSelect = document.getElementById('year-select')?.value || '';
+  const cursoSelect = document.getElementById('curso-select')?.value || '';
   const classSelect = document.getElementById('class-select')?.value || '';
   const submitButton = document.getElementById('registerSubmitButton');
 
   const usernameValid = validateUsername(username).isValid;
   const passwordValid = validatePassword(password).isValid;
-  const fieldsComplete = fullname && yearSelect && classSelect;
+  const fieldsComplete = fullname && cursoSelect && classSelect;
 
   const canSubmit = usernameValid && passwordValid && fieldsComplete;
 
@@ -397,7 +385,7 @@ export function initializeValidationListeners() {
   const usernameInput = document.getElementById('reg-username');
   const passwordInput = document.getElementById('reg-password');
   const fullnameInput = document.getElementById('reg-fullname');
-  const yearSelect = document.getElementById('year-select');
+  const cursoSelect = document.getElementById('curso-select');
   const classSelect = document.getElementById('class-select');
 
   if (usernameInput) {
@@ -418,8 +406,8 @@ export function initializeValidationListeners() {
     fullnameInput.addEventListener('input', updateFormValidation);
   }
 
-  if (yearSelect) {
-    yearSelect.addEventListener('change', updateFormValidation);
+  if (cursoSelect) {
+    cursoSelect.addEventListener('change', updateFormValidation);
   }
 
   if (classSelect) {

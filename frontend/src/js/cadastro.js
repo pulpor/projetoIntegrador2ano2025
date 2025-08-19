@@ -1,3 +1,5 @@
+import { showToast } from './utils/toast.js';
+
 // --- ÁREAS E CLASSES ---
 export const areasClasses = {
   beleza: { name: "👒 Beleza", classes: { "Estilista das Sombras": {}, "Feiticeira das Unhas": {}, "Encantador de Cores": {}, "Artista das Luzes": {}, "Cortes Fantasma": {}, "Guardiã das Flores": {}, "Alquimista do Perfume": {}, "Mestre do Reflexo": {} } },
@@ -288,9 +290,17 @@ function validateRegisterFields() {
   const password = document.getElementById('reg-password').value;
   const curso = document.getElementById('curso-select').value;
   const classe = document.getElementById('class-select').value;
+
+  // Verifique se todos os campos realmente têm valor
+  if (!username || !fullname || !password || !curso || !classe) {
+    return false;
+  }
+
+  // Validação de username e senha
   const usernameValid = validateUsername(username);
   const passwordValid = Object.values(validatePassword(password)).every(Boolean);
-  return usernameValid && fullname && passwordValid && curso && classe;
+
+  return usernameValid && passwordValid;
 }
 
 function updateRegisterButtonState() {
@@ -339,41 +349,56 @@ function getMasterForArea(area) {
 
 async function handleRegister() {
   if (!validateRegisterFields()) {
-    toast.error('Preencha todos os campos corretamente!');
+    showToast('Preencha todos os campos corretamente!', 'error');
     return;
   }
   const username = document.getElementById('reg-username').value.trim();
   const fullname = document.getElementById('reg-fullname').value.trim();
   const password = document.getElementById('reg-password').value;
-  const curso = document.getElementById('curso-select').value;
+  const curso = document.getElementById('curso-select').value; // Certifique-se que o id está correto!
   const classe = document.getElementById('class-select').value;
   const masterArea = getMasterForArea(curso);
 
-  // Envia para backend como pending e com masterArea
+  // Adicione log para depuração no frontend
+  console.log("[REGISTER FRONT] Dados enviados:", { username, fullname, password, curso, classe, masterArea });
+
   try {
-    const res = await fetch('/api/register', {
+    const res = await fetch('http://localhost:3000/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         username,
         fullname,
         password,
-        curso,
-        classe,
+        curso, // Certifique-se que está sendo enviado!
+        class: classe,
         pending: true,
-        masterArea // Indica para quem vai a aprovação
+        masterArea,
+        isMaster: false
       })
     });
-    const data = await res.json();
-    if (res.ok && data.success) {
-      toast.info('Conta criada! Aguarde aprovação do mestre da área.');
+
+    let data;
+    try {
+      data = await res.json();
+    } catch {
+      data = {};
+    }
+
+    if (!res.ok) {
+      showToast(data.message || data.error || `Erro ${res.status}: ${res.statusText}`, 'error');
+      return;
+    }
+
+    if (data.success) {
+      showToast('Conta criada! Aguarde aprovação do mestre da área.', 'success');
       clearRegistrationForm();
       updateRegisterButtonState();
     } else {
-      toast.error(data.message || 'Erro ao criar conta.');
+      showToast(data.message || 'Erro ao criar conta.', 'error');
     }
   } catch (err) {
-    toast.error('Erro de conexão com o servidor.');
+    showToast('Erro de conexão com o servidor.', 'error');
   }
 }
 

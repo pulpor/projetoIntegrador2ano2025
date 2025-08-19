@@ -15,7 +15,6 @@ router.get('/students', autenticar, ehMestre, (req, res) => {
 });
 
 router.get('/approved-students', autenticar, ehMestre, (req, res) => {
-  console.log('[DEBUG BACKEND] Chamada para approved-students');
   const approvedStudents = users.filter(u => !u.pending && !u.isMaster);
 
   // Enriquecer dados com informações de nível
@@ -26,21 +25,18 @@ router.get('/approved-students', autenticar, ehMestre, (req, res) => {
       username: student.username,
       fullname: student.fullname,
       class: student.class,
-      year: student.year,
+      curso: student.curso, 
       level: student.level,
       xp: student.xp,
       levelInfo: levelInfo
     };
   });
 
-  console.log('[DEBUG BACKEND] Alunos aprovados encontrados:', enrichedStudents.length);
-  console.log('[DEBUG BACKEND] Exemplo de aluno enviado:', enrichedStudents[0]);
   res.json(enrichedStudents);
 });
 
 // Rota para obter informações do usuário logado
 router.get('/me', autenticar, (req, res) => {
-  console.log('[DEBUG BACKEND] Chamada para /me:', req.user);
   const user = users.find(u => u.id === req.user.userId);
   if (!user) {
     return res.status(404).json({ error: 'Usuário não encontrado' });
