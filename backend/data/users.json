@@ -85,7 +85,7 @@
     "isMaster": false,
     "level": 1,
     "xp": 0,
-    "pending": true,
+    "pending": false,
     "masterUsername": "gastro"
   },
   {

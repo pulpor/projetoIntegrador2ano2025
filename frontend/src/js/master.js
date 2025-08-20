@@ -75,33 +75,48 @@ function openFileSecurely(fileUrl) {
 }
 
 // ====== FUNÇÕES DE CARREGAMENTO DE DADOS ======  
- 
 async function loadPendingUsers() {
   try {
     const masterUsername = localStorage.getItem('username');
-   
-    const res = await fetch('/auth/users');
-    if (!res.ok) throw new Error('Rota /auth/users não encontrada no backend');
+    const res = await fetch('http://localhost:3000/usuarios/pending-users', {
+      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+    });
+    const contentType = res.headers.get('content-type');
+    if (!res.ok || !contentType || !contentType.includes('application/json')) {
+      throw new Error('Resposta do servidor não é JSON. Verifique o endpoint /usuarios/pending-users.');
+    }
     const allUsers = await res.json();
-
-    const pendingUsers = getPendingUsersForMaster(allUsers, masterUsername);
-    renderPendingUsersSpecifique(pendingUsers);
+    // Filtrar para mostrar apenas os pendentes do mestre logado
+    const filtered = getPendingUsersForMaster(allUsers, masterUsername);
+    console.log('[FRONTEND] Usuários pendentes filtrados:', filtered);
+    renderPendingUsersSpecifique(filtered);
   } catch (err) {
-    console.error('Erro ao carregar usuários pendentes:', err);
-    showErrorContainer('pending-users', err.message);
+    if (err.message.includes('Failed to fetch') || err.message.includes('ECONNREFUSED')) {
+      showErrorContainer('pending-users', 'Não foi possível conectar ao servidor backend. Verifique se o backend está rodando na porta 3000.');
+    } else {
+      showErrorContainer('pending-users', err.message);
+    }
   }
-} 
+}
 
 async function loadApprovedStudents() {
   try {
+    const masterUsername = localStorage.getItem('username');
     const data = await apiRequest('/usuarios/approved-students');
-    originalStudents = data;
+    console.log('[FRONTEND] Todos alunos aprovados recebidos:', data);
+    data.forEach(student => {
+      console.log('[DEBUG] Aluno aprovado:', student);
+    });
+    // Filtrar alunos aprovados do mestre logado
+    const filtered = data.filter(student => student.masterUsername === masterUsername);
+    console.log('[FRONTEND] Alunos aprovados filtrados:', filtered);
+    originalStudents = filtered;
 
     const hasActiveFilters = checkActiveFilters('student');
     if (hasActiveFilters) {
       applyStudentFilters();
     } else {
-      renderStudents(data);
+      renderStudents(filtered);
     }
   } catch (err) {
     console.error('Erro ao carregar alunos:', err);
@@ -160,10 +175,69 @@ function renderPendingUsersSpecifique(users) {
         <div class="mt-2">
           <span class="inline-block bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">Pendente</span>
         </div>
-        <!-- Adicione botões de aprovação/rejeição conforme sua lógica -->
+        <div class="mt-4 flex gap-2">
+          <button class="approve-btn bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded" data-user-id="${user.id}">
+            <i class="fas fa-check mr-1"></i> Aprovar
+          </button>
+          <button class="reject-btn bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded" data-user-id="${user.id}">
+            <i class="fas fa-times mr-1"></i> Rejeitar
+          </button>
+        </div>
       </div>
     `;
   });
+
+  // Adicionar eventos aos botões
+  container.querySelectorAll('.approve-btn').forEach(btn => {
+    btn.onclick = async () => {
+      await approveUser(btn.dataset.userId);
+    };
+  });
+  container.querySelectorAll('.reject-btn').forEach(btn => {
+    btn.onclick = async () => {
+      await rejectUser(btn.dataset.userId);
+    };
+  });
+}
+
+// Aprovar usuário pendente
+async function approveUser(userId) {
+  try {
+    const res = await fetch('http://localhost:3000/usuarios/approve-user', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + localStorage.getItem('token')
+      },
+      body: JSON.stringify({ userId })
+    });
+    if (!res.ok) throw new Error('Erro ao aprovar usuário');
+    showSuccess('Usuário aprovado!');
+    loadPendingUsers();
+    loadApprovedStudents();
+  } catch (err) {
+    showError('Erro ao aprovar usuário: ' + err.message);
+  }
+}
+
+// Rejeitar usuário pendente
+async function rejectUser(userId) {
+  try {
+    const res = await fetch('http://localhost:3000/usuarios/reject-user', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + localStorage.getItem('token')
+      },
+      body: JSON.stringify({ userId })
+    });
+    if (!res.ok) throw new Error('Erro ao rejeitar usuário');
+    showSuccess('Usuário rejeitado!');
+    loadPendingUsers();
+    loadApprovedStudents();
+  } catch (err) {
+    showError('Erro ao rejeitar usuário: ' + err.message);
+  }
 }
 
 function renderStudents(students) {
@@ -1155,4 +1229,6 @@ function updateFilterSpacing() {
 function getPendingUsersForMaster(allUsers, masterUsername) {
   return allUsers.filter(u => u.pending && u.masterUsername === masterUsername);
 }
+
+// Nenhuma alteração necessária no JS.
 

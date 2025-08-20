@@ -25,7 +25,7 @@ router.get('/approved-students', autenticar, ehMestre, (req, res) => {
       username: student.username,
       fullname: student.fullname,
       class: student.class,
-      curso: student.curso, 
+      curso: student.curso,
       level: student.level,
       xp: student.xp,
       levelInfo: levelInfo
@@ -85,10 +85,14 @@ router.get('/my-penalties-rewards', autenticar, (req, res) => {
 });
 
 router.get('/pending-users', autenticar, ehMestre, (req, res) => {
-  console.log('[DEBUG BACKEND] Chamada para pending-users (com autenticação)');
-  const pendingUsers = users.filter(u => u.pending && !u.isMaster);
-  console.log('[DEBUG BACKEND] Usuários pendentes encontrados:', pendingUsers.length);
-  res.json(pendingUsers);
+  try {
+    console.log('[DEBUG BACKEND] Chamada para pending-users (com autenticação)');
+    const pendingUsers = users.filter(u => u.pending && !u.isMaster);
+    console.log('[DEBUG BACKEND] Usuários pendentes encontrados:', pendingUsers.length);
+    res.json(pendingUsers);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro interno ao buscar usuários pendentes' });
+  }
 });
 
 router.post('/approve-user', autenticar, ehMestre, async (req, res) => {
@@ -98,6 +102,8 @@ router.post('/approve-user', autenticar, ehMestre, async (req, res) => {
     return res.status(404).json({ error: 'Usuário não encontrado' });
   }
   user.pending = false;
+
+
   try {
     await fs.writeFile(caminhoUsers, JSON.stringify(users, null, 2));
     res.json({ user: { ...user, password: undefined } });

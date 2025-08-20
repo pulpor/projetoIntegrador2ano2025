@@ -75,6 +75,11 @@ app.post('/api/register', (req, res) => {
   // res.json({ success: true });
 });
 
+// Middleware para rotas não encontradas (404) - sempre retorna JSON
+app.use((req, res, next) => {
+  res.status(404).json({ error: 'Rota não encontrada', url: req.originalUrl });
+});
+
 // Iniciar servidor
 app.listen(port, () => {
   console.log(`🚀 Servidor rodando em http://localhost:${port}`);

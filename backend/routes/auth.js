@@ -114,7 +114,11 @@ router.post('/login', async (req, res) => {
 
 // Adicione esta rota para retornar todos os usuários em JSON
 router.get('/users', (req, res) => {
-  res.json(users);
+  try {
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro interno ao retornar usuários' });
+  }
 });
 
 module.exports = router;
