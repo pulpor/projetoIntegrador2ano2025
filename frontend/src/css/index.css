@@ -258,7 +258,9 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  /* animation: fa-spin 2s infinite steps(8);  efeito de dado rolando */
 }
+
 
 /* Tema escuro */
 [data-theme="dark"] {

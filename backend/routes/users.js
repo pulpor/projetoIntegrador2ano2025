@@ -17,7 +17,7 @@ router.get('/students', autenticar, ehMestre, (req, res) => {
 router.get('/approved-students', autenticar, ehMestre, (req, res) => {
   const approvedStudents = users.filter(u => !u.pending && !u.isMaster);
 
-  // Enriquecer dados com informações de nível
+  // Enriquecer dados com informações de nível e masterUsername
   const enrichedStudents = approvedStudents.map(student => {
     const levelInfo = getLevelInfo(student.xp || 0);
     return {
@@ -28,7 +28,8 @@ router.get('/approved-students', autenticar, ehMestre, (req, res) => {
       curso: student.curso,
       level: student.level,
       xp: student.xp,
-      levelInfo: levelInfo
+      levelInfo: levelInfo,
+      masterUsername: student.masterUsername // <-- Adicionado aqui
     };
   });
 
