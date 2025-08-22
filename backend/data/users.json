@@ -100,5 +100,18 @@
     "xp": 0,
     "pending": true,
     "masterUsername": "beleza"
+  },
+  {
+    "id": 10,
+    "username": "leonardo",
+    "fullname": "asdasdasd",
+    "password": "$2b$10$SpIzU4Ityqn55LKLT9qzr.yUCwyzZoLGesgnHIKLe0NCv9/TDwK36",
+    "curso": "beleza",
+    "class": "Mestre do Reflexo",
+    "isMaster": false,
+    "level": 1,
+    "xp": 0,
+    "pending": true,
+    "masterUsername": "beleza"
   }
 ]

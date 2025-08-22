@@ -15,14 +15,21 @@
     <script defer src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
   </head>
+
   <body class="animated-bg font-sans h-screen overflow-hidden">
     <div class="h-full flex items-center justify-center p-4">
       <div id="login-screen" class="login-card max-w-md w-full rounded-2xl max-h-full overflow-y-auto">
-        <button class="theme-toggle" onclick="toggleTheme()" title="Alternar tema">
+
+        <button id="themeToggle" class="theme-toggle toggle-btn" data-tooltip="Lumus" onclick="toggleTheme()" aria-label="Alternar tema">
           <i id="theme-icon" class="fas fa-moon theme-icon-moon"></i>
+
+          
+          
         </button>
+
+
         <div class="logo-title">
-          <i class="fas fa-light fa-duotone fa-dice-d20 logo-icon" style="--fa-primary-color: #ec79b3; --fa-secondary-color: #b1236a;"></i>
+          <i class="fas fa-light fa-dice-d20 logo-icon"></i>
           <h1 class="text-3xl font-bold">Sistema RPG<br /><span class="text-2x1">Educacional</span></h1>
         </div>
         <div id="login-form">
