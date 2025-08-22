@@ -1,312 +1,127 @@
-// Função para alternar tema (global)
-function toggleTheme() {
-  const html = document.documentElement;
-  const icon = document.getElementById("theme-icon");
-  const btn = document.getElementById("themeToggle");
-  const currentTheme = html.getAttribute("data-theme") || "light";
+// ============================
+// LOGIN + POSICIONAMENTO ÍCONES
+// ============================
 
-  if (currentTheme === "dark") {
-    html.setAttribute("data-theme", "light");
-    icon.className = "fas fa-moon";
-    btn.setAttribute("data-tooltip", "Lumus");
-  } else {
-    html.setAttribute("data-theme", "dark");
-    icon.className = "fas fa-sun";
-    btn.setAttribute("data-tooltip", "Nox");
-  }
-
-  btn.classList.add("show-tooltip");
-  setTimeout(() => btn.classList.remove("show-tooltip"), 1500);
-}
-
-// Initialize theme on page load
-function initTheme() {
-  const savedTheme = localStorage.getItem("theme");
-  const prefersDark = window.matchMedia(
-    "(prefers-color-scheme: dark)"
-  ).matches;
-  const initialTheme = savedTheme || (prefersDark ? "dark" : "light");
-
-  console.log("Inicializando tema:", initialTheme);
-  document.documentElement.setAttribute("data-theme", initialTheme);
-
-  const themeIcon = document.getElementById("theme-icon");
-  if (themeIcon) {
-    // Se está no dark mode, mostra sol dourado (para ir pro claro)
-    // Se está no light mode, mostra lua prateada (para ir pro escuro)
-    if (initialTheme === "dark") {
-      themeIcon.className = "fas fa-sun theme-icon-sun";
-    } else {
-      themeIcon.className = "fas fa-moon theme-icon-moon";
-    }
-  }
-}
-
-// Carregar tema salvo ao inicializar
-document.addEventListener("DOMContentLoaded", function () {
-  initTheme();
-
-  // Aplicar posicionamento absoluto e matemático aos ícones
-  function posicionarIconesPerfeito() {
-    const allIcons = document.querySelectorAll(
-      "#login-screen .input-icon, .input-group .input-icon"
-    );
-    allIcons.forEach((icon) => {
-      // Força posicionamento matemático - sem porcentagens
-      icon.style.setProperty("position", "absolute", "important");
-      icon.style.setProperty("left", "18px", "important");
-      icon.style.setProperty("top", "26px", "important"); // Exatamente no centro de 52px
-      icon.style.setProperty(
-        "transform",
-        "translateY(-50%)",
-        "important"
-      );
-      icon.style.setProperty("color", "#6b7280", "important");
-      icon.style.setProperty("font-size", "16px", "important");
-      icon.style.setProperty("width", "16px", "important");
-      icon.style.setProperty("height", "16px", "important");
-      icon.style.setProperty("display", "flex", "important");
-      icon.style.setProperty("align-items", "center", "important");
-      icon.style.setProperty("justify-content", "center", "important");
-      icon.style.setProperty("pointer-events", "none", "important");
-      icon.style.setProperty("z-index", "1000", "important");
-      icon.style.setProperty(
-        "transition",
-        "color 0.3s ease",
-        "important"
-      );
-      icon.style.setProperty("line-height", "1", "important");
-      icon.style.setProperty("margin", "0", "important");
-      icon.style.setProperty("padding", "0", "important");
-    });
-  }
-
-  // Garantir altura fixa dos inputs
-  function garantirAlturaInputs() {
-    const allInputs = document.querySelectorAll(
-      "#login-screen .input-field, .input-group .input-field"
-    );
-    allInputs.forEach((input) => {
-      input.style.setProperty("height", "52px", "important");
-      input.style.setProperty("line-height", "20px", "important");
-      input.style.setProperty(
-        "padding",
-        "16px 16px 16px 52px",
-        "important"
-      );
-      input.style.setProperty("box-sizing", "border-box", "important");
-      input.style.setProperty("transform", "none", "important");
-    });
-  }
-
-  // Aplicar posicionamento inicial
-  posicionarIconesPerfeito();
-  garantirAlturaInputs();
-
-  // Reforçar posicionamento em todos os eventos
-  const allInputs = document.querySelectorAll(
-    "#login-screen .input-field, .input-group .input-field"
-  );
-  allInputs.forEach((input) => {
-    input.addEventListener("focus", function () {
-      // Manter altura no foco
-      this.style.setProperty("height", "52px", "important");
-      this.style.setProperty("line-height", "20px", "important");
-      this.style.setProperty(
-        "padding",
-        "16px 16px 16px 52px",
-        "important"
-      );
-      this.style.setProperty("transform", "none", "important");
-
-      // Reposicionar ícone e trocar cor
-      const icon = this.nextElementSibling;
-      if (icon && icon.classList.contains("input-icon")) {
-        icon.style.setProperty("color", "#667eea", "important");
-        icon.style.setProperty("position", "absolute", "important");
-        icon.style.setProperty("left", "18px", "important");
-        icon.style.setProperty("top", "26px", "important");
-        icon.style.setProperty(
-          "transform",
-          "translateY(-50%)",
-          "important"
-        );
-        icon.style.setProperty("z-index", "1000", "important");
-      }
-    });
-
-    input.addEventListener("blur", function () {
-      // Manter altura no blur
-      this.style.setProperty("height", "52px", "important");
-      this.style.setProperty("line-height", "20px", "important");
-      this.style.setProperty(
-        "padding",
-        "16px 16px 16px 52px",
-        "important"
-      );
-      this.style.setProperty("transform", "none", "important");
-
-      // Reposicionar ícone e voltar cor
-      const icon = this.nextElementSibling;
-      if (icon && icon.classList.contains("input-icon")) {
-        icon.style.setProperty("color", "#6b7280", "important");
-        icon.style.setProperty("position", "absolute", "important");
-        icon.style.setProperty("left", "18px", "important");
-        icon.style.setProperty("top", "26px", "important");
-        icon.style.setProperty(
-          "transform",
-          "translateY(-50%)",
-          "important"
-        );
-        icon.style.setProperty("z-index", "1000", "important");
-      }
-    });
-
-    // CRÍTICO: Manter posicionamento durante digitação
-    input.addEventListener("input", function () {
-      // Garantir que o input mantenha altura
-      this.style.setProperty("height", "52px", "important");
-      this.style.setProperty("line-height", "20px", "important");
-      this.style.setProperty(
-        "padding",
-        "16px 16px 16px 52px",
-        "important"
-      );
-      this.style.setProperty("transform", "none", "important");
-
-      // Forçar reposicionamento do ícone
-      const icon = this.nextElementSibling;
-      if (icon && icon.classList.contains("input-icon")) {
-        icon.style.setProperty("position", "absolute", "important");
-        icon.style.setProperty("left", "18px", "important");
-        icon.style.setProperty("top", "26px", "important");
-        icon.style.setProperty(
-          "transform",
-          "translateY(-50%)",
-          "important"
-        );
-        icon.style.setProperty("z-index", "1000", "important");
-      }
-    });
-
-    // Reforçar a cada mudança de valor
-    input.addEventListener("change", function () {
-      posicionarIconesPerfeito();
-      garantirAlturaInputs();
-    });
-  });
-
-  // Observer para detectar mudanças dinâmicas no DOM
-  const observer = new MutationObserver(function (mutations) {
-    mutations.forEach(function (mutation) {
-      if (
-        mutation.type === "childList" ||
-        mutation.type === "attributes"
-      ) {
-        setTimeout(() => {
-          posicionarIconesPerfeito();
-          garantirAlturaInputs();
-        }, 10);
-      }
-    });
-  });
-
-  observer.observe(document.getElementById("login-screen"), {
-    childList: true,
-    subtree: true,
-    attributes: true,
-    attributeFilter: ["style", "class"],
-  });
-
-  // Reforçar posicionamento periodicamente (failsafe)
-  setInterval(() => {
-    posicionarIconesPerfeito();
-    garantirAlturaInputs();
-  }, 1000);
-});
-
-// Remova temporariamente o import do auth.js e todos os outros event listeners
-// import { showRegisterForm, hideRegisterForm, register, initializeValidationListeners } from "./auth.js";
 import { showToast } from './utils/toast.js';
 
-function login() {
-  const username = document.getElementById("username").value.trim();
-  const password = document.getElementById("password").value;
+document.addEventListener("DOMContentLoaded", () => {
+  // Elementos
+  const loginButton = document.getElementById("loginButton");
+  const diceIcon = document.querySelector(".logo-icon");
+  const loginScreen = document.getElementById("login-screen");
+  const inputs = document.querySelectorAll("#login-screen .input-field, .input-group .input-field");
 
-  if (!username || !password) {
-    showToast("Preencha usuário e senha!", "error");
-    return;
+  // ============================
+  // FUNÇÕES DE POSICIONAMENTO
+  // ============================
+  function posicionarIcones() {
+    const allIcons = document.querySelectorAll("#login-screen .input-icon, .input-group .input-icon");
+    allIcons.forEach(icon => {
+      Object.assign(icon.style, {
+        position: "absolute",
+        left: "18px",
+        top: "26px",
+        transform: "translateY(-50%)",
+        color: "#6b7280",
+        fontSize: "16px",
+        width: "16px",
+        height: "16px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        pointerEvents: "none",
+        zIndex: "1000",
+        transition: "color 0.3s ease",
+        lineHeight: "1",
+        margin: "0",
+        padding: "0"
+      });
+    });
   }
 
-  fetch("http://localhost:3000/auth/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password }),
-  })
-    .then(async (res) => {
-      let data = {};
-      try {
-        data = await res.json();
-      } catch { }
-      console.log("[LOGIN] status:", res.status);
-      console.log("[LOGIN] resposta:", data);
-
-      if (!res.ok) {
-        showToast(data.message || data.error || `Erro ${res.status}: ${res.statusText}`, "error");
-        return;
-      }
-      if (data.success || data.user) {
-        showToast("Login realizado com sucesso!", "success");
-        // Salva token e dados do usuário para manter sessão
-        if (data.token) {
-          localStorage.setItem("token", data.token);
-        }
-        if (data.user) {
-          localStorage.setItem("username", data.user.username);
-          localStorage.setItem("isMaster", data.user.isMaster);
-        }
-        // Redireciona para painel do mestre se for mestre
-        if (data.user && data.user.isMaster) {
-          window.location.href = "/src/pages/master.html";
-        } else {
-          window.location.href = "/src/pages/student.html";
-        }
-      } else {
-        showToast(data.message || "Usuário ou senha inválidos.", "error");
-      }
-    })
-    .catch((err) => {
-      showToast("Erro de conexão com o servidor.", "error");
+  function garantirAlturaInputs() {
+    inputs.forEach(input => {
+      Object.assign(input.style, {
+        height: "52px",
+        lineHeight: "20px",
+        padding: "16px 16px 16px 52px",
+        boxSizing: "border-box",
+        transform: "none"
+      });
     });
-}
+  }
 
-document.addEventListener("DOMContentLoaded", function () {
-  document.getElementById("loginButton").addEventListener("click", login);
+  // Aplica posicionamento inicial
+  posicionarIcones();
+  garantirAlturaInputs();
 
-  // Permite login ao pressionar Enter nos campos de usuário ou senha
+  // ============================
+  // EVENTOS DE INPUT
+  // ============================
+  inputs.forEach(input => {
+    const icon = input.nextElementSibling;
+
+    input.addEventListener("focus", () => {
+      input.style.paddingLeft = "52px";
+      if (icon && icon.classList.contains("input-icon")) {
+        icon.style.color = "#667eea";
+      }
+    });
+
+    input.addEventListener("blur", () => {
+      if (icon && icon.classList.contains("input-icon")) {
+        icon.style.color = "#6b7280";
+      }
+    });
+
+    // Mantém altura e posicionamento durante digitação
+    ["input", "change"].forEach(eventType => {
+      input.addEventListener(eventType, () => {
+        garantirAlturaInputs();
+        posicionarIcones();
+      });
+    });
+  });
+
+  // Observer para mudanças dinâmicas no DOM
+  if (loginScreen) {
+    const observer = new MutationObserver(() => {
+      setTimeout(() => {
+        garantirAlturaInputs();
+        posicionarIcones();
+      }, 10);
+    });
+    observer.observe(loginScreen, { childList: true, subtree: true, attributes: true, attributeFilter: ["style", "class"] });
+  }
+
+
+  // Efeito de rolar o dado ao clicar (apenas uma vez)
+  if (diceIcon) {
+    diceIcon.addEventListener("click", () => {
+      diceIcon.classList.add("rolling");
+      diceIcon.addEventListener("animationend", () => {
+        diceIcon.classList.remove("rolling");
+      }, { once: true });
+    });
+  }
+
+  // Evento de login
+  if (loginButton) {
+    loginButton.addEventListener("click", async () => {
+      loginButton.classList.add("btn-loading");
+      await login();
+      loginButton.classList.remove("btn-loading");
+    });
+  }
+
+  // Pressionar Enter nos campos
   ["username", "password"].forEach(id => {
     const input = document.getElementById(id);
-    if (input) {
-      input.addEventListener("keypress", function (event) {
-        if (event.key === "Enter") {
-          login();
-        }
+    if (input && loginButton) {
+      input.addEventListener("keypress", e => {
+        if (e.key === "Enter") loginButton.click();
       });
     }
   });
-});
 
-const loginButton = document.getElementById("loginButton");
-
-loginButton.addEventListener("click", () => {
-  loginButton.classList.add("btn-loading");
-  // depois de receber a resposta do login
-  setTimeout(() => loginButton.classList.remove("btn-loading"), 2000);
-});
-
-const diceIcon = document.querySelector(".logo-icon");
-
-diceIcon.addEventListener("click", () => {
-  diceIcon.classList.add("roll");
-  setTimeout(() => diceIcon.classList.remove("roll"), 600);
 });

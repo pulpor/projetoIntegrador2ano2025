@@ -41,6 +41,9 @@
   animation: slideIn 0.8s ease-out;
   position: relative;
   padding: 2rem 2rem 2rem 2rem;
+  overflow: visible !important;
+  max-width: 100vw;
+  max-height: 100vh;
 }
 
 @keyframes slideIn {
@@ -137,7 +140,7 @@
   box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2) !important;
 }
 
-/* Ícone no estado de foco - cor azul */
+/* Ícono no estado de foco - cor azul */
 #login-screen .input-field:focus + .input-icon,
 .input-group .input-field:focus + .input-icon {
   color: #667eea !important;
@@ -184,15 +187,6 @@
 #username-feedback {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
-}
-
-/* Melhorar aparência dos critérios da senha no modo escuro */
-[data-theme="dark"] .bg-gray-50 {
-  background-color: #374151 !important;
-}
-
-[data-theme="dark"] .border-gray-200 {
-  border-color: #4b5563 !important;
 }
 
 /* Botões melhorados */
@@ -257,122 +251,70 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  /* animation: fa-spin 2s infinite steps(8);  efeito de dado rolando */
-}
-
-.toggle-btn {
-  position: relative;
-  background: none;
-  border: none;
+  transition: transform 0.3s ease !important; /* Smooth scaling for hover */
+  cursor: pointer; /* Indicate clickability */
+  transform-origin: center; /* Ensure scaling and rotation are centered */
+  overflow: visible !important; /* Garante que não aparece scroll */
+  max-width: 100vw;
+  max-height: 100vh;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   cursor: pointer;
-  font-size: 24px;
-  color: #ec79b3;
+  /* Adiciona animação ao clicar */
+  transition: transform 0.3s ease;
 }
 
-.tooltip {
-  position: absolute;
-  top: -35px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #222;
-  color: #fff;
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-size: 14px;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.4s ease;
+.logo-icon.rolling {
+  animation: roll 1.2s ease-in-out;
 }
 
-
-.toggle-btn:hover .tooltip {
-  opacity: 1;
+.logo-icon.dualtone {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 60%, #667eea 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
 }
 
-/* Tema escuro */
-[data-theme="dark"] {
-  --animated-bg: linear-gradient(-45deg, #1f2937, #374151, #4b5563, #6b7280);
+.logo-icon::-webkit-scrollbar {
+  display: none !important;
 }
 
-[data-theme="dark"] body {
-  background: var(
-    --animated-bg,
-    linear-gradient(-45deg, #1f2937, #374151, #4b5563, #6b7280)
-  );
-  background-size: 400% 400%;
-  animation: gradientShift 15s ease infinite;
+/* Efeito de hover para o ícone de dado */
+.logo-icon:hover {
+  transform: scale(1.2);
 }
 
-[data-theme="dark"] .login-card {
-  background: rgba(31, 41, 55, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #f9fafb;
+@keyframes roll {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  25% {
+    transform: rotate(90deg) scale(1.1);
+  }
+  50% {
+    transform: rotate(360deg) scale(1);
+  }
+  75% {
+    transform: rotate(630deg) scale(1.1);
+  }
+  100% {
+    transform: rotate(720deg) scale(1);
+  }
 }
 
-/* ======= MODO ESCURO - ÍCONES CENTRALIZADOS ======= */
-[data-theme="dark"] #login-screen .input-field,
-[data-theme="dark"] .input-group .input-field {
-  background: rgba(55, 65, 81, 0.8) !important;
-  color: white !important;
-  border-color: rgba(75, 85, 99, 0.5) !important;
-  height: 52px !important;
-  line-height: 20px !important;
-  padding: 16px 16px 16px 52px !important;
+/* Feedback de senha mais claro no modo dark */
+[data-theme="dark"] #password-feedback {
+  color: #faebeb !important; /* vermelho claro */
 }
 
-[data-theme="dark"] #login-screen .input-field:focus,
-[data-theme="dark"] .input-group .input-field:focus {
-  background: rgba(75, 85, 99, 0.9) !important;
-  border-color: #818cf8 !important;
-  transform: none !important;
-  outline: none !important;
-  box-shadow: 0 10px 25px rgba(129, 140, 248, 0.2) !important;
-  height: 52px !important;
-  line-height: 20px !important;
-  padding: 16px 16px 16px 52px !important;
+/* Margem entre barra de progresso e feedback */
+.rounded {
+  margin-bottom: 0.7rem; /* mb-3 */
 }
 
-[data-theme="dark"] #login-screen .input-field::placeholder,
-[data-theme="dark"] .input-group .input-field::placeholder {
-  color: #9ca3af !important;
-}
-
-[data-theme="dark"] #login-screen .input-icon,
-[data-theme="dark"] .input-group .input-icon,
-[data-theme="dark"] .input-field + .input-icon {
-  color: #9ca3af !important;
-  position: absolute !important;
-  left: 18px !important;
-  top: 26px !important;
-  transform: translateY(-50%) !important;
-  z-index: 1000 !important;
-}
-
-[data-theme="dark"] #login-screen .input-field:focus + .input-icon,
-[data-theme="dark"] .input-group .input-field:focus + .input-icon {
-  color: #818cf8 !important;
-  position: absolute !important;
-  left: 18px !important;
-  top: 26px !important;
-  transform: translateY(-50%) !important;
-  z-index: 1000 !important;
-}
-
-[data-theme="dark"] .btn-secondary {
-  background: rgba(75, 85, 99, 0.3);
-  color: #e5e7eb;
-  border-color: rgba(75, 85, 99, 0.5);
-}
-
-[data-theme="dark"] .btn-secondary:hover {
-  background: rgba(75, 85, 99, 0.5);
-}
-
-/* Transições suaves para tema */
-* {
-  transition: background-color 0.3s ease, color 0.3s ease,
-    border-color 0.3s ease;
+[data-theme="dark"] #password-strength-text {
+  color: #d5d5d5;
 }
 
 /* === BOTÃO DE TEMA DENTRO DO CARD === */
@@ -510,39 +452,7 @@
   filter: drop-shadow(0 0 8px rgba(226, 232, 240, 0.6));
 }
 
-/* Tema escuro - versão compacta */
-[data-theme="dark"] .theme-toggle {
-  background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
-  border-color: rgba(148, 163, 184, 0.2);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(148, 163, 184, 0.15);
-}
-
-[data-theme="dark"] .theme-toggle::before {
-  background: conic-gradient(
-    from 0deg,
-    #fbbf24,
-    #f59e0b,
-    #f97316,
-    #ef4444,
-    #fbbf24
-  );
-}
-
-[data-theme="dark"] .theme-toggle::after {
-  background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
-}
-
-[data-theme="dark"] .theme-toggle:hover {
-  transform: scale(1.1);
-  box-shadow: 0 8px 30px rgba(251, 191, 36, 0.3), 0 4px 12px rgba(0, 0, 0, 0.25);
-}
-
-[data-theme="dark"] .theme-toggle:hover #theme-icon {
-  filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.8));
-  text-shadow: 0 0 12px rgba(251, 191, 36, 0.6);
-}
-
-/* === RESPONSIVIDADE PARA ÍCONES - NOVA LÓGICA === */
+/* === RESPONSIVIDADE PARA ÍCONES === */
 @media (max-width: 768px) {
   #login-screen .input-field,
   .input-group .input-field {
@@ -620,71 +530,3 @@
     top: 22px !important;
   }
 }
-
-/* efeito de rolar dados */
-.logo-icon {
-  display: inline-block;
-  transition: transform 0.3s ease, rotate 0.6s ease;
-  cursor: pointer;
-}
-
-.logo-icon:hover {
-  transform: scale(1.2);
-}
-
-.logo-icon.roll {
-  animation: roll 0.6s ease;
-}
-
-@keyframes roll {
-  0% { transform: rotate(0deg) scale(1); }
-  25% { transform: rotate(90deg) scale(1.1); }
-  50% { transform: rotate(180deg) scale(1); }
-  75% { transform: rotate(270deg) scale(1.1); }
-  100% { transform: rotate(360deg) scale(1); }
-}
-
-/* Caixa mágica estilo tooltip */
-.spell-box {
-  position: absolute;
-  top: -50px; /* ajusta a posição vertical */
-  right: 0;   /* ajusta horizontal */
-  background: linear-gradient(135deg, #f9fafb, #667eea);
-  color: #111;
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-weight: 700;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  opacity: 0;
-  transform: translateY(-10px) scale(0.8);
-  transition: all 0.3s ease;
-  pointer-events: none;
-  white-space: nowrap;
-  z-index: 1000;
-}
-
-/* Triângulo da caixinha (seta) */
-.spell-box::before {
-  content: '';
-  position: absolute;
-  bottom: -5px; /* seta para baixo */
-  left: 50%;
-  transform: translateX(-50%);
-  border-width: 5px;
-  border-style: solid;
-  border-color: #667eea transparent transparent transparent; /* cor da seta igual ao fundo */
-  opacity: 0;
-  transition: all 0.3s ease;
-}
-
-/* Mostra a caixa no hover do botão */
-.theme-toggle:hover .spell-box {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-  pointer-events: auto;
-}
-
-.theme-toggle:hover .spell-box::before {
-  opacity: 1;
-}
-

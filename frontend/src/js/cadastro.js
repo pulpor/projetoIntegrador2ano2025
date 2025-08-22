@@ -1,3 +1,15 @@
+// Efeito de rolar o dado ao clicar na tela de cadastro
+document.addEventListener('DOMContentLoaded', () => {
+  const diceIcon = document.querySelector('.logo-icon');
+  if (diceIcon) {
+    diceIcon.addEventListener('click', () => {
+      diceIcon.classList.add('rolling');
+      diceIcon.addEventListener('animationend', () => {
+        diceIcon.classList.remove('rolling');
+      }, { once: true });
+    });
+  }
+});
 import { showToast } from './utils/toast.js';
 
 // --- ÁREAS E CLASSES ---
@@ -14,7 +26,11 @@ export const areasClasses = {
 export function setupCursoClasse() {
   const cursoSelect = document.getElementById('curso-select');
   const classSelect = document.getElementById('class-select');
-  cursoSelect.addEventListener('change', function() {
+  if (!cursoSelect || !classSelect) {
+    console.error('Elementos curso-select ou class-select não encontrados');
+    return;
+  }
+  cursoSelect.addEventListener('change', function () {
     const area = cursoSelect.value;
     classSelect.innerHTML = '';
     if (!area || !areasClasses[area]) {
@@ -27,8 +43,10 @@ export function setupCursoClasse() {
     Object.keys(areasClasses[area].classes).forEach(classe => {
       classSelect.innerHTML += `<option value="${classe}">${classe}</option>`;
     });
+    updateRegisterButtonState();
   });
 }
+
 if (document.getElementById('curso-select') && document.getElementById('class-select')) {
   setupCursoClasse();
 }
@@ -38,15 +56,13 @@ function initializeEnhancedForms() {
   setupInputEffects();
   setupButtonAnimations();
   setupFormTransitions();
-  setupEnhancedValidation();
   setupEasterEggs();
 }
-document.addEventListener('DOMContentLoaded', function () {
-  initializeEnhancedForms();
-});
+
 function setupInputEffects() {
   // Desabilitado para evitar conflitos
 }
+
 function setupButtonAnimations() {
   const buttons = document.querySelectorAll('.btn-primary, .btn-secondary');
   buttons.forEach(button => {
@@ -65,8 +81,8 @@ function setupButtonAnimations() {
     });
   });
 }
+
 function setupFormTransitions() {
-  const loginForm = document.getElementById('login-form');
   const registerForm = document.getElementById('register-form');
   function animateFormEntry(form) {
     if (form) {
@@ -94,6 +110,7 @@ function setupFormTransitions() {
     observer.observe(registerForm, { attributes: true });
   }
 }
+
 function clearRegistrationForm() {
   const fields = [
     'reg-username',
@@ -116,11 +133,9 @@ function clearRegistrationForm() {
       feedback.classList.add('hidden');
     }
   });
-  updateRegisterButtonState(); // Garante que o botão seja desabilitado após limpar
+  updateRegisterButtonState();
 }
-function setupEnhancedValidation() {
-  // Validação visual removida
-}
+
 function setupEasterEggs() {
   let clickCount = 0;
   const logo = document.querySelector('.logo, h1');
@@ -140,6 +155,7 @@ function setupEasterEggs() {
     createClickParticle(e.clientX, e.clientY);
   });
 }
+
 function createClickParticle(x, y) {
   const particle = document.createElement('div');
   particle.style.position = 'fixed';
@@ -161,15 +177,15 @@ function createClickParticle(x, y) {
     document.body.removeChild(particle);
   }, 500);
 }
+
 const style = document.createElement('style');
 style.textContent = `
-    .has-content {
-        background: rgba(255, 255, 255, 0.95) !important;
-    }
+  .has-content {
+    background: rgba(255, 255, 255, 0.95) !important;
+  }
 `;
 document.head.appendChild(style);
 
-// Adicione este bloco de estilo para garantir a cor verde em qualquer tema
 const passwordBarStyle = document.createElement('style');
 passwordBarStyle.textContent = `
   .password-bar.active {
@@ -177,10 +193,17 @@ passwordBarStyle.textContent = `
   }
 `;
 document.head.appendChild(passwordBarStyle);
+console.log('Estilos dinâmicos aplicados:', style.textContent, passwordBarStyle.textContent);
 
 // --- REGISTRO ---
 function validateUsername(username) {
   return username.length >= 5;
+}
+
+function validateFullname(fullname) {
+  const minLength = 3;
+  const validFormat = /^[A-Za-z\s]+$/.test(fullname);
+  return fullname.length >= minLength && validFormat;
 }
 
 function validatePassword(password) {
@@ -194,8 +217,13 @@ function validatePassword(password) {
 }
 
 function showUsernameFeedback() {
-  const username = document.getElementById('reg-username').value.trim();
+  const usernameInput = document.getElementById('reg-username');
   const feedback = document.getElementById('username-feedback');
+  if (!usernameInput || !feedback) {
+    console.error('Elementos reg-username ou username-feedback não encontrados');
+    return;
+  }
+  const username = usernameInput.value.trim();
   if (username.length === 0) {
     feedback.textContent = '';
     feedback.classList.add('hidden');
@@ -213,38 +241,22 @@ function showUsernameFeedback() {
   }
 }
 
-function showPasswordFeedback() {
-  const password = document.getElementById('reg-password').value;
-  const feedback = document.getElementById('password-feedback');
-  const strengthDiv = document.getElementById('password-strength');
-  const strengthText = document.getElementById('password-strength-text');
-  const bars = strengthDiv ? strengthDiv.querySelectorAll('.password-bar') : [];
-  const result = validatePassword(password);
-
-  let validCount = Object.values(result).filter(Boolean).length;
-  let allValid = validCount === 5;
-
-  // Só mostra feedback se o usuário começou a digitar
-  if (password.length === 0) {
+function showFullnameFeedback() {
+  const fullnameInput = document.getElementById('reg-fullname');
+  const feedback = document.getElementById('fullname-feedback');
+  if (!fullnameInput || !feedback) {
+    console.error('Elementos reg-fullname ou fullname-feedback não encontrados');
+    return;
+  }
+  const fullname = fullnameInput.value.trim();
+  if (fullname.length === 0) {
     feedback.textContent = '';
     feedback.classList.add('hidden');
     feedback.classList.remove('text-red-500');
-    if (strengthDiv) {
-      strengthDiv.classList.add('hidden');
-      // Reset barras
-      bars.forEach(bar => {
-        bar.style.background = '#e5e7eb';
-      });
-    }
     return;
   }
-
-  // Sempre mostra a barrinha se há input
-  if (strengthDiv) strengthDiv.classList.remove('hidden');
-
-  feedback.innerHTML = '';
-  if (!allValid) {
-    feedback.innerHTML = '<span class="text-yellow-600"><i class="fas fa-exclamation-triangle"></i> Senha deve atender todos os critérios:</span>';
+  if (!validateFullname(fullname)) {
+    feedback.textContent = 'Nome completo deve ter pelo menos 3 caracteres e conter apenas letras e espaços.';
     feedback.classList.remove('hidden');
     feedback.classList.add('text-red-500');
   } else {
@@ -252,8 +264,52 @@ function showPasswordFeedback() {
     feedback.classList.add('hidden');
     feedback.classList.remove('text-red-500');
   }
+}
 
-  // Critérios
+function showPasswordFeedback() {
+  const passwordInput = document.getElementById('reg-password');
+  const feedback = document.getElementById('password-feedback');
+  const strengthDiv = document.getElementById('password-strength');
+  const strengthText = document.getElementById('password-strength-text');
+  if (!passwordInput || !feedback || !strengthDiv || !strengthText) {
+    console.error('Elementos de senha não encontrados');
+    return;
+  }
+  const bars = strengthDiv.querySelectorAll('.password-bar');
+  const password = passwordInput.value;
+  const result = validatePassword(password);
+
+  let validCount = Object.values(result).filter(Boolean).length;
+  let allValid = validCount === 5;
+
+  if (password.length === 0) {
+    feedback.textContent = '';
+    feedback.classList.add('hidden');
+    feedback.classList.remove('text-red-500');
+    strengthDiv.classList.add('hidden');
+    bars.forEach(bar => {
+      bar.classList.remove('active');
+      bar.style.background = '#e5e7eb';
+    });
+    return;
+  }
+
+  strengthDiv.classList.remove('hidden');
+  // Adiciona margem inferior à barra de progresso
+  strengthDiv.classList.add('mb-3');
+  feedback.innerHTML = '';
+  if (!allValid) {
+    feedback.innerHTML = '<span class="text-yellow-600"><i class="fas fa-exclamation-triangle"></i> Senha deve atender todos os critérios:</span>';
+    feedback.classList.remove('hidden');
+    feedback.classList.add('text-red-500');
+    feedback.classList.add('dark:text-red-300');
+  } else {
+    feedback.textContent = '';
+    feedback.classList.add('hidden');
+    feedback.classList.remove('text-red-500');
+    feedback.classList.remove('dark:text-red-300');
+  }
+
   let criteria = [
     { label: 'Pelo menos 8 caracteres', valid: result.length },
     { label: 'Uma letra maiúscula (A-Z)', valid: result.uppercase },
@@ -261,7 +317,7 @@ function showPasswordFeedback() {
     { label: 'Um número (0-9)', valid: result.number },
     { label: 'Um símbolo (!@#$%^&* etc.)', valid: result.symbol }
   ];
-  let html = '<div class="text-xs p-2 rounded bg-white border mt-2">';
+  let html = '';
   criteria.forEach(c => {
     html += `<div class="flex items-center gap-2 mb-1">
       <span class="${c.valid ? 'text-green-600' : 'text-red-500'}">
@@ -270,10 +326,8 @@ function showPasswordFeedback() {
       ${c.label}
     </div>`;
   });
-  html += '</div>';
   strengthText.innerHTML = html;
 
-  // Barras de força
   bars.forEach((bar, i) => {
     if (i < validCount) {
       bar.classList.add('active');
@@ -285,57 +339,38 @@ function showPasswordFeedback() {
 }
 
 function validateRegisterFields() {
-  const username = document.getElementById('reg-username').value.trim();
-  const fullname = document.getElementById('reg-fullname').value.trim();
-  const password = document.getElementById('reg-password').value;
-  const curso = document.getElementById('curso-select').value;
-  const classe = document.getElementById('class-select').value;
+  const username = document.getElementById('reg-username')?.value.trim();
+  const fullname = document.getElementById('reg-fullname')?.value.trim();
+  const password = document.getElementById('reg-password')?.value;
+  const curso = document.getElementById('curso-select')?.value;
+  const classe = document.getElementById('class-select')?.value;
 
-  // Verifique se todos os campos realmente têm valor
   if (!username || !fullname || !password || !curso || !classe) {
+    console.log('Campos obrigatórios não preenchidos:', { username, fullname, password, curso, classe });
     return false;
   }
 
-  // Validação de username e senha
   const usernameValid = validateUsername(username);
+  const fullnameValid = validateFullname(fullname);
   const passwordValid = Object.values(validatePassword(password)).every(Boolean);
 
-  return usernameValid && passwordValid;
+  console.log('Validações:', { usernameValid, fullnameValid, passwordValid });
+  return usernameValid && fullnameValid && passwordValid;
 }
 
 function updateRegisterButtonState() {
   const btn = document.getElementById('registerSubmitButton');
-  if (btn) {
-    btn.disabled = !validateRegisterFields();
-    btn.classList.toggle('opacity-50', btn.disabled);
-    btn.classList.toggle('cursor-not-allowed', btn.disabled);
+  if (!btn) {
+    console.error('Botão registerSubmitButton não encontrado');
+    return;
   }
+  const isValid = validateRegisterFields();
+  btn.disabled = !isValid;
+  btn.classList.toggle('opacity-50', !isValid);
+  btn.classList.toggle('cursor-not-allowed', !isValid);
 }
 
-// Eventos para feedback dinâmico
-document.getElementById('reg-username').addEventListener('input', () => {
-  showUsernameFeedback();
-  updateRegisterButtonState();
-});
-document.getElementById('reg-password').addEventListener('input', () => {
-  showPasswordFeedback();
-  updateRegisterButtonState();
-});
-['reg-fullname', 'curso-select', 'class-select'].forEach(id => {
-  const el = document.getElementById(id);
-  if (el) {
-    el.addEventListener('input', updateRegisterButtonState);
-    el.addEventListener('change', updateRegisterButtonState);
-  }
-});
-document.addEventListener('DOMContentLoaded', () => {
-  showUsernameFeedback();
-  showPasswordFeedback();
-  updateRegisterButtonState();
-});
-
 function getMasterForArea(area) {
-  // Mapeamento dos mestres por área
   const masters = {
     beleza: 'beleza',
     gastronomia: 'gastro',
@@ -355,11 +390,10 @@ async function handleRegister() {
   const username = document.getElementById('reg-username').value.trim();
   const fullname = document.getElementById('reg-fullname').value.trim();
   const password = document.getElementById('reg-password').value;
-  const curso = document.getElementById('curso-select').value; // Certifique-se que o id está correto!
+  const curso = document.getElementById('curso-select').value;
   const classe = document.getElementById('class-select').value;
   const masterArea = getMasterForArea(curso);
 
-  // Adicione log para depuração no frontend
   console.log("[REGISTER FRONT] Dados enviados:", { username, fullname, password, curso, classe, masterArea });
 
   try {
@@ -370,7 +404,7 @@ async function handleRegister() {
         username,
         fullname,
         password,
-        curso, // Certifique-se que está sendo enviado!
+        curso,
         class: classe,
         pending: true,
         masterArea,
@@ -395,21 +429,85 @@ async function handleRegister() {
       clearRegistrationForm();
       updateRegisterButtonState();
     } else {
-      showToast(data.message || 'Erro ao criar conta.', 'error');
+      showToast(data.message || 'Erro ao criar213 conta.', 'error');
     }
   } catch (err) {
     showToast('Erro de conexão com o servidor.', 'error');
   }
 }
 
-// Adiciona o event listener ao botão de cadastro
-document.addEventListener('DOMContentLoaded', function () {
-  // ...existing code...
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('DOMContentLoaded: Inicializando validações');
+  initializeEnhancedForms();
+  showUsernameFeedback();
+  showFullnameFeedback();
+  showPasswordFeedback();
+  updateRegisterButtonState();
+
+  const usernameInput = document.getElementById('reg-username');
+  const fullnameInput = document.getElementById('reg-fullname');
+  const passwordInput = document.getElementById('reg-password');
+  const cursoSelect = document.getElementById('curso-select');
+  const classSelect = document.getElementById('class-select');
   const registerBtn = document.getElementById('registerSubmitButton');
+
+  if (usernameInput) {
+    usernameInput.addEventListener('input', () => {
+      console.log('Input no username');
+      showUsernameFeedback();
+      updateRegisterButtonState();
+    });
+  } else {
+    console.error('Elemento reg-username não encontrado');
+  }
+
+  if (fullnameInput) {
+    fullnameInput.addEventListener('input', () => {
+      console.log('Input no fullname');
+      showFullnameFeedback();
+      updateRegisterButtonState();
+    });
+  } else {
+    console.error('Elemento reg-fullname não encontrado');
+  }
+
+  if (passwordInput) {
+    passwordInput.addEventListener('input', () => {
+      console.log('Input no password');
+      showPasswordFeedback();
+      updateRegisterButtonState();
+    });
+  } else {
+    console.error('Elemento reg-password não encontrado');
+  }
+
+  ['curso-select', 'class-select'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('change', () => {
+        console.log(`Change no ${id}`);
+        updateRegisterButtonState();
+      });
+    } else {
+      console.error(`Elemento ${id} não encontrado`);
+    }
+  });
+
+  if (classSelect) {
+    classSelect.addEventListener('click', function () {
+      if (this.disabled) {
+        showToast('Por favor, escolha um curso primeiro!', 'warning');
+      }
+    });
+  }
+
   if (registerBtn) {
     registerBtn.addEventListener('click', function (e) {
       e.preventDefault();
+      console.log('Botão de cadastro clicado');
       handleRegister();
     });
+  } else {
+    console.error('Botão registerSubmitButton não encontrado');
   }
 });
