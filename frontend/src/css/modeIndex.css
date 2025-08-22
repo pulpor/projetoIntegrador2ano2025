@@ -159,23 +159,6 @@
   transform: translateX(-50%) scale(1);
 }
 
-.theme-toggle .lumus-nox-tooltip::before {
-  content: "";
-  position: absolute;
-  bottom: -7px;
-  left: 50%;
-  transform: translateX(-50%);
-  border-width: 7px 7px 0 7px;
-  border-style: solid;
-  border-color: #667eea transparent transparent transparent;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.theme-toggle:hover .lumus-nox-tooltip::before {
-  opacity: 1;
-}
-
 /* Modo escuro */
 [data-theme="dark"] .theme-toggle .lumus-nox-tooltip {
   background: linear-gradient(135deg, #1e293b, #334155);

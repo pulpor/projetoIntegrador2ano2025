@@ -113,5 +113,18 @@
     "xp": 0,
     "pending": true,
     "masterUsername": "beleza"
+  },
+  {
+    "id": 11,
+    "username": "leonardo2",
+    "fullname": "pulpor",
+    "password": "$2b$10$QJ.akxgrYHEugAUsIPOhTe2/NNCVBQ3rV7UuP15T2m7/puo6V2DmO",
+    "curso": "tecnologia",
+    "class": "Cafeicultor do Java",
+    "isMaster": false,
+    "level": 1,
+    "xp": 0,
+    "pending": false,
+    "masterUsername": "tecno"
   }
 ]
