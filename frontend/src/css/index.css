@@ -432,7 +432,7 @@
   filter: drop-shadow(0 0 8px rgba(226, 232, 240, 0.6));
 }
 
-/* === RESPONSIVIDADE PARA ÍCONES === */
+/* === RESPONSIVIDADE PARA ÍCONS === */
 @media (max-width: 768px) {
   #login-screen .input-field,
   .input-group .input-field {

@@ -1,3 +1,4 @@
+
 /* ===================== TEMA DARK/LIGHT ===================== */
 [data-theme="dark"] {
   --animated-bg: linear-gradient(-45deg, #1f2937, #374151, #4b5563, #6b7280);
@@ -102,9 +103,14 @@
   background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
 }
 
-[data-theme="dark"] .theme-toggle:hover {
-  transform: scale(1.1);
-  box-shadow: 0 8px 30px rgba(251, 191, 36, 0.3), 0 4px 12px rgba(0, 0, 0, 0.25);
+
+#theme-icon {
+  font-size: 18px;
+  z-index: 3;
+  position: relative;
+  display: inline-block;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s cubic-bezier(0.4, 0.2, 0.2, 1), filter 0.3s, text-shadow 0.3s;
 }
 
 [data-theme="dark"] .theme-toggle:hover #theme-icon {
@@ -157,6 +163,31 @@
 .theme-toggle:hover .lumus-nox-tooltip {
   opacity: 1;
   transform: translateX(-50%) scale(1);
+}
+
+.nox {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+  display: block; /* sempre presente, mas invisível até o hover */
+  position: absolute;
+  top: 70px;
+  left: 380px;
+  width: 50px;
+  height: 50px;
+  background-image: url('../../assets/nox.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  z-index: 10001;
+}
+
+[data-theme="dark"] .nox {
+  background-image: url('../../assets/lumus.png');
+}
+
+.theme-toggle:hover + .nox {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 /* Modo escuro */
