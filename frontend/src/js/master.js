@@ -1032,38 +1032,6 @@ function cancelEdit() {
   }
 }
 
-// Theme toggle function
-function toggleTheme() {
-  const html = document.documentElement;
-  const icon = document.getElementById("theme-icon");
-
-  if (html.getAttribute("data-theme") === "dark") {
-    html.setAttribute("data-theme", "light");
-    icon.textContent = "🌙";
-    localStorage.setItem("theme", "light");
-  } else {
-    html.setAttribute("data-theme", "dark");
-    icon.textContent = "☀️";
-    localStorage.setItem("theme", "dark");
-  }
-}
-
-// Initialize theme on page load
-function initTheme() {
-  const savedTheme = localStorage.getItem("theme");
-  const prefersDark = window.matchMedia(
-    "(prefers-color-scheme: dark)"
-  ).matches;
-  const initialTheme = savedTheme || (prefersDark ? "dark" : "light");
-
-  document.documentElement.setAttribute("data-theme", initialTheme);
-
-  const themeIcon = document.getElementById("theme-icon");
-  if (themeIcon) {
-    themeIcon.textContent = initialTheme === "dark" ? "☀️" : "🌙";
-  }
-}
-
 // Tab management for fixed layout
 function initTabs() {
   const tabButtons = document.querySelectorAll(".tab-button");
@@ -1153,7 +1121,6 @@ function initTabs() {
 
 // Initialize everything when DOM is loaded
 document.addEventListener("DOMContentLoaded", function () {
-  initTheme();
   initTabs();
   initFilterSpacing();
 });

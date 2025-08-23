@@ -66,3 +66,6 @@ function setupTooltipEvents() {
     });
   });
 }
+
+window.toggleTheme = toggleTheme;
+window.applyThemeOnLoad = applyThemeOnLoad;

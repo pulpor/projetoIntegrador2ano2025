@@ -11,9 +11,7 @@
     <!-- Font Awesome - versão 5 estável -->
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
 
     <!-- Font Awesome - versão mais completa -->
@@ -27,8 +25,13 @@
 
     <!-- CSS Files -->
     <link rel="stylesheet" href="../css/styles.css" />
+    <link rel="stylesheet" href="../css/modeIndex.css" />
     <link rel="stylesheet" href="../css/helper.css" />
     <link rel="stylesheet" href="../css/master.css" />
+    <link rel="stylesheet" href="../css/modeMaster.css" />
+
+  <!-- Theme-specific CSS for master panel -->
+  <link rel="stylesheet" href="../css/modeMaster.css" />
 
   </head>
 
@@ -48,16 +51,18 @@
           </div>
         </div>
         <div class="flex items-center space-x-4">
-          <button
-            id="theme-toggle"
-            class="theme-toggle-header"
-            title="Alternar tema"
-          >
-            <i
-              id="theme-icon"
-              class="fas fa-moon theme-icon-moon"
-            ></i>
-          </button>
+          <div class="theme-toggle-container">
+            <button
+              id="themeToggle"
+              class="theme-toggle"
+              aria-label="Alternar tema"
+              onclick="toggleTheme()"
+            >
+              <i id="theme-icon" class="fas fa-moon theme-icon-moon"></i>
+              <div class="lumus-nox-tooltip">Nox</div>
+            </button>
+            
+          </div>
           <button id="logout-btn" class="logout-btn">
             <i class="fas fa-sign-out-alt"></i>
             <span>Sair</span>
@@ -436,6 +441,7 @@
       </div>
 
       <!-- Scripts -->
-  <script type="module" src="../js/master.js"></script>
+    <script type="module" src="../js/master.js"></script>
+    <script type="module" src="../js/mode.js"></script>
     </body>
 </html>

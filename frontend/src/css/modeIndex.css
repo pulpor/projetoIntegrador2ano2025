@@ -72,6 +72,90 @@
 }
 
 
+[data-theme="dark"] #password-strength-text {
+  color: #d5d5d5;
+}
+
+[data-theme="dark"] #password-feedback {
+  color: #faebeb !important; /* vermelho claro */
+}
+
+/* Estados específicos para ícones */
+.theme-icon-sun {
+  color: #fbbf24;
+  filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.6));
+}
+
+.theme-icon-moon {
+  color: #e2e8f0;
+  filter: drop-shadow(0 0 8px rgba(226, 232, 240, 0.6));
+}
+
+.theme-toggle::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  border-radius: 10px;
+  z-index: 1;
+}
+
+.theme-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5),
+    0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.theme-toggle:hover::before {
+  opacity: 0.7;
+  animation-duration: 3s;
+}
+
+.theme-toggle:active {
+  transform: scale(0.95);
+}
+
+/* Ícones do tema - tamanho reduzido */
+#theme-icon {
+  font-size: 18px;
+  z-index: 3;
+  position: relative;
+  display: inline-block;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.theme-toggle:hover #theme-icon {
+  transform: rotate(180deg) scale(1.1);
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.6);
+}
+
+/* efeitos do dark light mode */
+.theme-toggle::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    from 0deg,
+    #667eea,
+    #764ba2,
+    #f093fb,
+    #f5576c,
+    #667eea
+  );
+  opacity: 0;
+  transition: all 0.3s ease;
+  border-radius: 12px;
+  animation: rotate 6s linear infinite;
+}
+
+
 [data-theme="dark"] .btn-secondary {
   background: #374151; /* cinza escuro */
   color: #e5e7eb;      /* cinza claro */
