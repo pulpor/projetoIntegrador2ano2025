@@ -32,6 +32,9 @@
 
   <!-- Theme-specific CSS for master panel -->
   <link rel="stylesheet" href="../css/modeMaster.css" />
+  <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+  <link rel="icon" type="image/png" href="../../assets/favicon.png" />
+  <link rel="shortcut icon" href="../../assets/favicon.ico" />
 
   </head>
 
@@ -276,6 +279,22 @@
             <!-- Tab: Usuários Pendentes -->
             <div id="pending-content" class="tab-content active">
               <h2 class="text-xl font-bold mb-2">Usuários Pendentes</h2>
+              <!-- Formulário de criação de turmas -->
+              <div id="turmas-section" class="mb-6">
+                <h3 class="text-lg font-semibold mb-2 flex items-center gap-2">
+                  <i class="fas fa-users-cog text-blue-600"></i>Minhas Turmas
+                </h3>
+                <form id="form-criar-turma" class="flex flex-col md:flex-row gap-2 mb-4">
+                  <input type="text" id="nome-turma" class="p-2 border rounded-lg flex-1" placeholder="Nome da nova turma" required />
+                  <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition">
+                    <i class="fas fa-plus mr-2"></i>Criar Turma
+                  </button>
+                </form>
+                <div id="lista-turmas" class="turma-grid">
+                  <!-- Turmas do mestre serão listadas aqui via JS -->
+                </div>
+                <p class="text-sm text-gray-500 mt-2">Alunos pendentes só podem ser aprovados se forem inseridos em uma turma.</p>
+              </div>
               <div id="pending-users" class="cards-grid">
                 <!-- Conteúdo será carregado via JavaScript -->
               </div>
@@ -441,6 +460,21 @@
       </div>
 
       <!-- Scripts -->
+    <!-- Modal de detalhes de turma -->
+    <div id="turma-modal" class="hidden fixed inset-0 z-50 items-center justify-center">
+      <div id="turma-modal-backdrop" class="absolute inset-0 bg-black/50"></div>
+      <div class="relative z-60 max-w-xl mx-auto bg-white dark:bg-slate-800 rounded-lg shadow-lg overflow-hidden">
+        <div class="p-4 border-b dark:border-slate-700 flex justify-between items-center">
+          <h3 id="turma-modal-title" class="font-bold">Turma</h3>
+          <button id="turma-modal-close" class="text-gray-600 hover:text-gray-800">&times;</button>
+        </div>
+        <div class="p-4">
+          <div class="mb-2 text-sm text-gray-600">Quantidade: <span id="turma-modal-count">0</span></div>
+          <ul id="turma-modal-list" class="list-disc pl-5 text-gray-700 max-h-64 overflow-auto"></ul>
+        </div>
+      </div>
+    </div>
+
     <script type="module" src="../js/master.js"></script>
     <script type="module" src="../js/mode.js"></script>
     </body>

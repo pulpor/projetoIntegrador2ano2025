@@ -9,6 +9,7 @@ const router = express.Router();
 // Caminho correto para o arquivo users.json
 const caminhoUsers = path.join(__dirname, '../data/users.json');
 const caminhoSubmissions = path.join(__dirname, '../data/submissions.json');
+const caminhoTurmas = path.join(__dirname, '../data/turmas.json');
 
 router.get('/students', autenticar, ehMestre, (req, res) => {
   res.json(users.filter(u => !u.isMaster));
@@ -96,11 +97,65 @@ router.get('/pending-users', autenticar, ehMestre, (req, res) => {
   }
 });
 
+// Rotas para gerenciar turmas (persistidas em data/turmas.json)
+router.get('/turmas', autenticar, ehMestre, async (req, res) => {
+  try {
+    const allTurmas = JSON.parse(await fs.readFile(caminhoTurmas, 'utf8')) || {};
+    const myTurmas = allTurmas[req.user.userId] || [];
+    res.json({ turmas: myTurmas });
+  } catch (err) {
+    console.error('Erro ao ler turmas:', err);
+    res.status(500).json({ error: 'Erro ao ler turmas' });
+  }
+});
+
+router.post('/turmas', autenticar, ehMestre, async (req, res) => {
+  try {
+    const { nome } = req.body;
+    if (!nome || !nome.trim()) return res.status(400).json({ error: 'Nome inválido' });
+    const allTurmas = JSON.parse(await fs.readFile(caminhoTurmas, 'utf8')) || {};
+    const userId = req.user.userId;
+    const myTurmas = allTurmas[userId] || [];
+    if (!myTurmas.includes(nome)) myTurmas.push(nome);
+    allTurmas[userId] = myTurmas;
+    await fs.writeFile(caminhoTurmas, JSON.stringify(allTurmas, null, 2));
+    res.json({ turmas: myTurmas });
+  } catch (err) {
+    console.error('Erro ao salvar turma:', err);
+    res.status(500).json({ error: 'Erro ao salvar turma' });
+  }
+});
+
+router.delete('/turmas', autenticar, ehMestre, async (req, res) => {
+  try {
+    const { nome } = req.body;
+    if (!nome) return res.status(400).json({ error: 'Nome inválido' });
+    const allTurmas = JSON.parse(await fs.readFile(caminhoTurmas, 'utf8')) || {};
+    const userId = req.user.userId;
+    const myTurmas = (allTurmas[userId] || []).filter(t => t !== nome);
+    allTurmas[userId] = myTurmas;
+    await fs.writeFile(caminhoTurmas, JSON.stringify(allTurmas, null, 2));
+    res.json({ turmas: myTurmas });
+  } catch (err) {
+    console.error('Erro ao deletar turma:', err);
+    res.status(500).json({ error: 'Erro ao deletar turma' });
+  }
+});
+
 router.post('/approve-user', autenticar, ehMestre, async (req, res) => {
-  const { userId } = req.body;
+  const { userId, turma } = req.body;
   const user = users.find(u => u.id === parseInt(userId));
   if (!user) {
     return res.status(404).json({ error: 'Usuário não encontrado' });
+  }
+  // Atribuir turma/class quando for fornecida
+  if (turma && typeof turma === 'string') {
+    user.class = turma;
+  }
+  // Garantir que o usuário tenha o masterUsername correto (id -> username)
+  const master = users.find(u => u.id === req.user.userId);
+  if (master && master.username) {
+    user.masterUsername = master.username;
   }
   user.pending = false;
 

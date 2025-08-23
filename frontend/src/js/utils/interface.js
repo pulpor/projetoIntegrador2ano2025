@@ -66,7 +66,11 @@ export function setupLogout() {
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
-            localStorage.clear();
+            // Remover apenas dados de sessão para não apagar turmas criadas pelo mestre
+            localStorage.removeItem('token');
+            localStorage.removeItem('isMaster');
+            localStorage.removeItem('username');
+            // manter outras chaves, como turmas_<username>, para persistir as turmas
             window.location.href = '/';
         });
     }

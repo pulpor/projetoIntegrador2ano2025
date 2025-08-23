@@ -11,6 +11,7 @@ const caminhoSubmissions = path.join(__dirname, 'data', 'submissions.json');
 let users = [];
 let missions = [];
 let submissions = [];
+let turmas = {};
 let userIdCounter = { value: 1 };
 let missionIdCounter = { value: 1 };
 let submissionIdCounter = { value: 1 };
@@ -76,6 +77,14 @@ async function carregarDados() {
       submissionIdCounter.value = Math.max(...submissions.map(s => s.id), 0) + 1;
       console.log(`[INIT] ${submissions.length} submissões carregadas`);
     }
+
+    // Carregar turmas (mapa por mestre -> array de turmas)
+    const caminhoTurmas = path.join(__dirname, 'data', 'turmas.json');
+    if (await fs.access(caminhoTurmas).then(() => true).catch(() => false)) {
+      const dadosTurmas = JSON.parse(await fs.readFile(caminhoTurmas));
+      turmas = dadosTurmas || {};
+      console.log(`[INIT] turmas carregadas para ${Object.keys(turmas).length} mestres`);
+    }
   } catch (err) {
     console.error('Erro ao carregar dados persistentes:', err);
   }
@@ -87,6 +96,7 @@ module.exports = {
   users,
   missions,
   submissions,
+  turmas,
   userIdCounter,
   missionIdCounter,
   submissionIdCounter
